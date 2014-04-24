@@ -101,8 +101,9 @@ public class FlexiDialogActivity extends SherlockActivity {
         homeDir = toolchainDir + "/cctools/home";
         if (!(new File(homeDir)).exists()) {
         	(new File(homeDir)).mkdir();
-        	createShellProfile();
         }
+
+        createShellProfile();
     }
     
     protected String getToolchainDir() {
@@ -456,7 +457,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
 				writer.write("export PATH=" + toolchainDir + "/cctools/sbin:" + toolchainDir + "/cctools/bin:/system/xbin:/system/bin:$PATH");
 				writer.newLine();
-				writer.write("export LD_LIBRARY_PATH=" + toolchainDir + "/lib:$LD_LIBRARY_PATH");
+				writer.write("export LD_LIBRARY_PATH=" + toolchainDir + "/cctools/lib:$LD_LIBRARY_PATH");
 				writer.newLine();
 				writer.close();
 				return;

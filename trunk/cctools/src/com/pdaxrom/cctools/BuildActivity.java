@@ -378,7 +378,7 @@ public class BuildActivity extends Activity {
     					"TMPEXEDIR=" + tmpExeDir,
     					"PS1=''"
     					};
-    			String shell = "/system/bin/sh";
+    			String shell = getShell();
     	        shell = shell.replaceAll("\\s+", " ");
     			String[] argv = shell.split("\\s+");
     			int[] pId = new int[1];
@@ -388,7 +388,8 @@ public class BuildActivity extends Activity {
         			try {
         				Utils.setPtyUTF8Mode(mFd, true);
         				Utils.setPtyWindowSize(mFd, 64, 128, 0, 0);
-        				BufferedReader procout = new BufferedReader(new InputStreamReader(new FileInputStream(mFd)));
+        				FileInputStream fis = new FileInputStream(mFd);
+        				BufferedReader procout = new BufferedReader(new InputStreamReader(fis));
         				FileOutputStream procin = new FileOutputStream(mFd);
         				Thread execThread = new Thread() {
         					public void run() {
@@ -398,6 +399,7 @@ public class BuildActivity extends Activity {
         					}
         				};
         				execThread.start();
+        				while (fis.available() == 0) ;
         				procin.write(new String("export PS1=''\n").getBytes());
         				Pattern pat1 = Pattern.compile("^(\\S+):(\\d+):(\\d+): (\\S+|\\S+ \\S+): (.*)$");
         				Pattern pat2 = Pattern.compile("^(\\S+):(\\d+): (\\S+|\\S+ \\S+): (.*)$");
@@ -405,7 +407,7 @@ public class BuildActivity extends Activity {
         				errorsList.clear();
         				cmdline = "exec " + cmdline + "\n";
         				procin.write(cmdline.getBytes());
-        				int skipStrings = 3; //skip echos from two command strings
+        				int skipStrings = 2; //skip echos from two command strings
         				do {
         					String errstr = null;
         					try {
@@ -543,4 +545,18 @@ public class BuildActivity extends Activity {
 		f.delete();
     	return null;
     }
+    
+	private String getShell() {
+		String[] shellList = {
+				cctoolsDir + "/bin/bash",
+				cctoolsDir + "/bin/ash",
+		};
+		
+		for (String shell: shellList) {
+			if ((new File(shell)).exists()) {
+				return shell;
+			}
+		}
+		return "/system/bin/sh";
+	}
 }

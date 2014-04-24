@@ -1,0 +1,27 @@
+<cctools-module title="Java project">
+    <new title="New">
+	<view type="dirpath" title="Project path" name="path" />
+	<view type="edit" title="Package" name="package" />
+	<view type="edit" title="Project name" name="name" />
+	<view type="edit" title="Application name" name="appname" />
+	<command title="Create" exec="aproject init project @path @package @name @appname" />
+    </new>
+    <compile title="Compile">
+	<command title="Compile" exec="aproject release" />
+    </compile>
+    <compile title="Compile debug">
+	<command title="Compile" exec="aproject debug" />
+    </compile>
+    <build title="Build">
+	<command title="Build" exec="aproject release" />
+    </build>
+    <build title="Build debug">
+	<command title="Build" exec="aproject debug" />
+    </build>
+    <run title="Run">
+	<command title="Run" exec="aproject install" />
+    </run>
+    <clean title="Clean">
+	<command title="Clean" exec="aproject clean" />
+    </clean>
+</cctools-module>

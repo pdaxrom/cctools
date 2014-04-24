@@ -1027,7 +1027,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
     private void showModules() {
     	final Spinner spinner = new Spinner(this);
     	List<String> list = new ArrayList<String>();
-    	final List<String> projects = new ArrayList<String>();
+    	final List<String> modules = new ArrayList<String>();
 
     	FilenameFilter filter = new FilenameFilter() {
 			public boolean accept(File dir, String name) {
@@ -1067,13 +1067,13 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 					String title = e.getAttribute("title");
 					if (title != null && ! title.equals("")) {
 						list.add(title);
-						projects.add(rulesDir + "/" + fileName);
+						modules.add(rulesDir + "/" + fileName);
 					}
 				}
 			}
 		}
 		
-		if (projects.size() == 0) {
+		if (modules.size() == 0) {
 			// no modules installed
 			return;
 		}
@@ -1087,7 +1087,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> arg0, View view,
 					int position, long id) {
-				Log.i(TAG, "selected " + projects.get(position));
+				Log.i(TAG, "selected " + modules.get(position));
 				toolchainPackageToInstall = position;
 			}
 			public void onNothingSelected(AdapterView<?> arg0) {
@@ -1102,9 +1102,9 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 		.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {			
 			public void onClick(DialogInterface dialog, int which) {
 				int i = spinner.getSelectedItemPosition();
-				Log.i(TAG, "selected module rule " + projects.get(i));
+				Log.i(TAG, "selected module rule " + modules.get(i));
 				
-				dialogFromRule(projects.get(i), getLastOpenedDir());
+				dialogFromRule(modules.get(i), getLastOpenedDir());
 			}
 		})
 		.setCancelable(true)

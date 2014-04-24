@@ -1,6 +1,7 @@
 package com.pdaxrom.cctools;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -8,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +57,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 	private String tmpDir;
 	private String filesDir;
 	private String serviceDir;
+    private String homeDir;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,9 +95,14 @@ public class FlexiDialogActivity extends SherlockActivity {
 
         serviceDir = toolchainDir + "/cctools/services";
         if (!(new File(serviceDir)).exists()) {
-        	(new File(serviceDir)).mkdir();
+        	(new File(serviceDir)).mkdirs();
         }
 
+        homeDir = toolchainDir + "/cctools/home";
+        if (!(new File(homeDir)).exists()) {
+        	(new File(homeDir)).mkdir();
+        	createShellProfile();
+        }
     }
     
     protected String getToolchainDir() {
@@ -439,5 +447,22 @@ public class FlexiDialogActivity extends SherlockActivity {
 			}
 		}
 		return "/system/bin/sh";
+	}
+	
+	void createShellProfile() {
+		if (!new File(homeDir + "/.profile").exists()) {
+			try {
+				FileOutputStream fos = new FileOutputStream(homeDir + "/.profile");
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+				writer.write("export PATH=" + toolchainDir + "/cctools/sbin:" + toolchainDir + "/cctools/bin:/system/xbin:/system/bin:$PATH");
+				writer.newLine();
+				writer.write("export LD_LIBRARY_PATH=" + toolchainDir + "/lib:$LD_LIBRARY_PATH");
+				writer.newLine();
+				writer.close();
+				return;
+			} catch (Exception e) {
+				System.err.println("Cannot write BuildConfig.java " + e);
+			}			
+		}
 	}
 }

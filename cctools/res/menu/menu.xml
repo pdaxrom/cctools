@@ -31,29 +31,13 @@
         android:showAsAction="ifRoom"
         android:icon="@drawable/logviewer"
         android:title="@string/logButton" />
-    <item android:id="@+id/item_project"
-        android:title="@string/projectButton">
-        <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    		<item android:id="@+id/project_new"
-        		android:title="@string/project_new" />
-
-    		<item android:id="@+id/project_open"
-        		android:title="@string/project_open" />
-    
-    		<item android:id="@+id/project_close"
-        		android:title="@string/project_close" />
-
-<!--    		<item android:id="@+id/project_import"
-        		android:title="@string/project_import" /> -->
-
-    		<item android:id="@+id/project_properties"
-        		android:title="@string/project_properties" />
-		</menu>
-    </item>
     <item android:id="@+id/item_terminal"
         android:showAsAction="ifRoom"
         android:icon="@drawable/gnome_terminal"
         android:title="@string/terminalButton" />
+    <item android:id="@+id/item_modules"
+        android:showAsAction="ifRoom"
+        android:title="@string/modulesButton" />
     <item android:id="@+id/item_pkgmgr"
         android:showAsAction="ifRoom"
         android:icon="@drawable/pkgmgr"

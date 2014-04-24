@@ -431,12 +431,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
         	case TEXT_REDO:
         		codeEditor.redo();
         		break;
-        	case R.id.project_new:
-        		newProject();
-        		break;
-        	case R.id.project_open:
-        		break;
-        	case R.id.project_close:
+        	case R.id.item_modules:
+        		showModules();
         		break;
         }
         return true;
@@ -1028,7 +1024,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
     }
     
     //TODO: new project
-    private void newProject() {
+    private void showModules() {
     	final Spinner spinner = new Spinner(this);
     	List<String> list = new ArrayList<String>();
     	final List<String> projects = new ArrayList<String>();
@@ -1045,8 +1041,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 		};
 
 		String[] rulesDirs = {
-			getToolchainDir() + "/cctools/share/project",
-			getSDHomeDir() + "/share/project"
+			getToolchainDir() + "/cctools/share/modules",
+			getSDHomeDir() + "/share/modules"
 		};
 		
 		for (String rulesDir: rulesDirs) {
@@ -1063,7 +1059,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 						Log.i(TAG, "bad xml file " + rulesDir + "/" + fileName);
 						continue;
 					}
-					NodeList nl = doc.getElementsByTagName("cctools-project");
+					NodeList nl = doc.getElementsByTagName("cctools-module");
 					Element e = (Element) nl.item(0);
 					if (e == null) {
 						continue;
@@ -1075,6 +1071,11 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 					}
 				}
 			}
+		}
+		
+		if (projects.size() == 0) {
+			// no modules installed
+			return;
 		}
 		
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
@@ -1095,13 +1096,13 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 		});
 
 		new AlertDialog.Builder(this)
-		.setTitle(getText(R.string.project_new_project))
-		.setMessage(getText(R.string.project_new_project_message))
+		.setTitle(getText(R.string.module_select))
+		.setMessage(getText(R.string.module_select_message))
 		.setView(spinner)
 		.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {			
 			public void onClick(DialogInterface dialog, int which) {
 				int i = spinner.getSelectedItemPosition();
-				Log.i(TAG, "selected project rule " + projects.get(i));
+				Log.i(TAG, "selected module rule " + projects.get(i));
 				
 				dialogFromRule(projects.get(i), getLastOpenedDir());
 			}

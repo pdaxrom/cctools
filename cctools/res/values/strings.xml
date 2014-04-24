@@ -77,15 +77,10 @@
     <string name="goto_line">Line</string>
     <string name="search_string">Search string</string>
 
-    <string name="projectButton">Project</string>
-    <string name="project_new">New</string>
-    <string name="project_open">Open</string>
-    <string name="project_close">Close</string>
-    <string name="project_import">Import</string>
-    <string name="project_properties">Properties</string>
+    <string name="modulesButton">Modules</string>
     
-    <string name="project_new_project">New project</string>
-    <string name="project_new_project_message">Select project type</string>
+    <string name="module_select">Modules</string>
+    <string name="module_select_message">Select module</string>
     
     <string name="buildwindow_name">Build</string>
     <string name="buildwindow_name_error">Failed</string>

@@ -77,15 +77,10 @@
     <string name="goto_line">Cтрока</string>
     <string name="search_string">Строка для поиска</string>
 
-    <string name="projectButton">Проект</string>
-    <string name="project_new">Новый</string>
-    <string name="project_open">Открыть</string>
-    <string name="project_close">Закрыть</string>
-    <string name="project_import">Импортировать</string>
-    <string name="project_properties">Настройки</string>
+    <string name="modulesButton">Модули</string>
     
-	<string name="project_new_project">Новый проект</string>
-    <string name="project_new_project_message">Тип проекта</string>
+    <string name="module_select">Модули</string>
+    <string name="module_select_message">Выберите модуль</string>
     
     <string name="buildwindow_name">Собрать</string>
     <string name="buildwindow_name_error">Неудачно</string>

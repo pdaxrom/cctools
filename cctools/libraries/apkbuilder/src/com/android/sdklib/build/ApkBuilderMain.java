@@ -41,7 +41,7 @@ public class ApkBuilderMain {
             printUsageAndQuit();
         }
 
-        System.err.println("\nTHIS TOOL IS DEPRECATED. See --help for more information.\n");
+        //System.err.println("\nTHIS TOOL IS DEPRECATED. See --help for more information.\n");
 
         try {
             File outApk = new File(args[0]);

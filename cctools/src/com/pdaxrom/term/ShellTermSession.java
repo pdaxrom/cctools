@@ -3,7 +3,9 @@ package com.pdaxrom.term;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -94,6 +96,15 @@ public class ShellTermSession extends TermSession {
 		if (mProcId > 0) {
 			setTermIn(new FileInputStream(mFd));
 			setTermOut(new FileOutputStream(mFd));
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD &&
+				(cmd.endsWith("/sh") || cmd.endsWith("/ash") || cmd.endsWith("/bash"))) {
+				try {
+					while (getTermIn().available() == 0) ;
+					getTermOut().write(new String(". ~/.profile\n").getBytes());
+				} catch (IOException e) {
+					Log.e(TAG, "load profile");
+				}
+			}
 		}
 	}
 	

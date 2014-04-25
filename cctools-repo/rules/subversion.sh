@@ -3,7 +3,7 @@ build_subversion() {
     PKG_VERSION=1.7.14
     PKG_DESC="Subversion exists to be universally recognized and adopted as an open-source, centralized version control system characterized by its reliability as a safe haven for valuable data; the simplicity of its model and usage; and its ability to support the needs of a wide variety of users and projects, from individuals to large-scale enterprise operations."
     PKG_URL=http://www.eu.apache.org/dist/$PKG/$PKG-$PKG_VERSION.tar.bz2
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
+    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
     S_DIR=$src_dir/$PKG-$PKG_VERSION
     B_DIR=$build_dir/$PKG
     c_tag $PKG && return
@@ -11,10 +11,10 @@ build_subversion() {
     banner "Build $PKG"
 
     pushd .
-    mkdir -p $SRC_PREFIX/$PKG
-    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
 
-    tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
+    download $PKG_URL $O_FILE
+
+    unpack $src_dir $O_FILE
 
     cd $S_DIR
     #patch -p1 < $patch_dir/$PKG-$PKG_VERSION.patch || error "patch"

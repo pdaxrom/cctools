@@ -185,7 +185,17 @@ download() {
 	    return
 	fi
 	rm -f $2
-	error "download $PKG_URL"
+
+	local mirror
+	for mirror in "http://mirror.cctools.info/packages/src" "http://cctools.info/packages/src"; do
+	    local f=${1/*\/}
+	    if wget -c ${mirror}/${f} -O $2 ; then
+		return
+	    fi
+	    rm -f $2
+	done
+
+	error "downloading $PKG_URL"
     fi
 }
 

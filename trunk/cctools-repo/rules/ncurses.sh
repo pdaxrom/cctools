@@ -3,7 +3,7 @@ build_ncurses() {
     PKG_VERSION=$ncurses_version
     PKG_DESC="Programming library that provides an API which allows the programmer to write text-based user interfaces in a terminal-independent manner."
     PKG_URL="http://ftp.gnu.org/gnu/ncurses/ncurses-$ncurses_version.tar.gz"
-    O_FILE=$SRC_PREFIX/ncurses/ncurses-$ncurses_version.tar.bz2
+    O_FILE=$SRC_PREFIX/ncurses/ncurses-$ncurses_version.tar.gz
     S_DIR=$src_dir/ncurses-$ncurses_version
     B_DIR=$build_dir/ncurses
     c_tag $PKG && return
@@ -11,10 +11,10 @@ build_ncurses() {
     banner "Build $PKG"
 
     pushd .
-    mkdir -p $SRC_PREFIX/ncurses
-    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
 
-    tar zxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
+    download $PKG_URL $O_FILE
+
+    unpack $src_dir $O_FILE
 
 #    cd $S_DIR
 #    patch -p1 < $patch_dir/ncurses-$ncurses_version.patch || error "patch"

@@ -1,9 +1,9 @@
 build_wget() {
     PKG=wget
-    PKG_VERSION=1.14
+    PKG_VERSION=1.15
     PKG_DESC="GNU Wget is a free software package for retrieving files using HTTP, HTTPS and FTP, the most widely-used Internet protocols. It is a non-interactive commandline tool, so it may easily be called from scripts, cron jobs, terminals without X-Windows support, etc."
-    PKG_URL=http://ftp.gnu.org/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.gz
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
+    PKG_URL=http://ftp.gnu.org/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
+    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.xz
     S_DIR=$src_dir/$PKG-$PKG_VERSION
     B_DIR=$build_dir/$PKG
 
@@ -12,10 +12,10 @@ build_wget() {
     banner "Build $PKG"
 
     pushd .
-    mkdir -p $SRC_PREFIX/$PKG
-    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
 
-    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
+    download $PKG_URL $O_FILE
+
+    unpack $src_dir $O_FILE
 
     cd $S_DIR
 #    patch -p1 < $patch_dir/$PKG-$PKG_VERSION.patch || error "patch"

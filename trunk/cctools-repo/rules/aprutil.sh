@@ -12,10 +12,10 @@ build_aprutil() {
     banner "Build $PKG"
 
     pushd .
-    mkdir -p $SRC_PREFIX/$PKG
-    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
 
-    tar jxf $O_FILE -C $src_dir || error "tar jxf $O_FILE"
+    download $PKG_URL $O_FILE
+
+    unpack $src_dir $O_FILE
 
     cd $S_DIR
     #patch -p1 < $patch_dir/$PKG-$PKG_VERSION.patch || error "patch"

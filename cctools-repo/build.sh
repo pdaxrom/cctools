@@ -27,4 +27,8 @@ for d in armeabi mips x86; do
     popd
 done
 
+mkdir -p ${WRKDIR}/repo/src
+
+find `find src -type d` -type f -exec cp -f {} ${WRKDIR}/repo/src/ \;
+
 echo "DONE!"

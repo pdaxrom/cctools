@@ -32,9 +32,13 @@ build_cppcheck() {
 #                        --prefix=$TMPINST_DIR \
 #			|| error "Configure $PKG."
 
-    $MAKE $MAKEARGS CXX=${TARGET_ARCH}-g++ CC=${TARGET_ARCH}-gcc HAVE_RULES=yes || error "make $MAKEARGS"
+    $MAKE $MAKEARGS CXX=${TARGET_ARCH}-g++ CC=${TARGET_ARCH}-gcc HAVE_RULES=yes CFGDIR=${TARGET_INST_DIR}/share/cppcheck || error "make $MAKEARGS"
 
     $INSTALL -D -m 755 cppcheck ${TMPINST_DIR}/${PKG}/cctools/bin/cppcheck
+
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools/share/cppcheck
+
+    cp -f cfg/* ${TMPINST_DIR}/${PKG}/cctools/share/cppcheck
 
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/cppcheck
 

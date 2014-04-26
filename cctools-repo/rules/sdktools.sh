@@ -34,6 +34,7 @@ build_sdktools() {
     install -D -m 755 aidl/aidl     ${TMPINST_DIR}/${PKG}/cctools/bin/aidl
 
     install -D -m 755 aproject   ${TMPINST_DIR}/${PKG}/cctools/bin/aproject
+    install -D -m 755 jproject   ${TMPINST_DIR}/${PKG}/cctools/bin/jproject
 
     $STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
 

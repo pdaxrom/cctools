@@ -37,6 +37,8 @@ build_pcre() {
 
     $MAKE install || error "make install"
 
+    ln -s ${TMPINST_DIR}/bin/pcre-config ${TARGET_DIR}-host/bin/
+
     $INSTALL -D -m 755 .libs/libpcre.so.1.2.3 ${TMPINST_DIR}/lib${PKG}/cctools/lib/libpcre.so.1.2.3
     ln -sf libpcre.so.1.2.3 ${TMPINST_DIR}/lib${PKG}/cctools/lib/libpcre.so.1
     ln -sf libpcre.so.1.2.3 ${TMPINST_DIR}/lib${PKG}/cctools/lib/libpcre.so

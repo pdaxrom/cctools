@@ -1,27 +1,26 @@
 <cctools-module title="Java project">
     <new title="New">
-	<view type="dirpath" title="Project path" name="path" />
-	<view type="edit" title="Package" name="package" />
-	<view type="edit" title="Project name" name="name" />
-	<view type="edit" title="Application name" name="appname" />
-	<command title="Create" exec="aproject init project @path @package @name @appname" />
+	<view type="dirpath" title="Project directory" hint="Select directory for new project" name="path" />
+	<view type="edit" title="Project name" hint="HelloWorld" name="name" />
+	<view type="edit" title="Package" hint="com.example.HelloWorld"  name="package" />
+	<command title="Create" exec="jproject create project --gui --path @path@ --package @package@ --name @name@" />
     </new>
     <compile title="Compile">
-	<command title="Compile" exec="aproject release" />
+	<command title="Compile" exec="jproject release" />
     </compile>
     <compile title="Compile debug">
-	<command title="Compile" exec="aproject debug" />
+	<command title="Compile" exec="jproject debug" />
     </compile>
     <build title="Build">
-	<command title="Build" exec="aproject release" />
+	<command title="Build" exec="jproject release" />
     </build>
     <build title="Build debug">
-	<command title="Build" exec="aproject debug" />
+	<command title="Build" exec="jproject debug" />
     </build>
     <run title="Run">
-	<command title="Run" exec="aproject install" />
+	<command title="Run" exec="jproject install" />
     </run>
     <clean title="Clean">
-	<command title="Clean" exec="aproject clean" />
+	<command title="Clean" exec="jproject clean" />
     </clean>
 </cctools-module>

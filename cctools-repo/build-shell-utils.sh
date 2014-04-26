@@ -551,3 +551,6 @@ build_sdktools
 build_sdk_android
 build_java_examples
 build_build_essential_java
+
+build_pcre
+build_cppcheck

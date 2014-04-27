@@ -3,9 +3,7 @@ package com.pdaxrom.cctools;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +15,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.droidparts.widget.ClearableEditText;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -74,7 +73,11 @@ import android.widget.TextView.BufferType;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity implements ActionBar.TabListener, OnSharedPreferenceChangeListener, CodeEditorInterface {
+public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
+								implements ActionBar.TabListener,
+											OnSharedPreferenceChangeListener,
+											CodeEditorInterface,
+											FlexiDialogInterface {
 	private Context context = this;
 	public static final String SHARED_PREFS_NAME = "cctoolsSettings";
 	private static final String SHARED_PREFS_FILES_EDITPOS = "FilesPosition";
@@ -140,7 +143,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
         
         mPrefs = getSharedPreferences(SHARED_PREFS_NAME, 0);
 
-        //TODO:
         editors = new ArrayList<CodeEditor>();
         flipper = (ViewFlipper) findViewById(R.id.flipper);
 
@@ -150,23 +152,9 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
         	newFile();
         }
 
-/*
-        if (savedInstanceState != null) {
-        	fileName = savedInstanceState.getString("filename");
-        	
-        	if (fileName.contentEquals("") || fileName == null) {
-        		newTitle(getString(R.string.new_file));
-        	} else {
-        		newTitle(fileName);
-        	}
-        } else {
-        	showInfoAndCheckToolchain();
-        	
-			newTitle(getString(R.string.new_file));
-			fileName = "";
-        }
- */
-    	showInfoAndCheckToolchain();
+        setFlexiDialogInterface(this);
+
+        showInfoAndCheckToolchain();
 
         newButton = (ImageButton) findViewById(R.id.newButton);
         newButton.setOnClickListener(new OnClickListener() {
@@ -291,15 +279,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 		}
 	}
 
-	//FIXME
-	/*
-    protected void onSaveInstanceState(Bundle saveState) {
-    	super.onSaveInstanceState(saveState);
-    	saveState.putString("filename", fileName);
-    	saveState.putBoolean("hasChanged", codeEditor.hasChanged());
-    }
-	*/
-	
 	protected void onDestroy() {
 		saveTabs();
         serviceStartStop(SERVICE_STOP);
@@ -337,7 +316,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 	}
 	
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		//TODO: 
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 			menu.add(0, TEXT_GOTO, 0, getString(R.string.menu_goto));
 			menu.add(0, TEXT_FIND, 0, getString(R.string.menu_search));
@@ -370,7 +348,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.menu, menu);
-		//TODO:
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			menu.add(0, TEXT_UNDO, 0, getString(R.string.menu_undo)).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 			menu.add(0, TEXT_REDO, 0, getString(R.string.menu_redo)).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
@@ -1023,7 +1000,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 		startActivity(myIntent);
     }
     
-    //TODO: new project
     private void showModules() {
     	final Spinner spinner = new Spinner(this);
     	List<String> list = new ArrayList<String>();
@@ -1091,7 +1067,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 				toolchainPackageToInstall = position;
 			}
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
 			}
 		});
 
@@ -1110,7 +1085,34 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 		.setCancelable(true)
 		.show();
     }
-        
+
+    //TODO
+	public String getBuiltinVariable(String name) {
+		if (name.contains("$current_file$")) {
+			String file = "";
+			if (codeEditor != null) {
+				file = codeEditor.getFileName();
+				if (file == null) {
+					file = "";
+				}
+			}
+			name = name.replace("$current_file$", new File(file).getName());
+		}
+
+		if (name.contains("$current_dir$")) {
+			String dir = "";
+			if (codeEditor != null) {
+				String file = codeEditor.getFileName();
+				if (file != null) {
+					dir = new File(file).getParent();
+				}
+			}
+			name = name.replace("$current_dir$", dir);
+		}
+
+		return name;
+	}	
+    
     private void showInfoAndCheckToolchain() {
     	PackageInfo packageInfo;
 		try {
@@ -1218,7 +1220,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 				toolchainPackageToInstall = position;
 			}
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
 			}
 		});
 		
@@ -1364,5 +1365,5 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity im
 				}.start();
 			}			
 		}
-	}	
+	}
 }

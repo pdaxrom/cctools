@@ -70,7 +70,33 @@ public class BuildActivity extends Activity {
         
         systemShell	= new String("SHELL=" + SYSTEM_SHELL);
         buildLog	= (TextView) findViewById(R.id.buildLog);
-        cmdThread	= (Thread) getLastNonConfigurationInstance();
+
+        SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
+        buildLog.setTextSize(Float.valueOf(mPrefs.getString("fontsize", "12")));
+
+        cmdline		= getIntent().getExtras().getString("cmdline");
+        if (cmdline != null) {
+            cctoolsDir	= getIntent().getExtras().getString("cctoolsdir");
+            workDir		= getIntent().getExtras().getString("workdir");
+            tmpDir		= getIntent().getExtras().getString("tmpdir");
+
+            runme_ca = tmpDir + "/runme_ca";
+            runme_na = tmpDir + "/runme_na";
+            
+            if ((new File(runme_ca)).exists()) {
+            	(new File(runme_ca)).delete();
+            }
+
+            if ((new File(runme_na)).exists()) {
+            	(new File(runme_na)).delete();
+            }
+            
+            cmdThread = new MyThread();
+            cmdThread.start();
+
+            return;
+        }
+        
         fileName	= getIntent().getExtras().getString("filename");
         cctoolsDir	= getIntent().getExtras().getString("cctoolsdir");
         workDir		= (new File(fileName)).getParentFile().toString();
@@ -98,10 +124,8 @@ public class BuildActivity extends Activity {
         Log.i(TAG, "cctoolspath " + cctoolsDir);
         Log.i(TAG, "workdir " + workDir);
         Log.i(TAG, "tmpexedir " + tmpExeDir);
+        Log.i(TAG, "forceBuild " + forceBuild);
 
-        SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
-        buildLog.setTextSize(Float.valueOf(mPrefs.getString("fontsize", "12")));
-        
         showTitle(getString(R.string.buildwindow_name) + " - " + fileName);
         
         String infile = (new File(fileName)).getName();
@@ -164,10 +188,6 @@ public class BuildActivity extends Activity {
     	output(getString(R.string.known_filetypes) + "\n");
     }
     
-	public Object onRetainNonConfigurationInstance() {
-		return cmdThread;
-	}
-
 	protected void onDestroy() {
 		Log.i(TAG, "Finish cmdline thread before activity exit");
 		if (cmdThread != null && cmdThread.isAlive()) {

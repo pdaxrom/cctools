@@ -8,19 +8,22 @@
 	<command title="Create" exec="aproject create project --gui --path @path@ --package @package@ --name @name@ --appname @appname@ --activity @activity@" />
     </new>
     <compile title="Compile">
-	<command title="Compile" exec="aproject release" />
+	<command title="Compile" exec="aproject build release" />
     </compile>
     <compile title="Compile debug">
-	<command title="Compile" exec="aproject debug" />
+	<command title="Compile" exec="aproject build debug" />
     </compile>
     <build title="Build">
-	<command title="Build" exec="aproject release" />
+	<command title="Build" exec="aproject build release" />
     </build>
     <build title="Build debug">
-	<command title="Build" exec="aproject debug" />
+	<command title="Build" exec="aproject build debug" />
     </build>
     <run title="Run">
-	<command title="Run" exec="aproject install" />
+	<command title="Run" exec="aproject build release --install" />
+    </run>
+    <run title="Run debug">
+	<command title="Run" exec="aproject build --install" />
     </run>
     <clean title="Clean">
 	<command title="Clean" exec="aproject clean" />

@@ -6,19 +6,13 @@
 	<command title="Create" exec="jproject create project --gui --path @path@ --package @package@ --name @name@" />
     </new>
     <compile title="Compile">
-	<command title="Compile" exec="jproject release" />
-    </compile>
-    <compile title="Compile debug">
-	<command title="Compile" exec="jproject debug" />
+	<command title="Compile" exec="jproject build" />
     </compile>
     <build title="Build">
-	<command title="Build" exec="jproject release" />
-    </build>
-    <build title="Build debug">
-	<command title="Build" exec="jproject debug" />
+	<command title="Build" exec="jproject build" />
     </build>
     <run title="Run">
-	<command title="Run" exec="jproject install" />
+	<command title="Run" exec="jproject run" />
     </run>
     <clean title="Clean">
 	<command title="Clean" exec="jproject clean" />

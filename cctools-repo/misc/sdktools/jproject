@@ -117,9 +117,9 @@ if [ "$1" = "create" ]; then
 package ${PROJECT_PACKAGE};
 
 public class ${PROJECT_NAME} {
-    public static void main(String[] args) {
-	System.out.println("Hello ${PROJECT_NAME}!");
-    }
+  public static void main(String[] args) {
+    System.out.println("Hello ${PROJECT_NAME}!");
+  }
 }
 EOF
 

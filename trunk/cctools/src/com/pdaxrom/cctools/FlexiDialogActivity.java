@@ -12,12 +12,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.NativeActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,7 +32,6 @@ import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import com.actionbarsherlock.app.SherlockActivity;
 import com.pdaxrom.utils.FileDialog;
 import com.pdaxrom.utils.SelectionMode;
@@ -48,6 +47,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 	protected static final String PKGS_LISTS_DIR = "/installed/";
 
 	private Context context = this;
+	private FlexiDialogInterface flexiDialogInterface = null;
 	
     List<NamedView> namedViews = null;
     private int fileSelectorId;
@@ -58,7 +58,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 	private String filesDir;
 	private String serviceDir;
     private String homeDir;
-	
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +122,10 @@ public class FlexiDialogActivity extends SherlockActivity {
     	return serviceDir;
     }
     
+    protected void setFlexiDialogInterface(FlexiDialogInterface main) {
+    	flexiDialogInterface = main;
+    }
+    
     public class NamedView {
     	private View	view;
     	private String	name;
@@ -170,6 +174,47 @@ public class FlexiDialogActivity extends SherlockActivity {
     	return null;
     }
 
+    private String getVariable(List<NamedView> views, String name) {
+    	for (NamedView view: views) {
+    		if (name.contains("@" + view.getName() + "@")) {
+				EditText edit = (EditText) view.getView();
+				if (edit != null) {
+	    			name = name.replace("@" + view.getName() + "@", edit.getText().toString());
+				}
+    		}
+    	}
+    	
+    	return name;
+    }
+    
+    private String getBuiltinVariable(String name) {
+    	if (flexiDialogInterface != null) {
+    		name = flexiDialogInterface.getBuiltinVariable(name);
+    	}
+
+    	if (name.contains("$root_dir$")) {
+    		name = name.replace("$root_dir$", toolchainDir + "/cctools");
+    	}
+    	
+    	if (name.contains("$toolchain_dir$")) {
+    		name = name.replace("$toolchain_dir$", toolchainDir);
+    	}
+    	
+    	if (name.contains("$tmp_dir$")) {
+    		name = name.replace("$tmp_dir$", tmpDir);
+    	}
+    	
+    	if (name.contains("$sd_dir$")) {
+    		name = name.replace("$sd_dir$", sdHomeDir);
+    	}
+
+    	if (name.contains("$home_dir$")) {
+    		name = name.replace("$home_dir$", homeDir);
+    	}
+    	
+    	return name;
+    }
+    
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     	super.onActivityResult(requestCode, resultCode, data);
     	
@@ -200,7 +245,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 			if (doc != null) {
 				NodeList nl = doc.getElementsByTagName("new");
 				Element e = (Element) nl.item(0);
-				String title = e.getAttribute("title");
+				String title = getBuiltinVariable(e.getAttribute("title"));
 				nl = e.getElementsByTagName("view");
 
 				namedViews = new ArrayList<NamedView>();
@@ -224,6 +269,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 						EditText edit = new EditText(context);
 						edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 						edit.setHint(ne.getAttribute("hint"));
+						//edit.setText(getBuiltinVariable(ne.getAttribute("value")));
 
 						namedViews.add(new NamedView(edit, ne.getAttribute("name")));
 
@@ -239,6 +285,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 						EditText edit = new EditText(context);
 						edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 						edit.setHint(ne.getAttribute("hint"));
+						//edit.setText(getBuiltinVariable(ne.getAttribute("value")));
 						
 						namedViews.add(new NamedView(edit, ne.getAttribute("name"), fileSelectorId));
 						
@@ -289,6 +336,8 @@ public class FlexiDialogActivity extends SherlockActivity {
 				nl = e.getElementsByTagName("command");
 				e = (Element) nl.item(0);
 				final String execAttr = e.getAttribute("exec");
+				final String intentName = e.getAttribute("intent");
+				final NodeList nlExtras = e.getElementsByTagName("extra");
 				
 				new AlertDialog.Builder(context)
 				.setTitle(title)
@@ -296,21 +345,65 @@ public class FlexiDialogActivity extends SherlockActivity {
 				.setView(table)
 				.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {
 					private String exec = execAttr;
+					@SuppressLint("NewApi")
 					public void onClick(DialogInterface dialog, int which) {
-						exec.replaceAll("\\s+", " ");
-						String[] argv = exec.split("\\s+");
-						for (int i = 0; i < argv.length; i++) {
-							if (argv[i].startsWith("@") && argv[i].endsWith("@")) {
-								String var = argv[i].substring(1, argv[i].length() - 1);
-								EditText edit = (EditText) getNamedView(namedViews, var);
-								if (edit != null) {
-									argv[i] = edit.getText().toString();
+						if (exec.length() == 0) {
+							Intent intent = null;
+							if (intentName.contentEquals("BuildActivity")) {
+								intent = new Intent(FlexiDialogActivity.this, BuildActivity.class);
+							} else if (intentName.contentEquals("TermActivity")) {
+								intent = new Intent(FlexiDialogActivity.this, TermActivity.class);
+							} else if (intentName.contentEquals("NativeActivity")) {
+								intent = new Intent(FlexiDialogActivity.this, NativeActivity.class);
+							} else if (intentName.contentEquals("LauncherConsoleActivity")) {
+								intent = new Intent(FlexiDialogActivity.this, LauncherConsoleActivity.class);
+							} else if (intentName.contentEquals("LauncherNativeActivity")) {
+								intent = new Intent(FlexiDialogActivity.this, LauncherNativeActivity.class);
+							}
+							
+							for (int i=0; i < nlExtras.getLength(); i++) {
+								Element ne = (Element) nlExtras.item(i);
+								String type = ne.getAttribute("type");
+								String name = ne.getAttribute("name");
+								String value = getBuiltinVariable(ne.getAttribute("value"));
+								value = getVariable(namedViews, value);
+								
+								Log.i(TAG, "intentName " + intentName);
+								Log.i(TAG, "type " + type);
+								Log.i(TAG, "name " + name + " = " + value);								
+								
+								if (type.contentEquals("boolean")) {
+									intent.putExtra(name, Boolean.valueOf(value));
+								} else if (type.contentEquals("int")) {
+									intent.putExtra(name, Integer.valueOf(value));
+								} else if (type.contentEquals("long")) {
+									intent.putExtra(name, Long.valueOf(value));
+								} else if (type.contentEquals("float")) {
+									intent.putExtra(name, Float.valueOf(value));
+								} else {
+									intent.putExtra(name, value);
 								}
 							}
 							
-							Log.i(TAG, ":: " + argv[i]);
+							startActivity(intent);
+						} else {
+							exec.replaceAll("\\s+", " ");
+							String[] argv = exec.split("\\s+");
+							for (int i = 0; i < argv.length; i++) {
+								if (argv[i].startsWith("@") && argv[i].endsWith("@")) {
+									String var = argv[i].substring(1, argv[i].length() - 1);
+									EditText edit = (EditText) getNamedView(namedViews, var);
+									if (edit != null) {
+										argv[i] = edit.getText().toString();
+									}
+								} else {
+									argv[i] = getBuiltinVariable(argv[i]);
+								}
+								
+								Log.i(TAG, ":: " + argv[i]);
+							}
+							system(argv, false);
 						}
-						system(argv, false);
 						namedViews = null;
 					}
 				})

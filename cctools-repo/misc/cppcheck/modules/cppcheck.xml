@@ -1,0 +1,12 @@
+<cctools-module title="Check directory with cppcheck" id="runcppcheck">
+    <new title="Check directory with cppcheck">
+	<view type="dirpath" title="Directory" hint="Sources directory" value="$current_dir$" name="path" />
+	<view type="edit" title="Optional args" hint="For cppcheck" name="args" />
+	<command title="Process" intent="BuildActivity">
+	    <extra name="cmdline" value="cppcheck @args@ @path@" />
+	    <extra name="workdir" value="$current_dir$" />
+	    <extra name="cctoolsdir" value="$root_dir$" />
+	    <extra name="tmpdir" value="$tmp_dir$" />
+	</command>
+    </new>
+</cctools-module>

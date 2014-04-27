@@ -1,6 +1,6 @@
 <cctools-module title="Create local packages repository" id="makerepo">
     <new title="New">
-	<view type="dirpath" title="Packages directory" hint="Select directory with downloaded(backuped) packages" name="path" />
+	<view type="dirpath" title="Repo directory" hint="Downloaded packages directory" name="path" />
 	<command title="Process" exec="makerepo --gui --path @path@" />
     </new>
 </cctools-module>

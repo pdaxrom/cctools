@@ -33,8 +33,8 @@ usage() {
     echo "Usage:"
     echo "create project [options]     - Creates a new Android project."
     echo "create lib-project [options] - Creates a new Android library project."
-    echo "build [debug]                - Build a project."
-    echo "build relese                 - Build a release project."
+    echo "build [debug][-i|--install]  - Build a project."
+    echo "build release[-i|--install]  - Build a release project."
     echo "clean                        - Clean a project files."
 
     usage_create
@@ -259,6 +259,9 @@ echo "Build $PROJECTNAME"
 PROJECT_RELEASE="no"
 if [ "$1" = "release" ]; then
     PROJECT_RELEASE="yes"
+    shift
+elif [ "$1" = "debug" ]; then
+    shift
 fi
 
 mkdir -p bin/classes gen
@@ -463,4 +466,9 @@ else
     echo "Starting apksigner..."
 
     apksigner bin/${PROJECTNAME}.apk bin/${PROJECTNAME}-signed.apk || error "apksigner"
+
+    if [ "$1" = "-i" -o "$1" = "--install" ]; then
+	am start `am 2>&1| grep -q '\-\-user' && echo '--user 0'` -a android.intent.action.VIEW -t application/vnd.android.package-archive -d "file://${PWD}/bin/${PROJECTNAME}-signed.apk"
+    fi
+
 fi

@@ -1,4 +1,4 @@
-<cctools-module title="Java project">
+<cctools-module title="Java project" id="jproject">
     <new title="New">
 	<view type="dirpath" title="Project directory" hint="Select directory for new project" name="path" />
 	<view type="edit" title="Project name" hint="HelloWorld" name="name" />

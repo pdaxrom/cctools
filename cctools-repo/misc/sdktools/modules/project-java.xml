@@ -1,5 +1,5 @@
 <cctools-module title="Java project" id="jproject">
-    <new title="New">
+    <new title="New Java application">
 	<view type="dirpath" title="Project directory" hint="Select directory for new project" name="path" />
 	<view type="edit" title="Project name" hint="HelloWorld" name="name" />
 	<view type="edit" title="Package" hint="com.example.HelloWorld"  name="package" />

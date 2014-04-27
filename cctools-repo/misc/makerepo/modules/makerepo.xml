@@ -1,6 +1,6 @@
-<cctools-module title="Create local packages repository" id="makerepo">
-    <new title="New">
-	<view type="dirpath" title="Repo directory" hint="Downloaded packages directory" name="path" />
+<cctools-module title="Create local addons repository" id="makerepo">
+    <new title="Create local addons repository">
+	<view type="dirpath" title="Repo directory" hint="Path to downloaded addons" name="path" />
 	<command title="Process" exec="makerepo --gui --path @path@" />
     </new>
 </cctools-module>

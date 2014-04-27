@@ -1,4 +1,4 @@
-<cctools-module title="Android Java project">
+<cctools-module title="Android Java project" id="aproject">
     <new title="New Android Application">
 	<view type="dirpath" title="Project directory" hint="Select directory for new project" name="path" />
 	<view type="edit" title="Application name" hint="My Android App" name="appname" />

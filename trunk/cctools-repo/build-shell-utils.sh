@@ -554,3 +554,5 @@ build_build_essential_java
 
 build_pcre
 build_cppcheck
+
+build_makerepo

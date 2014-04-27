@@ -48,14 +48,27 @@ public class RepoUtils {
 	}
 	
 	public static List<PackageInfo> getRepoFromUrl(String url) {
-        return parseRepoXml(null, getRepoXmlFromUrl(url), url); // getting DOM element
+		if (url.startsWith("file://")) {
+			String path = url.substring(8);
+			return parseRepoXml(null, getRepoXmlFromFile(path), path);
+		} else {
+			return parseRepoXml(null, getRepoXmlFromUrl(url), url); // getting DOM element
+		}
 	}
 
 	public static List<PackageInfo> getRepoFromUrl(List<String> urls) {
 		List<PackageInfo> list = null;
 		for (String url: urls) {
-			url = url + "/" + _buildAbi;
-			list = parseRepoXml(list, getRepoXmlFromUrl(url), url); // getting DOM element
+			if (url.startsWith("file://")) {
+				String path = url.substring(8);
+				if (! new File(path + "Packages").exists()) {
+					url = url + "/" + _buildAbi;					
+				}
+				list = parseRepoXml(list, getRepoXmlFromFile(path), path);
+			} else {
+				url = url + "/" + _buildAbi;
+				list = parseRepoXml(list, getRepoXmlFromUrl(url), url); // getting DOM element
+			}
 		}
 		return list;
 	}
@@ -75,6 +88,12 @@ public class RepoUtils {
 	public static String getRepoXmlFromUrl(String url) {
 		XMLParser parser = new XMLParser();
 		String xml = parser.getXmlFromUrl(url + "/Packages");
+		return replaceMacro(xml);
+	}
+
+	public static String getRepoXmlFromFile(String url) {
+		XMLParser parser = new XMLParser();
+		String xml = parser.getXmlFromFile(url + "/Packages");
 		return replaceMacro(xml);
 	}
 	

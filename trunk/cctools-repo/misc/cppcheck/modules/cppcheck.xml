@@ -1,8 +1,26 @@
-<cctools-module title="Check directory with cppcheck" id="runcppcheck">
-    <new title="Check directory with cppcheck">
-	<view type="dirpath" title="Directory" hint="Sources directory" value="$current_dir$" name="path" />
-	<view type="edit" title="Optional args" hint="For cppcheck" name="args" />
-	<command title="Process" intent="BuildActivity">
+<cctools-module
+    title="Check directory with cppcheck"
+    title-ru="Рекурсивная проверка директории с cppcheck"
+    id="runcppcheck">
+    <new
+	title="Check directory with cppcheck"
+	title-ru="Рекурсивная проверка директории с cppcheck">
+	<view type="dirpath"
+	    title="Directory"
+	    title-ru="Директория"
+	    hint="Sources directory"
+	    hint-ru="для рекурсивной проверки"
+	    value="$current_dir$" name="path" />
+	<view type="edit"
+	    title="Optional args"
+	    title-ru="Опционально"
+	    hint="For cppcheck"
+	    hint-ru="дополнительные параметры"
+	    name="args" />
+	<command
+	    title="Process"
+	    title-ru="Запустить"
+	    intent="BuildActivity">
 	    <extra name="cmdline" value="cppcheck @args@ @path@" />
 	    <extra name="workdir" value="$current_dir$" />
 	    <extra name="cctoolsdir" value="$root_dir$" />

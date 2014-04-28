@@ -2,7 +2,7 @@
     <new title="Check $current_file$ with cppcheck">
 	<view type="edit" title="Optional args" hint="For cppcheck" name="args" />
 	<command title="Process" intent="BuildActivity">
-	    <extra name="cmdline" value="cppcheck @args@ $current_dir$/$current_file$" />
+	    <extra name="cmdline" value="cppcheck @args@ $current_file$" />
 	    <extra name="workdir" value="$current_dir$" />
 	    <extra name="cctoolsdir" value="$root_dir$" />
 	    <extra name="tmpdir" value="$tmp_dir$" />

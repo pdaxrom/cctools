@@ -232,6 +232,17 @@ public class FlexiDialogActivity extends SherlockActivity {
 
     }
     
+    protected String getLocalizedAttribute(Element e, String attr) {
+		String language = getResources().getConfiguration().locale.getLanguage();
+
+		String value = getBuiltinVariable(e.getAttribute(attr + "-" + language));
+		if (value.length() == 0) {
+			value = getBuiltinVariable(e.getAttribute(attr));
+		}
+		
+		return value;
+    }
+    
     /**
      * Create Dialog popup window from xml template
      * @param ruleFile xml template file
@@ -245,7 +256,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 			if (doc != null) {
 				NodeList nl = doc.getElementsByTagName("new");
 				Element e = (Element) nl.item(0);
-				String title = getBuiltinVariable(e.getAttribute("title"));
+				String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
 				nl = e.getElementsByTagName("view");
 
 				namedViews = new ArrayList<NamedView>();
@@ -264,12 +275,12 @@ public class FlexiDialogActivity extends SherlockActivity {
 						TableRow row = new TableRow(context);
 						
 						TextView view = new TextView(context);
-						view.setText(ne.getAttribute("title"));
+						view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
 						
 						EditText edit = new EditText(context);
 						edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-						edit.setHint(ne.getAttribute("hint"));
-						//edit.setText(getBuiltinVariable(ne.getAttribute("value")));
+						edit.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
+						//edit.setText(getBuiltinVariable(getLocalizedAttribute(ne, "value")));
 
 						namedViews.add(new NamedView(edit, ne.getAttribute("name")));
 
@@ -280,12 +291,12 @@ public class FlexiDialogActivity extends SherlockActivity {
 						TableRow row = new TableRow(context);
 
 						TextView view = new TextView(context);
-						view.setText(ne.getAttribute("title"));
+						view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
 						
 						EditText edit = new EditText(context);
 						edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-						edit.setHint(ne.getAttribute("hint"));
-						//edit.setText(getBuiltinVariable(ne.getAttribute("value")));
+						edit.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
+						//edit.setText(getBuiltinVariable(getLocalizedAttribute(ne, "value")));
 						
 						namedViews.add(new NamedView(edit, ne.getAttribute("name"), fileSelectorId));
 						

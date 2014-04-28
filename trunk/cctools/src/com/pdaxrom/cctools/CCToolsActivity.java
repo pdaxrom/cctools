@@ -1040,7 +1040,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 					if (e == null) {
 						continue;
 					}
-					String title = e.getAttribute("title");
+					String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
 					if (title != null && ! title.equals("")) {
 						list.add(title);
 						modules.add(rulesDir + "/" + fileName);

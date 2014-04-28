@@ -432,6 +432,9 @@ public class BuildActivity extends Activity {
         					String errstr = null;
         					try {
         						errstr = procout.readLine();
+        						
+        						//Log.i(TAG, "read: " + errstr);
+        						
         						// remove escape sequence
         						errstr = errstr.replaceAll("\u001b\\[([0-9]|;)*m", "");
         						// remove clearing new line
@@ -484,7 +487,7 @@ public class BuildActivity extends Activity {
     							output(errstr + "\n");
     						}
     						Log.i(TAG, errstr);
-        				} while(execThread.isAlive());
+        				} while(execThread.isAlive() || procout.ready());
 						if (mExitCode != 0) {
 							output(getString(R.string.build_error) + " " + mExitCode + "\n");
 					        showTitle(getString(R.string.buildwindow_name_error) + " - " + fileName);

@@ -1,20 +1,61 @@
-<cctools-module title="Java project" id="jproject">
-    <new title="New Java application">
-	<view type="dirpath" title="Project directory" hint="Select directory for new project" name="path" />
-	<view type="edit" title="Project name" hint="HelloWorld" name="name" />
-	<view type="edit" title="Package" hint="com.example.HelloWorld"  name="package" />
-	<command title="Create" exec="jproject create project --gui --path @path@ --package @package@ --name @name@" />
+<cctools-module
+    title="Java project"
+    title-ru="Java проект"
+    id="jproject">
+    <new
+	title="New Java application"
+	title-ru="Новое Java приложение">
+	<view type="dirpath"
+	    title="Project directory"
+	    title-ru="Директория"
+	    hint="Select directory for new project"
+	    hint-ru="для нового проекта"
+	    name="path" />
+	<view type="edit"
+	    title="Project name"
+	    title-ru="Название проекта"
+	    hint="HelloWorld"
+	    name="name" />
+	<view type="edit"
+	    title="Package"
+	    title-ru="Пакет"
+	    hint="com.example.HelloWorld"
+	    name="package" />
+	<command
+	    title="Create"
+	    title-ru="Создать"
+	    exec="jproject create project --gui --path @path@ --package @package@ --name @name@" />
     </new>
-    <compile title="Compile">
-	<command title="Compile" exec="jproject build" />
+    <compile
+	title="Compile"
+	title-ru="Скомпилировать">
+	<command
+	    title="Compile"
+	    title-ru="Скомпилировать"
+	    exec="jproject build" />
     </compile>
-    <build title="Build">
-	<command title="Build" exec="jproject build" />
+    <build
+	title="Build"
+	title-ru="Собрать">
+	<command
+	    title="Build"
+	    title-ru="Собрать"
+	    exec="jproject build" />
     </build>
-    <run title="Run">
-	<command title="Run" exec="jproject run" />
+    <run
+	title="Run"
+	title-ru="Запустить">
+	<command
+	    title="Run"
+	    title-ru="Запустить"
+	    exec="jproject run" />
     </run>
-    <clean title="Clean">
-	<command title="Clean" exec="jproject clean" />
+    <clean
+	title="Clean"
+	title="Очистить">
+	<command
+	    title="Clean"
+	    title-ru="Очистить"
+	    exec="jproject clean" />
     </clean>
 </cctools-module>

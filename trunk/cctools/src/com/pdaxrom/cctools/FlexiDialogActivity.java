@@ -12,9 +12,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.NativeActivity;
@@ -25,13 +27,16 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
 import com.actionbarsherlock.app.SherlockActivity;
 import com.pdaxrom.utils.FileDialog;
 import com.pdaxrom.utils.SelectionMode;
@@ -344,6 +349,10 @@ public class FlexiDialogActivity extends SherlockActivity {
 					}
 				}
 				
+				View view = LayoutInflater.from(this).inflate(R.layout.module_dialog, null);
+				LinearLayout layout = (LinearLayout) view.findViewById(R.id.moduleLayout);
+				layout.addView(table);
+				
 				nl = e.getElementsByTagName("command");
 				e = (Element) nl.item(0);
 				final String execAttr = e.getAttribute("exec");
@@ -353,7 +362,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 				new AlertDialog.Builder(context)
 				.setTitle(title)
 //				.setMessage(title)
-				.setView(table)
+				.setView(view)
 				.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {
 					private String exec = execAttr;
 					@SuppressLint("NewApi")

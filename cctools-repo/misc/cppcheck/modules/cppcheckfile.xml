@@ -1,7 +1,20 @@
-<cctools-module title="Check current file with cppcheck" id="runcppcheckfile">
-    <new title="Check $current_file$ with cppcheck">
-	<view type="edit" title="Optional args" hint="For cppcheck" name="args" />
-	<command title="Process" intent="BuildActivity">
+<cctools-module
+    title="Check current file with cppcheck"
+    title-ru="Проверить открытый файл с cppcheck"
+    id="runcppcheckfile">
+    <new
+	title="Check $current_file$ with cppcheck"
+	title-ru="Проверка $current_file$ с cppcheck">
+	<view type="edit"
+	    title="Optional args"
+	    title-ru="Опционально"
+	    hint="For cppcheck"
+	    hint-ru="дополнительные параметры"
+	    name="args" />
+	<command
+	    title="Process"
+	    title-ru="Запустить"
+	    intent="BuildActivity">
 	    <extra name="cmdline" value="cppcheck @args@ $current_file$" />
 	    <extra name="workdir" value="$current_dir$" />
 	    <extra name="cctoolsdir" value="$root_dir$" />

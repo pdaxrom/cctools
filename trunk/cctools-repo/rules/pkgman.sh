@@ -13,7 +13,8 @@ build_pkgman() {
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/pkgman << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx64M -cp \$CCTOOLSRES com.pdaxrom.pkgmanager.Main \$@
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS -cp \$CCTOOLSRES com.pdaxrom.pkgmanager.Main \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/pkgman
 

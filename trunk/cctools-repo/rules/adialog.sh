@@ -1,6 +1,6 @@
 build_adialog() {
     PKG=adialog
-    PKG_VERSION=1.0
+    PKG_VERSION=1.01
     PKG_DESC="CCTools console dialog utility"
     O_DIR=${TOPDIR}/misc/adialog
     B_DIR=${build_dir}/${PKG}

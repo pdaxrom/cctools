@@ -133,6 +133,8 @@ class Main {
 				}
 				if (!installPackage(installInfo)) {
 					System.err.println("Errors during installation.");
+				} else {
+					System.out.println();
 				}
 			}
 		} else if (args[0].equals("upgrade")) {

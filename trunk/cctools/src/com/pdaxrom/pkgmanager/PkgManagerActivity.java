@@ -49,7 +49,7 @@ import android.widget.TextView;
 
 public class PkgManagerActivity extends SherlockListActivity {
 	private static final String TAG = "PkgMgrActivity";
-	private static final String URL = "http://mirror.cctools.info/packages";
+	private static final String URL = "http://cctools.info/packages";
 	//private static final String URL = "http://sashz-laptop/cctools/packages/" + Build.CPU_ABI;
 	//private static final String URL = "http://192.168.0.106/cctools/packages/" + Build.CPU_ABI;
 

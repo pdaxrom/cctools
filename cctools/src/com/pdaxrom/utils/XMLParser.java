@@ -79,7 +79,7 @@ public class XMLParser {
 		StringBuilder sb = new StringBuilder();
 		try {
 			FileInputStream fin = new FileInputStream(f);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(fin));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(fin), 8192);
 			String line = null;
 			while((line = reader.readLine()) != null) {
 				sb.append(line).append("\n");

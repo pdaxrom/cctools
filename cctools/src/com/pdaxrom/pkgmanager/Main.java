@@ -37,7 +37,7 @@ class Main {
     static private String ndkArch;
     static private String cpuAbi;
 
-    static private String URL = "http://mirror.cctools.info/packages";
+    static private String URL = "http://cctools.info/packages";
     
     private static final String toolchainDir = "/data/data/com.pdaxrom.cctools/root";
     private static String sdCardDir;
@@ -230,7 +230,7 @@ class Main {
         try {
         	String line;
             Process p = Runtime.getRuntime().exec("getprop");
-            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()), 8192);
             while ((line = input.readLine()) != null) {
             	Matcher m = Pattern.compile("\\[" + prop + "\\].*\\[(.+?)\\]").matcher(line);
             	while(m.find()) {
@@ -303,14 +303,16 @@ class Main {
 				throw new RuntimeException("bad archive");
 			}
 			
-			File partition = new File(to);			
-			if (partition.getUsableSpace() < need_mem) {
-				System.err.println("Need " + 
-					Utils.humanReadableByteCount(need_mem, false) + 
-					" but " + 
-					Utils.humanReadableByteCount(partition.getUsableSpace(), false) + 
-					" available");
-				return false;
+			File partition = new File(to);
+			if (sdkVersion >= 9) {
+				if (partition.getUsableSpace() < need_mem) {
+					System.err.println("Need " + 
+						Utils.humanReadableByteCount(need_mem, false) + 
+						" but " + 
+						Utils.humanReadableByteCount(partition.getUsableSpace(), false) + 
+						" available");
+					return false;
+				}
 			}
 			if (logFile == null) {
 				logFile = toolchainDir + PKGS_LISTS_DIR + file + ".list";
@@ -427,7 +429,7 @@ class Main {
 			try {
 				FileInputStream fin = new FileInputStream(logFile);
 				DataInputStream in = new DataInputStream(fin);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in), 8192);
 				String line = "";
 				while((line = reader.readLine()) != null) {
 					(new File(toolchainDir + "/" + line)).delete();
@@ -449,7 +451,7 @@ class Main {
 			try {
 				FileInputStream fin = new FileInputStream(reposListFile);
 				DataInputStream in = new DataInputStream(fin);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in), 8192);
 				String line = "";
 				while ((line = reader.readLine()) != null) {
 					if (list == null) {
@@ -534,7 +536,7 @@ class Main {
 		FileDescriptor fd = Utils.createSubProcess(baseDir, argv[0], argv, envp, pId);
 		FileInputStream fis = new FileInputStream(fd);
 		DataInputStream in = new DataInputStream(fis);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in), 8192);
 		String line = "";
 		try {
 			while((line = reader.readLine()) != null) {

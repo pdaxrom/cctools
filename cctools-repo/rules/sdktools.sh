@@ -40,39 +40,52 @@ build_sdktools() {
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/javac << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.sun.tools.javac.Main \$@
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS -cp \$CCTOOLSRES com.sun.tools.javac.Main \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/javac
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/dx << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.android.dx.command.Main \$@
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS -cp \$CCTOOLSRES com.android.dx.command.Main \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/dx
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/apkbuilder << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.android.sdklib.build.ApkBuilderMain \$@
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS -cp \$CCTOOLSRES com.android.sdklib.build.ApkBuilderMain \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/apkbuilder
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/apksigner << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.pdaxrom.cmdline.ApkSigner \$@
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS -cp \$CCTOOLSRES com.pdaxrom.cmdline.ApkSigner \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/apksigner
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/proguard << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES proguard.ProGuard \$@
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS -cp \$CCTOOLSRES proguard.ProGuard \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/proguard
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/aproject-helper << EOF
 #!/system/bin/sh
-exec dalvikvm -Xss262912 -Xmx256M -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProjectHelper \$@
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS -cp \$CCTOOLSRES com.pdaxrom.cmdline.AProjectHelper \$@
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/aproject-helper
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/dxrun << EOF
+#!/system/bin/sh
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH#\$CCTOOLSDIR/lib}
+exec dalvikvm \$CCTOOLS_DALVIKVM_ARGS \$@
+EOF
+    chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/dxrun
 
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/share/modules
     cp -f modules/*java.xml ${TMPINST_DIR}/${PKG}/cctools/share/modules/

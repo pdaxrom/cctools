@@ -2,6 +2,7 @@ package com.pdaxrom.cctools;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -10,6 +11,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -46,6 +49,14 @@ public class DialogWindow extends Activity {
         				String message = inFromClient.readLine();
         				String text = inFromClient.readLine();
         				dialogTextView(title, message, text, s);
+        		    } else if (clientSentence.contentEquals("install")) {
+        				String apkFile = inFromClient.readLine();
+        				String message = inFromClient.readLine();
+        				Intent intent = new Intent(Intent.ACTION_VIEW);
+        				intent.setDataAndType(Uri.fromFile(new File(apkFile)), "application/vnd.android.package-archive");
+        			    startActivity(intent);
+        			    s.close();
+        			    finish();
         		    } else {
         		    	s.close();
         		    	finish();

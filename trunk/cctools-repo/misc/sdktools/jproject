@@ -219,7 +219,7 @@ fi
 
 if [ "$1" = "run" ]; then
     shift
-    exec dalvikvm -Xss262912 -Xmx256M -cp bin/${PROJECTNAME}.dex `get_properties package`.`get_properties name` $@
+    exec dxrun -cp bin/${PROJECTNAME}.dex `get_properties package`.`get_properties name` $@
 fi
 
 if [ ! "$1" = "build" ]; then

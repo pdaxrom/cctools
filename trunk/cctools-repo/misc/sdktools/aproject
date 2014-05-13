@@ -455,7 +455,7 @@ else
 
     echo "Starting apkbuilder..."
 
-    apkbuilder bin/${PROJECTNAME}.apk \
+    apkbuilder bin/${PROJECTNAME}-unsigned.apk \
 	$VERBOSE_APKBUILDER \
 	-u \
 	-z ./bin/resources.res \
@@ -465,10 +465,11 @@ else
 
     echo "Starting apksigner..."
 
-    apksigner bin/${PROJECTNAME}.apk bin/${PROJECTNAME}-signed.apk || error "apksigner"
+    apksigner bin/${PROJECTNAME}-unsigned.apk bin/${PROJECTNAME}.apk || error "apksigner"
 
     if [ "$1" = "-i" -o "$1" = "--install" ]; then
-	am start `am 2>&1| grep -q '\-\-user' && echo '--user 0'` -a android.intent.action.VIEW -t application/vnd.android.package-archive -d "file://${PWD}/bin/${PROJECTNAME}-signed.apk"
+	#am start `am 2>&1| grep -q '\-\-user' && echo '--user 0'` -a android.intent.action.VIEW -t application/vnd.android.package-archive -d "file://${PWD}/bin/${PROJECTNAME}.apk"
+	adialog --install "${PWD}/bin/${PROJECTNAME}.apk"
     fi
 
 fi

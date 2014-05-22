@@ -18,11 +18,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NativeActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
@@ -133,6 +135,22 @@ public class FlexiDialogActivity extends SherlockActivity {
     
     protected void setFlexiDialogInterface(FlexiDialogInterface main) {
     	flexiDialogInterface = main;
+    }
+
+    protected String getPrefString(String key) {
+		return getPrefString(key, "");    	
+    }
+
+    protected String getPrefString(String key, String defaultValue) {
+	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+		return settings.getString(key, defaultValue);    	
+    }
+    
+    protected void setPrefString(String key, String value) {
+		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(key, value);
+		editor.commit();
     }
     
     public class NamedView {
@@ -257,14 +275,14 @@ public class FlexiDialogActivity extends SherlockActivity {
      * @param nl NodeList
      */
     
-    private void showModuleActions(final NodeList nl) {
+    private void showModuleActions(final NodeList nl, String title) {
     	final ListView listView = new ListView(this);
     	List<String> list = new ArrayList<String>();
 
     	for (int i = 0; i < nl.getLength(); i++) {
     		Element e = (Element) nl.item(i);
-    		String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
-    		list.add(title);
+    		String str = getBuiltinVariable(getLocalizedAttribute(e, "title"));
+    		list.add(str);
     	}
     	
     	ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -273,8 +291,8 @@ public class FlexiDialogActivity extends SherlockActivity {
     	listView.setAdapter(adapter);
     	
 		final AlertDialog dialog = new AlertDialog.Builder(this)
-		.setTitle(getText(R.string.module_select))
-		.setMessage(getText(R.string.module_select_message))
+		.setTitle(title)
+//		.setMessage(getText(R.string.module_select_message))
 		.setView(listView)
 		.setCancelable(true)
 		.show();
@@ -300,9 +318,13 @@ public class FlexiDialogActivity extends SherlockActivity {
 		if (xml != null) {
 			Document doc = xmlParser.getDomElement(xml);
 			if (doc != null) {
-				NodeList nl = doc.getElementsByTagName("action");
+				NodeList nl = doc.getElementsByTagName("cctools-module");
+				Element e = (Element) nl.item(0);
+				String title = getLocalizedAttribute(e, "title");
+				Log.i(TAG, ">>> " + title);
+				nl = e.getElementsByTagName("action");
 				if (nl.getLength() > 1) {
-					showModuleActions(nl);
+					showModuleActions(nl, title);
 					return;
 				}
 				showAction((Element) nl.item(0));
@@ -315,7 +337,7 @@ public class FlexiDialogActivity extends SherlockActivity {
      * @param nl
      */
     void showAction(Element e) {
-		String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
+		final String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
 		NodeList nl = e.getElementsByTagName("view");
 
 		namedViews = new ArrayList<NamedView>();
@@ -357,6 +379,12 @@ public class FlexiDialogActivity extends SherlockActivity {
 				edit.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
 				//edit.setText(getBuiltinVariable(getLocalizedAttribute(ne, "value")));
 				
+				final String value = getPrefString(title + "@" + ne.getAttribute("name") + "@");
+				
+				if (!value.equals("") && new File(value).exists()) {
+					edit.setText(value);
+				}
+				
 				namedViews.add(new NamedView(edit, ne.getAttribute("name"), fileSelectorId));
 				
 				ImageButton button = new ImageButton(context);
@@ -368,9 +396,12 @@ public class FlexiDialogActivity extends SherlockActivity {
 						
 			        	public void onClick(View v) {
 			        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-			        		String dir = getBuiltinVariable("$current_dir$");
-			        		if (dir == null || !new File(dir).exists()) {
-			        			dir = Environment.getExternalStorageDirectory().getPath();
+			        		String dir = value;
+			        		if (!new File(dir).exists() || !new File(dir).isDirectory()) {
+				        		dir = getBuiltinVariable("$current_dir$");
+				        		if (dir == null || !new File(dir).exists()) {
+				        			dir = Environment.getExternalStorageDirectory().getPath();
+				        		}
 			        		}
 			        		intent.putExtra(FileDialog.START_PATH, dir);
 			        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_SELECT_DIR);
@@ -384,9 +415,14 @@ public class FlexiDialogActivity extends SherlockActivity {
 						
 			        	public void onClick(View v) {
 			        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-			        		String dir = getBuiltinVariable("$current_dir$");
-			        		if (dir == null || !new File(dir).exists()) {
-			        			dir = Environment.getExternalStorageDirectory().getPath();
+			        		String dir = value;
+			        		if (new File(dir).exists() && new File(dir).isFile()) {
+			        			dir = new File(dir).getParent();
+			        		} else {
+				        		dir = getBuiltinVariable("$current_dir$");
+				        		if (dir == null || !new File(dir).exists()) {
+				        			dir = Environment.getExternalStorageDirectory().getPath();
+				        		}
 			        		}
 			        		intent.putExtra(FileDialog.START_PATH, dir);
 			        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
@@ -440,7 +476,18 @@ public class FlexiDialogActivity extends SherlockActivity {
 						String type = ne.getAttribute("type");
 						String name = ne.getAttribute("name");
 						String value = getBuiltinVariable(ne.getAttribute("value"));
-						value = getVariable(namedViews, value);
+
+						//value = getVariable(namedViews, value);
+						
+				    	for (NamedView view: namedViews) {
+				    		if (value.contains("@" + view.getName() + "@")) {
+								EditText edit = (EditText) view.getView();
+								if (edit != null) {
+					    			value = value.replace("@" + view.getName() + "@", edit.getText().toString());
+					    			setPrefString(title + "@" + view.getName() + "@", edit.getText().toString());
+								}
+				    		}
+				    	}
 						
 						Log.i(TAG, "intentName " + intentName);
 						Log.i(TAG, "type " + type);
@@ -469,6 +516,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 							EditText edit = (EditText) getNamedView(namedViews, var);
 							if (edit != null) {
 								argv[i] = edit.getText().toString();
+				    			setPrefString(title + "@" + var + "@", edit.getText().toString());
 							}
 						} else {
 							argv[i] = getBuiltinVariable(argv[i]);

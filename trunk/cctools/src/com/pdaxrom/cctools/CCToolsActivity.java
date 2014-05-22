@@ -441,18 +441,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		}
 	}
 
-    private String getPrefString(String key) {
-	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
-		return settings.getString(key, Environment.getExternalStorageDirectory().getPath() + "/CCTools/Examples");    	
-    }
-    
-    private void setPrefString(String key, String value) {
-		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(key, value);
-		editor.commit();
-    }
-    
     private int loadTabs() {
 	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
 	    int total = settings.getInt("TabsCount", 0);
@@ -529,15 +517,14 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         editors.add(codeEditor);
         registerForContextMenu(codeEditor);  
         ActionBar.Tab tab = getSupportActionBar().newTab();
-        //RelativeLayout view = (RelativeLayout) getLayoutInflater().inflate(R.layout.tablabel, null);
-        //tab.setCustomView(view);
         tab.setTabListener(this);
         getSupportActionBar().addTab(tab);
         getSupportActionBar().selectTab(tab);
     }
     
     private String getLastOpenedDir() {
-    	return getPrefString("lastdir");
+    	String lastDir = getPrefString("lastdir", Environment.getExternalStorageDirectory().getPath() + "/CCTools/Examples");
+    	return lastDir;
     }
     
     private void setLastOpenedDir(String dir) {
@@ -545,7 +532,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void newTitle(String title) {
-    	//((TextView) ((RelativeLayout)getSupportActionBar().getSelectedTab().getCustomView()).findViewById(R.id.title)).setText(title);
     	getSupportActionBar().getSelectedTab().setText(title);
     }
     
@@ -1001,7 +987,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void showModules() {
-    	final Spinner spinner = new Spinner(this);
+    	final ListView listView = new ListView(this);
+    	//final Spinner spinner = new Spinner(this);
     	List<String> list = new ArrayList<String>();
     	final List<String> modules = new ArrayList<String>();
 
@@ -1054,36 +1041,32 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 			return;
 		}
 		
+    	ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+    	        android.R.layout.simple_list_item_1, list);
+    	
+    	listView.setAdapter(adapter);
+
+		
+		
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item, list);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		spinner.setAdapter(dataAdapter);
-		
-		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-			public void onItemSelected(AdapterView<?> arg0, View view,
-					int position, long id) {
-				Log.i(TAG, "selected " + modules.get(position));
-				toolchainPackageToInstall = position;
-			}
-			public void onNothingSelected(AdapterView<?> arg0) {
-			}
-		});
-
-		new AlertDialog.Builder(this)
+		final AlertDialog dialog = new AlertDialog.Builder(this)
 		.setTitle(getText(R.string.module_select))
-		.setMessage(getText(R.string.module_select_message))
-		.setView(spinner)
-		.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {			
-			public void onClick(DialogInterface dialog, int which) {
-				int i = spinner.getSelectedItemPosition();
-				Log.i(TAG, "selected module rule " + modules.get(i));
-				
-				dialogFromModule(modules.get(i), getLastOpenedDir());
-			}
-		})
+//		.setMessage(getText(R.string.module_select_message))
+		.setView(listView)
 		.setCancelable(true)
 		.show();
+		
+    	listView.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Log.i(TAG, "selected action " + position);
+				dialog.dismiss();
+				dialogFromModule(modules.get(position), getLastOpenedDir());
+			}
+    	});
     }
 
     //TODO

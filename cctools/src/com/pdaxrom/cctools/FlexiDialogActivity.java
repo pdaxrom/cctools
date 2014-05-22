@@ -30,9 +30,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -249,189 +253,236 @@ public class FlexiDialogActivity extends SherlockActivity {
     }
     
     /**
+     * Show module actions
+     * @param nl NodeList
+     */
+    
+    private void showModuleActions(final NodeList nl) {
+    	final ListView listView = new ListView(this);
+    	List<String> list = new ArrayList<String>();
+
+    	for (int i = 0; i < nl.getLength(); i++) {
+    		Element e = (Element) nl.item(i);
+    		String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
+    		list.add(title);
+    	}
+    	
+    	ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+    	        android.R.layout.simple_list_item_1, list);
+    	
+    	listView.setAdapter(adapter);
+    	
+		final AlertDialog dialog = new AlertDialog.Builder(this)
+		.setTitle(getText(R.string.module_select))
+		.setMessage(getText(R.string.module_select_message))
+		.setView(listView)
+		.setCancelable(true)
+		.show();
+		
+    	listView.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Log.i(TAG, "selected action " + position);
+				dialog.dismiss();
+				showAction((Element) nl.item(position));
+			}
+    	});
+    }
+    
+    /**
      * Create Dialog popup window from xml template
      * @param ruleFile xml template file
      * @param lastOpenedDir last opened directory
      */
-    protected void dialogFromRule(String ruleFile, final String lastOpenedDir) {
+    protected void dialogFromModule(String ruleFile, final String lastOpenedDir) {
 		XMLParser xmlParser = new XMLParser();
 		String xml = xmlParser.getXmlFromFile(ruleFile);
 		if (xml != null) {
 			Document doc = xmlParser.getDomElement(xml);
 			if (doc != null) {
-				NodeList nl = doc.getElementsByTagName("new");
-				Element e = (Element) nl.item(0);
-				String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
-				nl = e.getElementsByTagName("view");
-
-				namedViews = new ArrayList<NamedView>();
-				
-		        TableLayout table = new TableLayout(context);
-		        table.setColumnStretchable(1, true);
-		        
-		        fileSelectorId = 0;
-				for (int i = 0; i < nl.getLength(); i++) {
-					Element ne = (Element) nl.item(i);
-					Log.i(TAG, "-- " + ne.getTagName());
-					Log.i(TAG, "--- " + ne.getAttribute("type"));
-					Log.i(TAG, "--- " + ne.getAttribute("title"));
-					Log.i(TAG, "--- " + ne.getAttribute("name"));
-					if (ne.getAttribute("type").equals("edit")) {
-						TableRow row = new TableRow(context);
-						
-						TextView view = new TextView(context);
-						view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
-						
-						EditText edit = new EditText(context);
-						edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-						edit.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
-						//edit.setText(getBuiltinVariable(getLocalizedAttribute(ne, "value")));
-
-						namedViews.add(new NamedView(edit, ne.getAttribute("name")));
-
-						row.addView(view);
-						row.addView(edit);
-						table.addView(row);
-					} else if (ne.getAttribute("type").equals("dirpath") || ne.getAttribute("type").equals("filepath")) {
-						TableRow row = new TableRow(context);
-
-						TextView view = new TextView(context);
-						view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
-						
-						EditText edit = new EditText(context);
-						edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-						edit.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
-						//edit.setText(getBuiltinVariable(getLocalizedAttribute(ne, "value")));
-						
-						namedViews.add(new NamedView(edit, ne.getAttribute("name"), fileSelectorId));
-						
-						ImageButton button = new ImageButton(context);
-						button.setImageResource(R.drawable.folder);
-						
-						if (ne.getAttribute("type").equals("dirpath")) {
-							button.setOnClickListener(new OnClickListener() {
-								private int id = fileSelectorId++;
-								
-					        	public void onClick(View v) {
-					        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-					        		String dir = lastOpenedDir;
-					        		if (dir == null || !new File(dir).exists()) {
-					        			dir = Environment.getExternalStorageDirectory().getPath();
-					        		}
-					        		intent.putExtra(FileDialog.START_PATH, dir);
-					        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_SELECT_DIR);
-					        		startActivityForResult(intent, REQUEST_DIALOG_FILE_SELECTOR + id);    	
-					        		
-					        	}
-					        });
-						} else {
-							button.setOnClickListener(new OnClickListener() {
-								private int id = fileSelectorId++;
-								
-					        	public void onClick(View v) {
-					        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-					        		String dir = lastOpenedDir;
-					        		if (dir == null || !new File(dir).exists()) {
-					        			dir = Environment.getExternalStorageDirectory().getPath();
-					        		}
-					        		intent.putExtra(FileDialog.START_PATH, dir);
-					        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
-					        		startActivityForResult(intent, REQUEST_DIALOG_FILE_SELECTOR + id);    	
-					        		
-					        	}
-					        });							
-						}
-						
-						row.addView(view);
-						row.addView(edit);
-						row.addView(button);
-						table.addView(row);
-					}
+				NodeList nl = doc.getElementsByTagName("action");
+				if (nl.getLength() > 1) {
+					showModuleActions(nl);
+					return;
 				}
-				
-				View view = LayoutInflater.from(this).inflate(R.layout.module_dialog, null);
-				LinearLayout layout = (LinearLayout) view.findViewById(R.id.moduleLayout);
-				layout.addView(table);
-				
-				nl = e.getElementsByTagName("command");
-				e = (Element) nl.item(0);
-				final String execAttr = e.getAttribute("exec");
-				final String intentName = e.getAttribute("intent");
-				final NodeList nlExtras = e.getElementsByTagName("extra");
-				
-				new AlertDialog.Builder(context)
-				.setTitle(title)
-//				.setMessage(title)
-				.setView(view)
-				.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {
-					private String exec = execAttr;
-					@SuppressLint("NewApi")
-					public void onClick(DialogInterface dialog, int which) {
-						if (exec.length() == 0) {
-							Intent intent = null;
-							if (intentName.contentEquals("BuildActivity")) {
-								intent = new Intent(FlexiDialogActivity.this, BuildActivity.class);
-							} else if (intentName.contentEquals("TermActivity")) {
-								intent = new Intent(FlexiDialogActivity.this, TermActivity.class);
-							} else if (intentName.contentEquals("NativeActivity")) {
-								intent = new Intent(FlexiDialogActivity.this, NativeActivity.class);
-							} else if (intentName.contentEquals("LauncherConsoleActivity")) {
-								intent = new Intent(FlexiDialogActivity.this, LauncherConsoleActivity.class);
-							} else if (intentName.contentEquals("LauncherNativeActivity")) {
-								intent = new Intent(FlexiDialogActivity.this, LauncherNativeActivity.class);
-							}
-							
-							for (int i=0; i < nlExtras.getLength(); i++) {
-								Element ne = (Element) nlExtras.item(i);
-								String type = ne.getAttribute("type");
-								String name = ne.getAttribute("name");
-								String value = getBuiltinVariable(ne.getAttribute("value"));
-								value = getVariable(namedViews, value);
-								
-								Log.i(TAG, "intentName " + intentName);
-								Log.i(TAG, "type " + type);
-								Log.i(TAG, "name " + name + " = " + value);								
-								
-								if (type.contentEquals("boolean")) {
-									intent.putExtra(name, Boolean.valueOf(value));
-								} else if (type.contentEquals("int")) {
-									intent.putExtra(name, Integer.valueOf(value));
-								} else if (type.contentEquals("long")) {
-									intent.putExtra(name, Long.valueOf(value));
-								} else if (type.contentEquals("float")) {
-									intent.putExtra(name, Float.valueOf(value));
-								} else {
-									intent.putExtra(name, value);
-								}
-							}
-							
-							startActivity(intent);
-						} else {
-							exec.replaceAll("\\s+", " ");
-							String[] argv = exec.split("\\s+");
-							for (int i = 0; i < argv.length; i++) {
-								if (argv[i].startsWith("@") && argv[i].endsWith("@")) {
-									String var = argv[i].substring(1, argv[i].length() - 1);
-									EditText edit = (EditText) getNamedView(namedViews, var);
-									if (edit != null) {
-										argv[i] = edit.getText().toString();
-									}
-								} else {
-									argv[i] = getBuiltinVariable(argv[i]);
-								}
-								
-								Log.i(TAG, ":: " + argv[i]);
-							}
-							system(argv, false);
-						}
-						namedViews = null;
-					}
-				})
-				.setCancelable(true)
-				.show();
-
+				showAction((Element) nl.item(0));
 			}
 		}
+    }
+    
+    /**
+     * Show action dialog
+     * @param nl
+     */
+    void showAction(Element e) {
+		String title = getBuiltinVariable(getLocalizedAttribute(e, "title"));
+		NodeList nl = e.getElementsByTagName("view");
+
+		namedViews = new ArrayList<NamedView>();
+		
+        TableLayout table = new TableLayout(context);
+        table.setColumnStretchable(1, true);
+        
+        fileSelectorId = 0;
+		for (int i = 0; i < nl.getLength(); i++) {
+			Element ne = (Element) nl.item(i);
+			Log.i(TAG, "-- " + ne.getTagName());
+			Log.i(TAG, "--- " + ne.getAttribute("type"));
+			Log.i(TAG, "--- " + ne.getAttribute("title"));
+			Log.i(TAG, "--- " + ne.getAttribute("name"));
+			if (ne.getAttribute("type").equals("edit")) {
+				TableRow row = new TableRow(context);
+				
+				TextView view = new TextView(context);
+				view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
+				
+				EditText edit = new EditText(context);
+				edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+				edit.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
+				//edit.setText(getBuiltinVariable(getLocalizedAttribute(ne, "value")));
+
+				namedViews.add(new NamedView(edit, ne.getAttribute("name")));
+
+				row.addView(view);
+				row.addView(edit);
+				table.addView(row);
+			} else if (ne.getAttribute("type").equals("dirpath") || ne.getAttribute("type").equals("filepath")) {
+				TableRow row = new TableRow(context);
+
+				TextView view = new TextView(context);
+				view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
+				
+				EditText edit = new EditText(context);
+				edit.setInputType(edit.getInputType() & ~InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+				edit.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
+				//edit.setText(getBuiltinVariable(getLocalizedAttribute(ne, "value")));
+				
+				namedViews.add(new NamedView(edit, ne.getAttribute("name"), fileSelectorId));
+				
+				ImageButton button = new ImageButton(context);
+				button.setImageResource(R.drawable.folder);
+				
+				if (ne.getAttribute("type").equals("dirpath")) {
+					button.setOnClickListener(new OnClickListener() {
+						private int id = fileSelectorId++;
+						
+			        	public void onClick(View v) {
+			        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
+			        		String dir = getBuiltinVariable("$current_dir$");
+			        		if (dir == null || !new File(dir).exists()) {
+			        			dir = Environment.getExternalStorageDirectory().getPath();
+			        		}
+			        		intent.putExtra(FileDialog.START_PATH, dir);
+			        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_SELECT_DIR);
+			        		startActivityForResult(intent, REQUEST_DIALOG_FILE_SELECTOR + id);    	
+			        		
+			        	}
+			        });
+				} else {
+					button.setOnClickListener(new OnClickListener() {
+						private int id = fileSelectorId++;
+						
+			        	public void onClick(View v) {
+			        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
+			        		String dir = getBuiltinVariable("$current_dir$");
+			        		if (dir == null || !new File(dir).exists()) {
+			        			dir = Environment.getExternalStorageDirectory().getPath();
+			        		}
+			        		intent.putExtra(FileDialog.START_PATH, dir);
+			        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
+			        		startActivityForResult(intent, REQUEST_DIALOG_FILE_SELECTOR + id);    	
+			        		
+			        	}
+			        });							
+				}
+				
+				row.addView(view);
+				row.addView(edit);
+				row.addView(button);
+				table.addView(row);
+			}
+		}
+		
+		View view = LayoutInflater.from(this).inflate(R.layout.module_dialog, null);
+		LinearLayout layout = (LinearLayout) view.findViewById(R.id.moduleLayout);
+		layout.addView(table);
+		
+		nl = e.getElementsByTagName("command");
+		e = (Element) nl.item(0);
+		final String execAttr = e.getAttribute("exec");
+		final String intentName = e.getAttribute("intent");
+		final NodeList nlExtras = e.getElementsByTagName("extra");
+		
+		new AlertDialog.Builder(context)
+		.setTitle(title)
+//		.setMessage(title)
+		.setView(view)
+		.setPositiveButton(getText(R.string.button_continue), new DialogInterface.OnClickListener() {
+			private String exec = execAttr;
+			@SuppressLint("NewApi")
+			public void onClick(DialogInterface dialog, int which) {
+				if (exec.length() == 0) {
+					Intent intent = null;
+					if (intentName.contentEquals("BuildActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, BuildActivity.class);
+					} else if (intentName.contentEquals("TermActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, TermActivity.class);
+					} else if (intentName.contentEquals("NativeActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, NativeActivity.class);
+					} else if (intentName.contentEquals("LauncherConsoleActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, LauncherConsoleActivity.class);
+					} else if (intentName.contentEquals("LauncherNativeActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, LauncherNativeActivity.class);
+					}
+					
+					for (int i=0; i < nlExtras.getLength(); i++) {
+						Element ne = (Element) nlExtras.item(i);
+						String type = ne.getAttribute("type");
+						String name = ne.getAttribute("name");
+						String value = getBuiltinVariable(ne.getAttribute("value"));
+						value = getVariable(namedViews, value);
+						
+						Log.i(TAG, "intentName " + intentName);
+						Log.i(TAG, "type " + type);
+						Log.i(TAG, "name " + name + " = " + value);								
+						
+						if (type.contentEquals("boolean")) {
+							intent.putExtra(name, Boolean.valueOf(value));
+						} else if (type.contentEquals("int")) {
+							intent.putExtra(name, Integer.valueOf(value));
+						} else if (type.contentEquals("long")) {
+							intent.putExtra(name, Long.valueOf(value));
+						} else if (type.contentEquals("float")) {
+							intent.putExtra(name, Float.valueOf(value));
+						} else {
+							intent.putExtra(name, value);
+						}
+					}
+					
+					startActivity(intent);
+				} else {
+					exec.replaceAll("\\s+", " ");
+					String[] argv = exec.split("\\s+");
+					for (int i = 0; i < argv.length; i++) {
+						if (argv[i].startsWith("@") && argv[i].endsWith("@")) {
+							String var = argv[i].substring(1, argv[i].length() - 1);
+							EditText edit = (EditText) getNamedView(namedViews, var);
+							if (edit != null) {
+								argv[i] = edit.getText().toString();
+							}
+						} else {
+							argv[i] = getBuiltinVariable(argv[i]);
+						}
+						
+						Log.i(TAG, ":: " + argv[i]);
+					}
+					system(argv, false);
+				}
+				namedViews = null;
+			}
+		})
+		.setCancelable(true)
+		.show();
     }
     
     /**

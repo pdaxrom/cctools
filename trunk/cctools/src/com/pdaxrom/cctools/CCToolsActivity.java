@@ -1079,7 +1079,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 				int i = spinner.getSelectedItemPosition();
 				Log.i(TAG, "selected module rule " + modules.get(i));
 				
-				dialogFromRule(modules.get(i), getLastOpenedDir());
+				dialogFromModule(modules.get(i), getLastOpenedDir());
 			}
 		})
 		.setCancelable(true)

@@ -2,7 +2,7 @@
     title="Create local addons repository"
     title-ru="Создание локального репозитория"
     id="makerepo">
-    <new
+    <action
 	title="Create local addons repository"
 	title-ru="Создание локального репозитория">
 	<view type="dirpath"
@@ -15,5 +15,5 @@
 	    title="Process"
 	    title-ru="Создать"
 	    exec="makerepo --gui --path @path@" />
-    </new>
+    </action>
 </cctools-module>

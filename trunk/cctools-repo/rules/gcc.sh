@@ -149,8 +149,8 @@ build_gcc() {
 
     find . -name "libgfortran.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgfortran-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
 
-    find . -name "libobjc.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libobjc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
-    find . -name "libobjc_gc.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libobjc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
+    find . -name "libobjc.*"    -type f -exec install -D -m644 {} ${TMPINST_DIR}/libobjc-dev/cctools/${TARGET_ARCH}/lib/{} \; -exec rm -f {} \;
+    find . -name "libobjc_gc.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libobjc-dev/cctools/${TARGET_ARCH}/lib/{} \; -exec rm -f {} \;
 
     cd ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}
     find . -name "crt*.o"      -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
@@ -166,7 +166,7 @@ build_gcc() {
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/include/c++
 
     copysrc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/include/objc \
-		${TMPINST_DIR}/libobjc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/include/objc
+		${TMPINST_DIR}/libobjc-dev/cctools/${TARGET_ARCH}/include/objc
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/include/objc
 

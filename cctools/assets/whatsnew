@@ -1,11 +1,11 @@
 CCTools
 - Editable repos list.
-- Copy/Cut/Delete files in file dialog window (long touch).
-- Added support for cctools modules.
+- The File Dialog allows the Copy/Cut/Delete operations (long touch).
+- Added support for external cctools modules.
 
 Repository
 - Toolchain updated to NDK r9d.
-- Added tools for Android and console Java projects.
+- Added tools for Android and console Java projects (via modules).
 - Added cppcheck module.
 - Added module for create local repository.
-- Added console package manager pkgman.
+- Added console package manager - pkgman.

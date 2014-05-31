@@ -1,6 +1,6 @@
 build_sdktools() {
     PKG=sdktools
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="android sdk tools"
     O_DIR=${TOPDIR}/misc/sdktools
     B_DIR=${build_dir}/${PKG}

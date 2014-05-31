@@ -32,7 +32,7 @@ usage() {
     echo "create lib-project [options] - Creates a new Android library project."
     echo "build [debug]                - Build a project."
     echo "build release                - Build a release project."
-    echo "run                          - Run project."
+    echo "run                          - Run."
     echo "clean                        - Clean a project files."
 
     usage_create

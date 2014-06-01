@@ -557,3 +557,5 @@ build_cppcheck
 build_cppcheck_module
 
 build_makerepo
+build_kernel_dev_fix
+build_kernel_dev

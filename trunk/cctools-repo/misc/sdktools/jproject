@@ -30,10 +30,10 @@ usage() {
     echo "Usage:"
     echo "create project [options]     - Creates a new Android project."
     echo "create lib-project [options] - Creates a new Android library project."
-    echo "build [debug]                - Build a project."
-    echo "build release                - Build a release project."
-    echo "run                          - Run."
-    echo "clean                        - Clean a project files."
+    echo "build [debug][-r|--run[args]]- Debug build."
+    echo "build release[-r|--run[args]]- Release build."
+    echo "run[args]                    - Run without rebuild."
+    echo "clean                        - Cleanup project files."
 
     usage_create
 }
@@ -240,6 +240,9 @@ echo "Build $PROJECTNAME"
 PROJECT_RELEASE="no"
 if [ "$1" = "release" ]; then
     PROJECT_RELEASE="yes"
+    shift
+elif [ "$1" = "debug" ]; then
+    shift
 fi
 
 mkdir -p bin/classes gen
@@ -375,4 +378,9 @@ else
 	`find bin/classes -maxdepth 1 -not -path "bin/classes"` \
 	$DEXED_LIBS \
 	|| error "dx"
+
+    if [ "$1" = "-r" -o "$1" = "--run" ]; then
+	shift
+	exec dxrun -cp bin/${PROJECTNAME}.dex `get_properties package`.`get_properties name` $@
+    fi
 fi

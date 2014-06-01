@@ -31,11 +31,11 @@ usage_create() {
 usage() {
     echo
     echo "Usage:"
-    echo "create project [options]     - Creates a new Android project."
-    echo "create lib-project [options] - Creates a new Android library project."
-    echo "build [debug][-i|--install]  - Build a project."
-    echo "build release[-i|--install]  - Build a release project."
-    echo "clean                        - Clean a project files."
+    echo "create project [options]     - Create a new Android project."
+    echo "create lib-project [options] - Create a new Android library project."
+    echo "build [debug][-i|--install]  - Debug build."
+    echo "build release[-i|--install]  - Release build."
+    echo "clean                        - Cleanup project files."
 
     usage_create
 }

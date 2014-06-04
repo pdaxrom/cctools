@@ -1,8 +1,8 @@
 build_build_essential_gcc_objc_compact() {
     PKG=build-essential-gcc-objc-compact
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="Informational list of objc compact build-essential packages"
-    PKG_DEPS="busybox binutils-compact libgcc-compact-dev libstdc++-compact-dev libobjc-compact-dev gobjc make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples gobjc-examples"
+    PKG_DEPS="busybox project-ctl binutils-compact libgcc-compact-dev libstdc++-compact-dev libobjc-compact-dev gobjc make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples gobjc-examples"
     c_tag ${PKG} && return
 
     banner "Build gcc build essential"

@@ -1,8 +1,8 @@
 build_build_essential_clang_compact() {
     PKG=build-essential-clang-compact
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="Informational list of clang compact build-essential packages"
-    PKG_DEPS="busybox binutils-compact libgcc-compact-dev libstdc++-compact-dev clang make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples"
+    PKG_DEPS="busybox project-ctl binutils-compact libgcc-compact-dev libstdc++-compact-dev clang make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples"
     c_tag ${PKG} && return
 
     banner "Build clang build essential"

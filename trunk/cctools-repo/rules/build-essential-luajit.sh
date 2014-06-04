@@ -1,8 +1,8 @@
 build_build_essential_luajit() {
     PKG=build-essential-luajit
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="Informational list of Lua JIT build-essential packages"
-    PKG_DEPS="busybox LuaJIT"
+    PKG_DEPS="busybox project-ctl LuaJIT"
     c_tag ${PKG} && return
 
     banner "Build lua jit build essential"

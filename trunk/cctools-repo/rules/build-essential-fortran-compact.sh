@@ -1,8 +1,8 @@
 build_build_essential_fortran_compact() {
     PKG=build-essential-fortran-compact
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="Informational list of fortran compact build-essential packages"
-    PKG_DEPS="busybox binutils-compact libgcc-compact-dev libstdc++-compact-dev libgfortran-compact-dev gfortran make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples gfortran-examples"
+    PKG_DEPS="busybox project-ctl binutils-compact libgcc-compact-dev libstdc++-compact-dev libgfortran-compact-dev gfortran make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples gfortran-examples"
     c_tag ${PKG} && return
 
     banner "Build fortran build essential"

@@ -1,8 +1,8 @@
 build_build_essential_gcc_avr() {
     PKG=build-essential-gcc-avr
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="Informational list of avr gcc build-essential packages"
-    PKG_DEPS="busybox binutils-avr gcc-avr avr-libc make"
+    PKG_DEPS="busybox project-ctl binutils-avr gcc-avr avr-libc make"
     c_tag ${PKG} && return
 
     banner "Build gcc-avr build essential"

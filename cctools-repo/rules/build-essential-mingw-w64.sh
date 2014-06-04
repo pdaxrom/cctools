@@ -1,8 +1,8 @@
 build_build_essential_mingw_w64() {
     PKG=build-essential-mingw-w64
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="Informational list of mingw-w64 i686 build-essential packages"
-    PKG_DEPS="busybox make binutils-mingw-w64-i686 gcc-mingw-w64-i686 mingw-w64-i686-dev mingw-w64-examples"
+    PKG_DEPS="busybox project-ctl make binutils-mingw-w64-i686 gcc-mingw-w64-i686 mingw-w64-i686-dev mingw-w64-examples"
     c_tag ${PKG} && return
 
     banner "Build mingw build essential"

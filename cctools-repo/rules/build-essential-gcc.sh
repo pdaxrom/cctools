@@ -1,8 +1,8 @@
 build_build_essential_gcc() {
     PKG=build-essential-gcc
-    PKG_VERSION=1.0
+    PKG_VERSION=1.1
     PKG_DESC="Informational list of gcc build-essential packages"
-    PKG_DEPS="busybox binutils libgcc-dev libstdc++-dev gcc make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples"
+    PKG_DEPS="busybox project-ctl binutils libgcc-dev libstdc++-dev gcc make ndk-misc ndk-sysroot-\${HOSTNDKARCH}-\${HOSTNDKVERSION} cctools-examples"
     c_tag ${PKG} && return
 
     banner "Build gcc build essential"

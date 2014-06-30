@@ -1,0 +1,18 @@
+--- gcc-4.8/gcc/config/linux-android.h.gcc.original	2014-06-30 16:18:00.882166810 +0400
++++ gcc-4.8/gcc/config/linux-android.h	2014-06-30 16:21:51.848981087 +0400
+@@ -38,10 +38,15 @@
+   "%{" NOANDROID "|tno-android-ld:" LINUX_SPEC ";:" ANDROID_SPEC "}"
+ 
+ #define ANDROID_LINK_SPEC \
++  "%{!nopie: %{!static: %{!A: %{!shared: %{!nostdlib: %{!nostartfiles:	\
++     %{!fno-PIE: %{!fno-pie: -pie} } } } } } } } %{pie: -pie} "		\
+   "%{shared: -Bsymbolic} -z noexecstack -z relro -z now"
+ 
+ #define ANDROID_CC1_SPEC(ANDROID_PIC_DEFAULT)				\
+   "%{!mglibc:%{!muclibc:%{!mbionic: -mbionic}}} "			\
++  "%{!D__KERNEL__: %{!static: %{!fno-PIC: %{!fno-pic: %{!shared:	\
++     %{!nostdlib: %{!nostartfiles: %{!fno-PIE: %{!fno-pie: %{!nopie:	\
++     %{!fPIC: %{!fpic:-fPIE} } } } } } } } } } } } "			\
+   "%{!fno-pic:%{!fno-PIC:%{!fpic:%{!fPIC: " ANDROID_PIC_DEFAULT "}}}}"
+ 
+ #define ANDROID_CC1PLUS_SPEC						\

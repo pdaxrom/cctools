@@ -16,10 +16,13 @@ build_llvm() {
 
     preparesrc $O_DIR $S_DIR
 
-    #copysrc $O_DIR $S_DIR
-
-    #cd $S_DIR
-    #patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch || error "patch"
+    if [ "$BUILD_PIE_COMPILER" = "yes" ]; then
+	cd $S_DIR
+	if [ ! -e ${S_DIR}/.pie_patched ]; then
+	    patch -p1 < ${patch_dir}/${PKG}-${PKG_VERSION}-pie.patch || error "No pie patch found!"
+	    touch ${S_DIR}/.pie_patched
+	fi
+    fi
 
     mkdir -p $B_DIR
     cd $B_DIR
@@ -103,8 +106,8 @@ build_llvm() {
     ln -sf clang ${TMPINST_DIR}/${PKG}/cctools/bin/clang++
     cp -Rf ${LLVMROOTDIR}/lib/clang ${TMPINST_DIR}/${PKG}/cctools/lib/
 
-    cp -f ${LLVMROOTDIR}/lib/libprofile_rt.a  ${TMPINST_DIR}/${PKG}/cctools/lib/
-    cp -f ${LLVMROOTDIR}/lib/libprofile_rt.so ${TMPINST_DIR}/${PKG}/cctools/lib/
+    #cp -f ${LLVMROOTDIR}/lib/libprofile_rt.a  ${TMPINST_DIR}/${PKG}/cctools/lib/
+    #cp -f ${LLVMROOTDIR}/lib/libprofile_rt.so ${TMPINST_DIR}/${PKG}/cctools/lib/
 
     cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/cpp-clang << EOF
 #!/system/bin/sh

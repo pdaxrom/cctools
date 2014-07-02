@@ -49,7 +49,10 @@ public class RepoUtils {
 	
 	public static List<PackageInfo> getRepoFromUrl(String url) {
 		if (url.startsWith("file://")) {
-			String path = url.substring(8);
+			String path = url.substring(7);
+			if (! new File(path + "/Packages").exists()) {
+				path = path + "/" + _buildAbi;					
+			}
 			return parseRepoXml(null, getRepoXmlFromFile(path), path);
 		} else {
 			return parseRepoXml(null, getRepoXmlFromUrl(url), url); // getting DOM element
@@ -60,9 +63,9 @@ public class RepoUtils {
 		List<PackageInfo> list = null;
 		for (String url: urls) {
 			if (url.startsWith("file://")) {
-				String path = url.substring(8);
-				if (! new File(path + "Packages").exists()) {
-					url = url + "/" + _buildAbi;					
+				String path = url.substring(7);
+				if (! new File(path + "/Packages").exists()) {
+					path = path + "/" + _buildAbi;					
 				}
 				list = parseRepoXml(list, getRepoXmlFromFile(path), path);
 			} else {

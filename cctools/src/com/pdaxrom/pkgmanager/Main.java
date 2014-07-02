@@ -250,42 +250,50 @@ class Main {
 		File temp = new File(filesDir + "/" + file);
 		if (!temp.exists()) {
 			try {
-				int totalread = 0;
 				System.out.println("Downloading file " + from + "/" + file);
-				URL url = new URL(from + "/" + file);
-				URLConnection cn = url.openConnection();
-				cn.setReadTimeout(3 * 60 * 1000); // timeout 3 minutes
-				cn.connect();
-				int file_size = cn.getContentLength();
-				if (sdkVersion >= 9) {
-					File partition = new File(filesDir);
-					if (partition.getUsableSpace() < file_size) {
-						temp.delete();
-						System.err.println("Can't download, need " + 
-								Utils.humanReadableByteCount(file_size - partition.getUsableSpace(), false) + 
-								" on SD");
-						return false;
+				if (from.startsWith("/")) {
+					File fromFile = new File(from + "/" + file);
+					if (!fromFile.exists()) {
+						throw new RuntimeException("File not found in local repo!");
 					}
-				}
-				InputStream stream = cn.getInputStream();
-				if (stream == null) {
-					throw new RuntimeException("stream is null");
-				}
-				FileOutputStream out = new FileOutputStream(temp);
-				byte buf[] = new byte[128 * 1024];
-				do {
-					int numread = stream.read(buf);
-					if (numread <= 0) {
-						break;
+					Utils.copyDirectory(fromFile, temp);
+				} else {
+					int totalread = 0;
+					URL url = new URL(from + "/" + file);
+					URLConnection cn = url.openConnection();
+					cn.setReadTimeout(3 * 60 * 1000); // timeout 3 minutes
+					cn.connect();
+					int file_size = cn.getContentLength();
+					if (sdkVersion >= 9) {
+						File partition = new File(filesDir);
+						if (partition.getUsableSpace() < file_size) {
+							temp.delete();
+							System.err.println("Can't download, need " + 
+									Utils.humanReadableByteCount(file_size - partition.getUsableSpace(), false) + 
+									" on SD");
+							return false;
+						}
 					}
-					out.write(buf, 0, numread);
-					totalread += numread;
-					System.out.print("Received " + totalread + " from " + file_size + "\r");
-				} while (true);
-				stream.close();
-				out.close();
-				if (totalread != file_size) {
-					throw new RuntimeException("Partially downloaded file!");
+					InputStream stream = cn.getInputStream();
+					if (stream == null) {
+						throw new RuntimeException("stream is null");
+					}
+					FileOutputStream out = new FileOutputStream(temp);
+					byte buf[] = new byte[128 * 1024];
+					do {
+						int numread = stream.read(buf);
+						if (numread <= 0) {
+							break;
+						}
+						out.write(buf, 0, numread);
+						totalread += numread;
+						System.out.print("Received " + totalread + " from " + file_size + "\r");
+					} while (true);
+					stream.close();
+					out.close();
+					if (totalread != file_size) {
+						throw new RuntimeException("Partially downloaded file!");
+					}					
 				}
 			} catch (Exception e) {
 				temp.delete();

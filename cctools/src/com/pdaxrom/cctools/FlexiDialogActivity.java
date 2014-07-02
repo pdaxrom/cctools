@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
@@ -55,6 +56,8 @@ public class FlexiDialogActivity extends SherlockActivity {
 	private final static int REQUEST_DIALOG_FILE_SELECTOR = 1000;
 	private final static int MAX_REQUESTS_FROM_FILE_DIALOG = 20;
 	
+	private static final String REPO_URL = "http://cctools.info/packages";
+
 	protected static final String PKGS_LISTS_DIR = "/installed/";
 
 	private Context context = this;
@@ -115,6 +118,8 @@ public class FlexiDialogActivity extends SherlockActivity {
         }
 
         createShellProfile();
+        
+        initRepoList();
     }
     
     protected String getToolchainDir() {
@@ -675,6 +680,24 @@ public class FlexiDialogActivity extends SherlockActivity {
 				return;
 			} catch (Exception e) {
 				System.err.println("Cannot write BuildConfig.java " + e);
+			}			
+		}
+	}
+	
+	private void initRepoList() {
+		String reposListFile = toolchainDir + "/cctools/etc/repos.list"; 
+		if (!new File(reposListFile).exists()) {
+			try {
+				FileOutputStream fos = new FileOutputStream(reposListFile);
+				String repoUrl = REPO_URL;
+				if (Build.VERSION.SDK_INT >= 19) {
+					repoUrl += "-pie";
+				}
+				repoUrl += "\n";
+				fos.write(repoUrl.getBytes());
+				fos.close();
+			} catch (Exception e) {
+				Log.e(TAG, "Write repos list (" + reposListFile + "): " + e);
 			}			
 		}
 	}

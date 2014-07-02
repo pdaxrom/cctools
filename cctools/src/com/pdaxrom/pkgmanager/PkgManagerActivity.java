@@ -578,50 +578,58 @@ public class PkgManagerActivity extends SherlockListActivity {
 		File temp = new File(filesDir + "/" + file);
 		if (!temp.exists()) {
 			try {
-				int totalread = 0;
 				Log.i(TAG, "Downloading file " + from + "/" + file);
-				URL url = new URL(from + "/" + file);
-				URLConnection cn = url.openConnection();
-				cn.setReadTimeout(3 * 60 * 1000); // timeout 3 minutes
-				cn.connect();
-				int file_size = cn.getContentLength();
-				StatFs stat = new StatFs(filesDir);
-				int sdAvailSize = stat.getAvailableBlocks();// * stat.getBlockSize();
-				Log.i(TAG, "File size " + file_size);
-				Log.i(TAG, "Available on SD (in blocks " + stat.getBlockSize() + ") " + sdAvailSize);
-				int need_mem = file_size / stat.getBlockSize();
-				if (sdAvailSize < need_mem) {
-					temp.delete();
-					errorString = getString(R.string.sd_no_memory) + 
-									" " + Utils.humanReadableByteCount(need_mem, false) + 
-									" " + getString(R.string.sd_no_memory2);
-					return false;
-				}
-				InputStream stream = cn.getInputStream();
-				if (stream == null) {
-					throw new RuntimeException("stream is null");
-				}
-				Log.i(TAG, "File is " + temp.getAbsolutePath());
-				FileOutputStream out = new FileOutputStream(temp);
-				byte buf[] = new byte[128 * 1024];
-				do {
-					int numread = stream.read(buf);
-					if (numread <= 0) {
-						break;
+				if (from.startsWith("/")) {
+					File fromFile = new File(from + "/" + file);
+					if (!fromFile.exists()) {
+						throw new RuntimeException("File not found in local repo!");
 					}
-					out.write(buf, 0, numread);
-					totalread += numread;
-					updateProgress(getString(R.string.received) + " " + totalread + " " + getString(R.string.from) + " " + file_size + " " + getString(R.string.bytes));
-					if (file_size > 20 * 1024 * 1024) {
-						updateProgress(totalread / (file_size / 100));
-					} else {
-						updateProgress(totalread * 100 / file_size);
+					Utils.copyDirectory(fromFile, temp);
+				} else {				
+					int totalread = 0;
+					URL url = new URL(from + "/" + file);
+					URLConnection cn = url.openConnection();
+					cn.setReadTimeout(3 * 60 * 1000); // timeout 3 minutes
+					cn.connect();
+					int file_size = cn.getContentLength();
+					StatFs stat = new StatFs(filesDir);
+					int sdAvailSize = stat.getAvailableBlocks();// * stat.getBlockSize();
+					Log.i(TAG, "File size " + file_size);
+					Log.i(TAG, "Available on SD (in blocks " + stat.getBlockSize() + ") " + sdAvailSize);
+					int need_mem = file_size / stat.getBlockSize();
+					if (sdAvailSize < need_mem) {
+						temp.delete();
+						errorString = getString(R.string.sd_no_memory) + 
+										" " + Utils.humanReadableByteCount(need_mem, false) + 
+										" " + getString(R.string.sd_no_memory2);
+						return false;
 					}
-				} while (true);
-				stream.close();
-				out.close();
-				if (totalread != file_size) {
-					throw new RuntimeException("Partially downloaded file!");
+					InputStream stream = cn.getInputStream();
+					if (stream == null) {
+						throw new RuntimeException("stream is null");
+					}
+					Log.i(TAG, "File is " + temp.getAbsolutePath());
+					FileOutputStream out = new FileOutputStream(temp);
+					byte buf[] = new byte[128 * 1024];
+					do {
+						int numread = stream.read(buf);
+						if (numread <= 0) {
+							break;
+						}
+						out.write(buf, 0, numread);
+						totalread += numread;
+						updateProgress(getString(R.string.received) + " " + totalread + " " + getString(R.string.from) + " " + file_size + " " + getString(R.string.bytes));
+						if (file_size > 20 * 1024 * 1024) {
+							updateProgress(totalread / (file_size / 100));
+						} else {
+							updateProgress(totalread * 100 / file_size);
+						}
+					} while (true);
+					stream.close();
+					out.close();
+					if (totalread != file_size) {
+						throw new RuntimeException("Partially downloaded file!");
+					}
 				}
 			} catch (Exception e) {
 				temp.delete();

@@ -449,6 +449,9 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
     makerepo -p $REPO_DIR
     pkgman install bison flex
 
+    build_nano
+    build_vim
+
     exit 0
 fi
 

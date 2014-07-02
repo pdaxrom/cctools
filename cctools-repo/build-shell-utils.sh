@@ -414,7 +414,19 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 
     build_native_perl
     build_m4
+
+    if ! which pkgman 2>/dev/null >/dev/null; then
+	echo "Please install pkgman package and restart build."
+	exit 0
+    fi
+
+    makerepo -p $REPO_DIR
+    pkgman install perl m4
+
     build_autoconf
+
+    makerepo -p $REPO_DIR
+    pkgman install autoconf
 
     if ! which autoconf 2>/dev/null >/dev/null; then
 	echo "Please install autoconf package and restart build."
@@ -423,6 +435,9 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 
     build_automake
 
+    makerepo -p $REPO_DIR
+    pkgman install automake
+
     if ! which automake 2>/dev/null >/dev/null; then
 	echo "Please install automake package and restart build."
 	exit 0
@@ -430,6 +445,9 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 
     build_bison
     build_flex
+
+    makerepo -p $REPO_DIR
+    pkgman install bison flex
 
     exit 0
 fi

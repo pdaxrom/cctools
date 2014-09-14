@@ -166,7 +166,7 @@ public class BuildActivity extends Activity {
             		}
             	} else if ((new File(cctoolsDir + "/bin/javac")).exists() &&
             				ext.contentEquals(".java")) {
-            		cmdline = "project-helper -b -r " + outFile;
+            		cmdline = "project-ctl -b -r " + outFile;
             		execJava = true;
 //            		if (forceBuild) {
 //            			cmdline += " " + mPrefs.getString("force_ccopts", "");

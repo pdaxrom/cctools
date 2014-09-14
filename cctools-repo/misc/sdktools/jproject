@@ -6,7 +6,7 @@ if [ "$TOPDIR" = "" ]; then
     TOPDIR="."
 fi
 
-TOPDIR=`realpath $TOPDIR`
+TOPDIR=$(realpath $TOPDIR)
 
 error() {
     echo "ERROR: $@"
@@ -49,7 +49,7 @@ if [ "$1" = "create" ]; then
     shift 2
 
     USE_GUIBOX=
-    O=`getopt -n jproject -l path:,package:,name:,target:,gui -o p:k:n:t:g -- "$@"` || exit 1
+    O=$(getopt -n jproject -l path:,package:,name:,target:,gui -o p:k:n:t:g -- "$@") || exit 1
     eval set -- "$O"
     while true; do
 	case "$1" in
@@ -85,7 +85,7 @@ if [ "$1" = "create" ]; then
     fi
 
     if [ "$PROJECT_TARGET" = "" ]; then
-	ANDROID_SDK_VER=`getprop ro.build.version.sdk`
+	ANDROID_SDK_VER=$(getprop ro.build.version.sdk)
     else
 	ANDROID_SDK_VER=$PROJECT_TARGET
     fi
@@ -110,7 +110,7 @@ if [ "$1" = "create" ]; then
     fi
 
     p="${PROJECT_PATH}/${PROJECT_NAME}"
-    p1="${p}/src/`echo $PROJECT_PACKAGE | tr '.' '/'`"
+    p1="${p}/src/$(echo $PROJECT_PACKAGE | tr '.' '/')"
 
     mkdir -p $p1
 
@@ -185,12 +185,12 @@ get_properties() {
     done
 }
 
-PROJECTNAME=`aproject-helper AppName 2>/dev/null`
+PROJECTNAME=$(aproject-helper AppName 2>/dev/null)
 if [ "$PROJECTNAME" = "" ]; then
-    PROJECTNAME=`basename $TOPDIR`
+    PROJECTNAME=$(basename $TOPDIR)
 fi
 
-APROJECT_BIN=`realpath $0`
+APROJECT_BIN=$(realpath $0)
 
 VERBOSE_JAVAC=
 VERBOSE_JAR=
@@ -211,7 +211,7 @@ if [ "$1" = "clean" ]; then
     check_properties
     echo "Cleaning $PROJECTNAME"
     rm -rf bin gen
-    for d in `get_ext_libdirs`; do
+    for d in $(get_ext_libdirs); do
 	cd $d && $APROJECT_BIN $VERBOSE_AAPT clean
 	cd $TOPDIR
     done
@@ -220,7 +220,7 @@ fi
 
 if [ "$1" = "run" ]; then
     shift
-    exec dxrun -cp bin/${PROJECTNAME}.dex `get_properties package`.`get_properties name` $@
+    exec dxrun -cp bin/${PROJECTNAME}.dex $(get_properties package).$(get_properties name) $@
 fi
 
 if [ ! "$1" = "build" ]; then
@@ -229,7 +229,7 @@ fi
 
 shift
 
-for d in `get_ext_libdirs`; do
+for d in $(get_ext_libdirs); do
     cd $d
     $APROJECT_BIN $VERBOSE_AAPT build $@ || error "external library"
     cd $TOPDIR
@@ -248,14 +248,14 @@ fi
 mkdir -p bin/classes gen
 mkdir -p bin/res
 
-ANDROID_SDK_VER=`get_android_sdk`
+ANDROID_SDK_VER=$(get_android_sdk)
 if [ "$ANDROID_SDK_VER" = "" ]; then
-    ANDROID_SDK_VER=`aproject-helper MinSDK`
+    ANDROID_SDK_VER=$(aproject-helper MinSDK)
 fi
 
 if [ "$ANDROID_SDK_VER" = "" ]; then
     echo "WARNING: No SDK version found in AndroidManifest.xml!"
-    ANDROID_SDK_VER=`getprop ro.build.version.sdk`
+    ANDROID_SDK_VER=$(getprop ro.build.version.sdk)
     echo "WARNING: Use OS defined version $ANDROID_SDK_VER"
 fi
 
@@ -319,23 +319,23 @@ find_ext_libs_for_dex() {
 
 echo "Starting aidl..."
 
-find . -name "*.aidl" -exec aidl -Isrc `find_aidl_for_aidl $ANDROID_SDK $ANDROID_AIDL` -ogen {} \;
+find . -name "*.aidl" -exec aidl -Isrc $(find_aidl_for_aidl $ANDROID_SDK $ANDROID_AIDL) -ogen {} \;
 
 echo "Starting javac..."
 
 javac $VERBOSE_JAVAC \
     -d ${TOPDIR}/bin/classes \
-    -classpath ${TOPDIR}/bin/classes:`find_ext_libs_for_javac $EXT_LIBDIRS`:`find_libs_for_javac $ANDROID_SDK libs $ANDROID_LIBS` \
+    -classpath ${TOPDIR}/bin/classes:$(find_ext_libs_for_javac $EXT_LIBDIRS):$(find_libs_for_javac $ANDROID_SDK libs $ANDROID_LIBS) \
     -sourcepath ${TOPDIR}/src:${TOPDIR}/gen \
     -target 1.5 \
     -bootclasspath ${ANDROID_SDK}/android.jar \
     -encoding UTF-8 \
     -source 1.5 \
-    `find src -name "*.java"` \
-    `find gen -name "*.java"` \
+    $(find src -name "*.java") \
+    $(find gen -name "*.java") \
     || error "javac"
 
-IS_LIBRARY=`is_library`
+IS_LIBRARY=$(is_library)
 
 if [ "$IS_LIBRARY" = "true" ]; then
 
@@ -347,7 +347,7 @@ else
     mkdir -p ${TOPDIR}/bin/dexedLibs
     DEX_LIBS=
     DEXED_LIBS=
-    for f in `find_ext_libs_for_dex $EXT_LIBDIRS` `find_libs_for_dex libs`; do
+    for f in $(find_ext_libs_for_dex $EXT_LIBDIRS) $(find_libs_for_dex libs); do
 	for v in $DEX_LIBS; do
 	    if cmp -s $f $v; then
 		f=""
@@ -356,7 +356,7 @@ else
 	done
 	if [ ! "$f" = "" ]; then
 	    DEX_LIBS="$DEX_LIBS $f"
-	    fname=`basename $f`
+	    fname=$(basename $f)
 	    
 	    echo "Pre-dexing library ${fname}..."
 	    
@@ -375,12 +375,12 @@ else
 	$VERBOSE_DEX \
 	--no-strict \
 	--output=bin/${PROJECTNAME}.dex \
-	`find bin/classes -maxdepth 1 -not -path "bin/classes"` \
+	$(find bin/classes -maxdepth 1 -not -path "bin/classes") \
 	$DEXED_LIBS \
 	|| error "dx"
 
     if [ "$1" = "-r" -o "$1" = "--run" ]; then
 	shift
-	exec dxrun -cp bin/${PROJECTNAME}.dex `get_properties package`.`get_properties name` $@
+	exec dxrun -cp bin/${PROJECTNAME}.dex $(get_properties package).$(get_properties name) $@
     fi
 fi

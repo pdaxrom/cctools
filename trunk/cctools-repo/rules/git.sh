@@ -1,6 +1,6 @@
 build_git() {
     PKG=git
-    PKG_VERSION=1.8.1.2
+    PKG_VERSION=1.9.0
     PKG_SUBVERSION="-1"
     PKG_DESC="Git is a distributed revision control and source code management (SCM) system with an emphasis on speed.[3] Git was initially designed and developed by Linus Torvalds for Linux kernel development; it has since been adopted by many other projects."
     PKG_URL=http://git-core.googlecode.com/files/${PKG}-${PKG_VERSION}.tar.gz

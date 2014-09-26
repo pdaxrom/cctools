@@ -1,6 +1,15 @@
 #!/bin/bash
 
 WRKDIR=$PWD/tmp
+
+#
+# uncomment to build pie compiler
+# -------------------------------
+export BUILD_PIE_COMPILER="yes"
+WRKDIR=${WRKDIR}-pie
+# -------------------------------
+#
+
 NDKDIR=/opt/android-ndk
 NDKSRC=/home/sash/Work/android/ndk-source
 

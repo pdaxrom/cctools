@@ -39,9 +39,9 @@ build_mc() {
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
-    gcc ${S_DIR}/src/man2hlp.c -o src/man2hlp -I${TARGET_DIR}-host/include/glib-2.0 -I${TARGET_DIR}-host/lib/glib-2.0/include -L${TARGET_DIR}/lib -lglib-2.0 -I.
+    gcc ${S_DIR}/src/man2hlp.c -o src/man2hlp.cross -I${TARGET_DIR}-host/include/glib-2.0 -I${TARGET_DIR}-host/lib/glib-2.0/include -L${TARGET_DIR}-host/lib -lglib-2.0 -I.
 
-    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools NATIVE_SUFFIX=".cross" || error "package install"
 
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
     $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/mc/*

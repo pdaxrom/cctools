@@ -1,11 +1,7 @@
 CCTools
-- Editable repos list.
-- The File Dialog allows the Copy/Cut/Delete operations (long touch).
-- Added support for external cctools modules.
+- Build Android and Java projects from toolbar or menu.
+
+- Fixed installation from local repository.
 
 Repository
-- Toolchain updated to NDK r9d.
-- Added tools for Android and console Java projects (via modules).
-- Added cppcheck module.
-- Added module for create local repository.
-- Added console package manager - pkgman.
+- Android 19+ uses PIE repository by default.

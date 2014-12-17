@@ -1,12 +1,14 @@
 #!/bin/bash
 
+BUILD_START=$(date +%s)
+
 WRKDIR=$PWD/tmp
 
 #
 # uncomment to build pie compiler
 # -------------------------------
-export BUILD_PIE_COMPILER="yes"
-WRKDIR=${WRKDIR}-pie
+#export BUILD_PIE_COMPILER="yes"
+#WRKDIR=${WRKDIR}-pie
 # -------------------------------
 #
 
@@ -40,4 +42,12 @@ mkdir -p ${WRKDIR}/repo/src
 
 find `find src -type d` -type f -exec cp -f {} ${WRKDIR}/repo/src/ \;
 
+BUILD_END=$(date +%s)
+
+TOTAL_TIME=$(($BUILD_END - $BUILD_START))
+
+echo
+echo
+echo "Build time: $(date -u -d @$TOTAL_TIME +%T)"
+echo
 echo "DONE!"

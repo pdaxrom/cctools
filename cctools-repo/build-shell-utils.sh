@@ -394,7 +394,7 @@ i*86*)
     ;;
 esac
 
-for f in rules/*.sh; do
+for f in $(find rules -type f -name "*.sh"); do
     echo "Include $f"
     . $f
 done
@@ -582,3 +582,31 @@ build_kernel_dev_fix
 build_kernel_dev
 
 build_project_ctl
+
+# Xorg
+build_xproto
+build_bigreqsproto
+build_compositeproto
+build_damageproto
+build_dmxproto
+build_dri2proto
+build_fixesproto
+build_fontsproto
+build_glproto
+build_inputproto
+build_kbproto
+build_randrproto
+build_recordproto
+build_renderproto
+build_resourceproto
+build_scrnsaverproto
+build_videoproto
+build_windowswmproto
+build_xcb-proto
+build_xcmiscproto
+build_xextproto
+build_xf86bigfontproto
+build_xf86dgaproto
+build_xf86driproto
+build_xf86vidmodeproto
+build_xineramaproto

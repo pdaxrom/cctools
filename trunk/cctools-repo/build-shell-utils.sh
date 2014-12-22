@@ -775,3 +775,13 @@ build_libXxf86dga
 build_libdmx
 #build_libpciaccess
 
+build_xauth
+
+build_mkfontdir
+build_mkfontscale
+build_bdftopcf
+
+build_xkbcomp
+build_setxkbmap
+build_xkbevd
+build_xkbutils

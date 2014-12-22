@@ -2,18 +2,20 @@
 
 BUILD_START=$(date +%s)
 
-WRKDIR=$PWD/tmp
+#WRKDIR=$PWD/tmp
+WRKDIR=/mnt/nfs/Work/cctools-pro/tmp
 
 #
 # uncomment to build pie compiler
 # -------------------------------
-#export BUILD_PIE_COMPILER="yes"
-#WRKDIR=${WRKDIR}-pie
+export BUILD_PIE_COMPILER="yes"
+WRKDIR=${WRKDIR}-pie
 # -------------------------------
 #
 
 NDKDIR=/opt/android-ndk
-NDKSRC=/home/sash/Work/android/ndk-source
+#NDKSRC=/home/sash/Work/android/ndk-source
+NDKSRC=/mnt/nfs/Work/android/ndk-source
 
 for d in binutils gcc gmp mpc mpfr cloog isl ppl llvm-3.3 llvm-3.4; do
     ln -sf ${NDKSRC}/${d} src/
@@ -22,6 +24,8 @@ done
 export PATH=/opt/CodeSourcery/bin:$PATH
 
 ./build-shell-utils.sh ${PWD}/src arm-linux-androideabi ${WRKDIR}/arm-repo  || exit 1
+
+exit 0
 
 ./build-shell-utils.sh ${PWD}/src mipsel-linux-android  ${WRKDIR}/mips-repo || exit 1
 

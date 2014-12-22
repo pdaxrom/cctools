@@ -1,0 +1,47 @@
+diff -Nur xproto-7.0.23-orig/Xfuncs.h xproto-7.0.23/Xfuncs.h
+--- xproto-7.0.23-orig/Xfuncs.h	2012-03-16 13:11:44.000000000 +0700
++++ xproto-7.0.23/Xfuncs.h	2014-12-22 21:09:05.731766124 +0600
+@@ -57,8 +57,11 @@
+ #  ifndef _XFUNCS_H_INCLUDED_STRING_H
+ #   include <string.h>
+ #  endif
+-#  undef bzero
+-#  define bzero(b,len) memset(b,0,len)
++
++#  ifndef __BIONIC__
++#   undef bzero
++#   define bzero(b,len) memset(b,0,len)
++#  endif
+ 
+ #  if defined WIN32 && defined __MINGW32__
+ #   define bcopy(b1,b2,len) memmove(b2, b1, (size_t)(len))
+diff -Nur xproto-7.0.23-orig/Xosdefs.h xproto-7.0.23/Xosdefs.h
+--- xproto-7.0.23-orig/Xosdefs.h	2012-03-16 13:11:44.000000000 +0700
++++ xproto-7.0.23/Xosdefs.h	2014-12-22 21:09:25.439766517 +0600
+@@ -106,7 +106,7 @@
+ # endif
+ 
+ # if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__) \
+-	|| defined(__APPLE__) || defined(__DragonFly__)
++	|| defined(__APPLE__) || defined(__DragonFly__) || defined(__BIONIC__)
+ #  ifndef CSRG_BASED
+ #   define CSRG_BASED
+ #  endif
+diff -Nur xproto-7.0.23-orig/Xos.h xproto-7.0.23/Xos.h
+--- xproto-7.0.23-orig/Xos.h	2012-03-16 13:11:44.000000000 +0700
++++ xproto-7.0.23/Xos.h	2014-12-22 21:09:16.415766337 +0600
+@@ -60,8 +60,13 @@
+  */
+ 
+ # include <string.h>
+-# if defined(__SCO__) || defined(__UNIXWARE__) || defined(__sun) || defined(__CYGWIN__)
++# if defined(__SCO__) || defined(__UNIXWARE__) || defined(__sun) || defined(__CYGWIN__) || defined(__BIONIC__)
+ #  include <strings.h>
++# ifdef __BIONIC__
++#  ifndef rindex
++#   define rindex(s,c) (strrchr((s),(c)))
++#  endif
++# endif
+ # else
+ #  ifndef index
+ #   define index(s,c) (strchr((s),(c)))

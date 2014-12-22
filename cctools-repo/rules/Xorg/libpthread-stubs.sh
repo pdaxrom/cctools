@@ -1,10 +1,10 @@
-build_xcb_proto() {
-    PKG=xcb-proto
-    PKG_VERSION=1.11
+build_libpthread_stubs() {
+    PKG=libpthread-stubs
+    PKG_VERSION=0.3
     PKG_SUBVERSION=
     PKG_URL="http://xcb.freedesktop.org/dist/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="X C Binding - protocol descriptions"
-    PKG_DEPS="xorg-util-macros-dev"
+    PKG_DESC="pthread stubs not provided by native libc"
+    PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
@@ -34,8 +34,6 @@ build_xcb_proto() {
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
     $MAKE install || error "make install"
-
-    PKG=xorg-${PKG}
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 

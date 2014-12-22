@@ -1,6 +1,36 @@
+diff -Nur libX11-1.5.0-orig/include/X11/Xlib.h libX11-1.5.0/include/X11/Xlib.h
+--- libX11-1.5.0-orig/include/X11/Xlib.h	2012-06-02 13:37:17.000000000 +0700
++++ libX11-1.5.0/include/X11/Xlib.h	2014-12-23 02:37:02.792159027 +0600
+@@ -66,9 +66,16 @@
+ #endif
+ #endif
+ 
++#ifdef __BIONIC__
++#define wctomb		_Xwctomb
++#undef mblen
++#define mblen		_Xmblen
++#define mbtowc		_Xmbtowc
++#endif
++
+ extern int
+ _Xmblen(
+-#ifdef ISC
++#if defined(ISC) || defined(__BIONIC__)
+     char const *str,
+     size_t len
+ #else
+@@ -3995,7 +4002,7 @@
+ 
+ extern int _Xmbtowc(
+     wchar_t *			/* wstr */,
+-#ifdef ISC
++#if defined(ISC) || defined(__BIONIC__)
+     char const *		/* str */,
+     size_t			/* len */
+ #else
 diff -Nur libX11-1.5.0-orig/ltmain.sh libX11-1.5.0/ltmain.sh
 --- libX11-1.5.0-orig/ltmain.sh	2012-06-02 13:37:28.000000000 +0700
-+++ libX11-1.5.0/ltmain.sh	2014-12-23 00:38:15.436016711 +0600
++++ libX11-1.5.0/ltmain.sh	2014-12-23 02:37:02.796159027 +0600
 @@ -2963,8 +2963,8 @@
  	  # At present, this check doesn't affect windows .dll's that
  	  # are installed into $libdir/../bin (currently, that works fine)
@@ -14,7 +44,7 @@ diff -Nur libX11-1.5.0-orig/ltmain.sh libX11-1.5.0/ltmain.sh
  	    # Stick the inst_prefix_dir data into the link command.
 diff -Nur libX11-1.5.0-orig/src/GetDflt.c libX11-1.5.0/src/GetDflt.c
 --- libX11-1.5.0-orig/src/GetDflt.c	2012-06-02 13:37:19.000000000 +0700
-+++ libX11-1.5.0/src/GetDflt.c	2014-12-23 00:38:15.436016711 +0600
++++ libX11-1.5.0/src/GetDflt.c	2014-12-23 02:37:02.796159027 +0600
 @@ -95,19 +95,21 @@
      char *dest,
      int len)
@@ -40,7 +70,7 @@ diff -Nur libX11-1.5.0-orig/src/GetDflt.c libX11-1.5.0/src/GetDflt.c
  	sprintf (dest, "%s%s", ptr1, (ptr2) ? ptr2 : "");
 diff -Nur libX11-1.5.0-orig/src/util/Makefile.in libX11-1.5.0/src/util/Makefile.in
 --- libX11-1.5.0-orig/src/util/Makefile.in	2012-06-02 13:37:33.000000000 +0700
-+++ libX11-1.5.0/src/util/Makefile.in	2014-12-23 00:42:32.944021852 +0600
++++ libX11-1.5.0/src/util/Makefile.in	2014-12-23 02:37:02.800159027 +0600
 @@ -321,9 +321,9 @@
  	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
  	echo " rm -f" $$list; \
@@ -53,3 +83,24 @@ diff -Nur libX11-1.5.0-orig/src/util/Makefile.in libX11-1.5.0/src/util/Makefile.
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
+diff -Nur libX11-1.5.0-orig/src/xlibi18n/lcStd.c libX11-1.5.0/src/xlibi18n/lcStd.c
+--- libX11-1.5.0-orig/src/xlibi18n/lcStd.c	2012-06-02 13:37:19.000000000 +0700
++++ libX11-1.5.0/src/xlibi18n/lcStd.c	2014-12-23 02:39:31.556161997 +0600
+@@ -199,7 +199,7 @@
+ int
+ _Xmbtowc(
+     wchar_t *wstr,
+-#ifdef ISC
++#if defined(ISC) || defined(__BIONIC__)
+     char const *str,
+     size_t len
+ #else
+@@ -213,7 +213,7 @@
+ 
+ int
+ _Xmblen(
+-#ifdef ISC
++#if defined(ISC) || defined(__BIONIC__)
+     char const *str,
+     size_t len
+ #else

@@ -356,7 +356,6 @@ fix_bionic_shell() {
 	    fi
 	fi
     done
-    echo "Fixed!"
 }
 
 replace_string() {
@@ -377,7 +376,6 @@ replace_string() {
 	    fi
 	fi
     done
-    echo "Fixed!"
 }
 
 make_packages() {
@@ -386,7 +384,7 @@ make_packages() {
     local nodev=""
     local noman=""
     local nodoc=""
-    local pkg_new_dep="$PKG"
+    local pkg_new_dep="$(string_to_lower $PKG)"
 
     while [ ! "$1" = "" ]; do
 	case $1 in
@@ -438,13 +436,13 @@ make_packages() {
 
 	if [ ! "$nodev" = "1" ]; then
 	    local filename="$(string_to_lower ${PKG})-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-	    build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename ${PKG}-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, development files" "$pkg_new_dep"
+	    build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename ${PKG}-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC (development files)" "$pkg_new_dep"
 	    pushd .
 	    cd ${TMPINST_DIR}/${PKG}-dev
 	    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 	    popd
 	    if [ "$nomain" = "1" ]; then
-		pkg_new_dep="${PKG}-dev"
+		pkg_new_dep="$(string_to_lower ${PKG})-dev"
 	    fi
 	fi
     fi
@@ -460,7 +458,7 @@ make_packages() {
 
 	if [ ! "$noman" = "1" ]; then
 	    local filename="$(string_to_lower ${PKG})-man_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-	    build_package_desc ${TMPINST_DIR}/${PKG}-man $filename ${PKG}-man ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, manual files" "$pkg_new_dep"
+	    build_package_desc ${TMPINST_DIR}/${PKG}-man $filename ${PKG}-man ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC (manual files)" "$pkg_new_dep"
 	    pushd .
 	    cd ${TMPINST_DIR}/${PKG}-man
 	    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
@@ -479,7 +477,7 @@ make_packages() {
 
 	if [ ! "$nodoc" = "1" ]; then
 	    local filename="$(string_to_lower ${PKG})-doc_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-	    build_package_desc ${TMPINST_DIR}/${PKG}-doc $filename ${PKG}-doc ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, doc files" "$pkg_new_dep"
+	    build_package_desc ${TMPINST_DIR}/${PKG}-doc $filename ${PKG}-doc ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC (doc files)" "$pkg_new_dep"
 	    pushd .
 	    cd ${TMPINST_DIR}/${PKG}-doc
 	    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
@@ -710,6 +708,7 @@ export PKG_CONFIG_PATH=${TMPINST_DIR}/lib/pkgconfig
 
 build_freetype
 build_fontconfig
+build_android_shmem
 
 # Xorg
 build_util_macros
@@ -731,7 +730,7 @@ build_resourceproto
 build_scrnsaverproto
 build_videoproto
 build_windowswmproto
-build_xcb-proto
+build_xcb_proto
 build_xcmiscproto
 build_xextproto
 build_xf86bigfontproto
@@ -740,4 +739,17 @@ build_xf86driproto
 build_xf86vidmodeproto
 build_xineramaproto
 
+build_libpthread_stubs
+build_xtrans
 build_libXau
+build_libXdmcp
+build_libxcb
+build_libX11
+build_libXext
+build_libXxf86vm
+build_libfontenc
+build_libFS
+build_libICE
+build_libSM
+build_libXt
+build_libXpm

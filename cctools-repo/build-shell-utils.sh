@@ -295,13 +295,17 @@ get_pkg_deps() {
     echo $pkgs
 }
 
+string_to_lower() {
+    echo $@ | tr '[:upper:]' '[:lower:]'
+}
+
 #
 # build_package_desc <path> <filename> <name> <version> <arch> <description> [<depends> [<replaces>]]
 #
 
 build_package_desc() {
     local filename=$2
-    local name=$3
+    local name=$(string_to_lower $3)
     local vers=$4
     local arch=$5
     local desc=$6
@@ -433,7 +437,7 @@ make_packages() {
 	done
 
 	if [ ! "$nodev" = "1" ]; then
-	    local filename="${PKG}-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	    local filename="$(string_to_lower ${PKG})-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
 	    build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename ${PKG}-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, development files" "$pkg_new_dep"
 	    pushd .
 	    cd ${TMPINST_DIR}/${PKG}-dev
@@ -455,7 +459,7 @@ make_packages() {
 	done
 
 	if [ ! "$noman" = "1" ]; then
-	    local filename="${PKG}-man_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	    local filename="$(string_to_lower ${PKG})-man_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
 	    build_package_desc ${TMPINST_DIR}/${PKG}-man $filename ${PKG}-man ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, manual files" "$pkg_new_dep"
 	    pushd .
 	    cd ${TMPINST_DIR}/${PKG}-man
@@ -474,7 +478,7 @@ make_packages() {
 	done
 
 	if [ ! "$nodoc" = "1" ]; then
-	    local filename="${PKG}-doc_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	    local filename="$(string_to_lower ${PKG})-doc_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
 	    build_package_desc ${TMPINST_DIR}/${PKG}-doc $filename ${PKG}-doc ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, doc files" "$pkg_new_dep"
 	    pushd .
 	    cd ${TMPINST_DIR}/${PKG}-doc
@@ -488,7 +492,7 @@ make_packages() {
     ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/lib/*.so*
 
     if [ ! "$nomain" = "1" ]; then
-	local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	local filename="$(string_to_lower ${PKG})_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
 	build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
 	cd ${TMPINST_DIR}/${PKG}
 	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
@@ -704,6 +708,9 @@ build_project_ctl
 
 export PKG_CONFIG_PATH=${TMPINST_DIR}/lib/pkgconfig
 
+build_freetype
+build_fontconfig
+
 # Xorg
 build_util_macros
 build_xproto
@@ -733,5 +740,4 @@ build_xf86driproto
 build_xf86vidmodeproto
 build_xineramaproto
 
-build_freetype
-build_fontconfig
+build_libXau

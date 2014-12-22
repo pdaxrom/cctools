@@ -1,10 +1,10 @@
-build_videoproto() {
-    PKG=videoproto
-    PKG_VERSION=2.3.1
+build_util_macros() {
+    PKG=util-macros
+    PKG_VERSION=1.17
     PKG_SUBVERSION=
-    PKG_URL="http://www.x.org/releases/X11R7.7/src/proto/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="X11 Video extension wire protocol"
-    PKG_DEPS="xorg-util-macros-dev"
+    PKG_URL="http://www.x.org/releases/X11R7.7/src/util/${PKG}-${PKG_VERSION}.tar.bz2"
+    PKG_DESC="X Window System utility programs for development"
+    PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
@@ -39,7 +39,7 @@ build_videoproto() {
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    make_packages nomain
+    make_packages
 
     popd
     s_tag $PKG

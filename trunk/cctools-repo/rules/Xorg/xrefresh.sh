@@ -1,9 +1,9 @@
-build_bdftopcf() {
-    PKG=bdftopcf
-    PKG_VERSION=1.0.3
+build_xrefresh() {
+    PKG=xrefresh
+    PKG_VERSION=1.0.4
     PKG_SUBVERSION=
     PKG_URL="http://www.x.org/releases/X11R7.7/src/app/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="Convert X font from Bitmap Distribution Format to Portable Compiled Format"
+    PKG_DESC="Refresh all or part of an X screen"
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}

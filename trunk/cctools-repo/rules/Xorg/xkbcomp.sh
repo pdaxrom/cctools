@@ -3,7 +3,7 @@ build_xkbcomp() {
     PKG_VERSION=1.2.4
     PKG_SUBVERSION=
     PKG_URL="http://www.x.org/releases/X11R7.7/src/app/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="X11 XKB utilities"
+    PKG_DESC="Compile XKB keyboard description"
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -36,11 +36,9 @@ build_xkbcomp() {
 
     $MAKE install || error "make install"
 
-    PKG="x11-xkb-utils"
-
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-#    make_packages
+    make_packages
 
     popd
     s_tag $FUNCNAME

@@ -3,8 +3,8 @@ build_mkfontdir() {
     PKG_VERSION=1.0.7
     PKG_SUBVERSION=
     PKG_URL="http://www.x.org/releases/X11R7.7/src/app/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="X Window System font utility programs"
-    PKG_DEPS=""
+    PKG_DESC="create an index of X font files in a directory"
+    PKG_DEPS="mkfontscale"
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
@@ -36,11 +36,9 @@ build_mkfontdir() {
 
     $MAKE install || error "make install"
 
-    PKG="xfonts-utils"
-
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-#    make_packages
+    make_packages
 
     popd
     s_tag $FUNCNAME

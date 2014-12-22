@@ -1,10 +1,10 @@
-build_xcb_proto() {
-    PKG=xcb-proto
-    PKG_VERSION=1.11
+build_xtrans() {
+    PKG=xtrans
+    PKG_VERSION=1.2.7
     PKG_SUBVERSION=
-    PKG_URL="http://xcb.freedesktop.org/dist/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="X C Binding - protocol descriptions"
-    PKG_DEPS="xorg-util-macros-dev"
+    PKG_URL="http://www.x.org/releases/X11R7.7/src/lib/${PKG}-${PKG_VERSION}.tar.bz2"
+    PKG_DESC="X transport library"
+    PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
@@ -34,8 +34,6 @@ build_xcb_proto() {
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
     $MAKE install || error "make install"
-
-    PKG=xorg-${PKG}
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 

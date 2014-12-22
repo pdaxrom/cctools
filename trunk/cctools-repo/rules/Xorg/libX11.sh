@@ -1,10 +1,10 @@
-build_xcb_proto() {
-    PKG=xcb-proto
-    PKG_VERSION=1.11
+build_libX11() {
+    PKG=libX11
+    PKG_VERSION=1.5.0
     PKG_SUBVERSION=
-    PKG_URL="http://xcb.freedesktop.org/dist/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="X C Binding - protocol descriptions"
-    PKG_DEPS="xorg-util-macros-dev"
+    PKG_URL="http://www.x.org/releases/X11R7.7/src/lib/${PKG}-${PKG_VERSION}.tar.bz2"
+    PKG_DESC="X11 client-side library"
+    PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
@@ -26,6 +26,10 @@ build_xcb_proto() {
 
     # Configure here
 
+    CFLAGS="-I$TMPINST_DIR/include -D_LINUX_IPC_H -Dipc_perm=debian_ipc_perm" \
+    CXXFLAGS="-I$TMPINST_DIR/include -D_LINUX_IPC_H -Dipc_perm=debian_ipc_perm" \
+    LDFLAGS="-L$TMPINST_DIR/lib -Wl,-rpath-link,${SYSROOT}/usr/lib" \
+    LIBS="-landroid-shmem" \
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
                         --prefix=$TMPINST_DIR \
@@ -35,11 +39,9 @@ build_xcb_proto() {
 
     $MAKE install || error "make install"
 
-    PKG=xorg-${PKG}
-
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    make_packages nomain
+    make_packages
 
     popd
     s_tag $FUNCNAME

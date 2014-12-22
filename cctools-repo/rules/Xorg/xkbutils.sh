@@ -36,11 +36,9 @@ build_xkbutils() {
 
     $MAKE install || error "make install"
 
-    PKG="x11-xkb-utils"
-
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-#    make_packages
+    make_packages
 
     popd
     s_tag $FUNCNAME

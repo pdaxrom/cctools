@@ -9,7 +9,7 @@ build_util_macros() {
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
 
-    c_tag $PKG && return
+    c_tag $FUNCNAME && return
 
     pushd .
 
@@ -42,5 +42,5 @@ build_util_macros() {
     make_packages
 
     popd
-    s_tag $PKG
+    s_tag $FUNCNAME
 }

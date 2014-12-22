@@ -378,6 +378,30 @@ replace_string() {
 
 make_packages() {
     local n
+    local nomain=""
+    local nodev=""
+    local noman=""
+    local nodoc=""
+    local pkg_new_dep="$PKG"
+
+    while [ ! "$1" = "" ]; do
+	case $1 in
+	nomain)
+	    nomain="1"
+	    pkg_new_dep="$PKG_DEPS"
+	    ;;
+	nodev)
+	    nodev="1"
+	    ;;
+	noman)
+	    noman="1"
+	    ;;
+	nodoc)
+	    nodoc="1"
+	    ;;
+	esac
+	shift
+    done
 
     fix_bionic_shell ${TMPINST_DIR}/${PKG}/cctools
     replace_string   ${TMPINST_DIR}/${PKG}/cctools "${TMPINST_DIR}" "${TARGET_INST_DIR}"
@@ -408,12 +432,17 @@ make_packages() {
 	    mv "$n" ${TMPINST_DIR}/${PKG}-dev/$(dirname "$n")
 	done
 
-	local filename="${PKG}-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-	build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename ${PKG}-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, development files" "${PKG}"
-	pushd .
-	cd ${TMPINST_DIR}/${PKG}-dev
-	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
-	popd
+	if [ ! "$nodev" = "1" ]; then
+	    local filename="${PKG}-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	    build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename ${PKG}-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, development files" "$pkg_new_dep"
+	    pushd .
+	    cd ${TMPINST_DIR}/${PKG}-dev
+	    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+	    popd
+	    if [ "$nomain" = "1" ]; then
+		pkg_new_dep="${PKG}-dev"
+	    fi
+	fi
     fi
 
     if [ -d cctools/share/man -o -d cctools/man ]; then
@@ -425,12 +454,14 @@ make_packages() {
 	    fi
 	done
 
-	local filename="${PKG}-man_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-	build_package_desc ${TMPINST_DIR}/${PKG}-man $filename ${PKG}-man ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, manual files" "${PKG}"
-	pushd .
-	cd ${TMPINST_DIR}/${PKG}-man
-	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
-	popd
+	if [ ! "$noman" = "1" ]; then
+	    local filename="${PKG}-man_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	    build_package_desc ${TMPINST_DIR}/${PKG}-man $filename ${PKG}-man ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, manual files" "$pkg_new_dep"
+	    pushd .
+	    cd ${TMPINST_DIR}/${PKG}-man
+	    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+	    popd
+	fi
     fi
 
     if [ -d cctools/share/doc -o -d cctools/doc ]; then
@@ -442,22 +473,26 @@ make_packages() {
 	    fi
 	done
 
-	local filename="${PKG}-doc_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-	build_package_desc ${TMPINST_DIR}/${PKG}-doc $filename ${PKG}-doc ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, doc files" "${PKG}"
-	pushd .
-	cd ${TMPINST_DIR}/${PKG}-doc
-	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
-	popd
+	if [ ! "$nodoc" = "1" ]; then
+	    local filename="${PKG}-doc_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	    build_package_desc ${TMPINST_DIR}/${PKG}-doc $filename ${PKG}-doc ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, doc files" "$pkg_new_dep"
+	    pushd .
+	    cd ${TMPINST_DIR}/${PKG}-doc
+	    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+	    popd
+	fi
     fi
     popd
 
     ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/bin/*
     ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/lib/*.so*
 
-    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
-    cd ${TMPINST_DIR}/${PKG}
-    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+    if [ ! "$nomain" = "1" ]; then
+	local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
+	cd ${TMPINST_DIR}/${PKG}
+	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+    fi
 }
 
 case $TARGET_ARCH in
@@ -670,6 +705,7 @@ build_project_ctl
 export PKG_CONFIG_PATH=${TMPINST_DIR}/lib/pkgconfig
 
 # Xorg
+build_util_macros
 build_xproto
 build_bigreqsproto
 build_compositeproto

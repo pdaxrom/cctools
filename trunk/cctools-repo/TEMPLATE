@@ -37,12 +37,7 @@ build_@PKG_NAME@() {
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
-
-    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
-    cd ${TMPINST_DIR}/${PKG}
-    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+    make_packages
 
     popd
     s_tag $PKG

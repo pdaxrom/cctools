@@ -342,11 +342,11 @@ fix_bionic_shell() {
     fi
 
     for f in $(find $p -type f); do
-        if file $f | grep -q 'ASCII text'; then
+        if file $f | grep -q 'ASCII text\|shell script'; then
 	    if grep -q '/bin/sh' $f; then
 		echo "fix bionic shell in $f"
 		touch -r $f ${f}.timestamp
-		sed -i -e 's|/bin/sh|/system/bin/sh|' $f
+		sed -i -e 's|/bin/sh|/system/bin/sh|g' $f
 		touch -r ${f}.timestamp $f
 		rm -f ${f}.timestamp
 	    fi
@@ -363,17 +363,101 @@ replace_string() {
     fi
 
     for f in $(find $p -type f); do
-        if file $f | grep -q 'ASCII text\|shell script'; then
+        if file $f | grep -q 'ASCII text\|shell script\|libtool library file\|XML document text'; then
 	    if grep -q "$2" $f; then
 		echo "replace string in $f"
 		touch -r $f ${f}.timestamp
-		sed -i -e "s|$2|$3|" $f
+		sed -i -e "s|$2|$3|g" $f
 		touch -r ${f}.timestamp $f
 		rm -f ${f}.timestamp
 	    fi
 	fi
     done
     echo "Fixed!"
+}
+
+make_packages() {
+    local n
+
+    fix_bionic_shell ${TMPINST_DIR}/${PKG}/cctools
+    replace_string   ${TMPINST_DIR}/${PKG}/cctools "${TMPINST_DIR}" "${TARGET_INST_DIR}"
+
+    pushd .
+    cd ${TMPINST_DIR}/${PKG}
+
+    find . -type l | while read n; do
+	if readlink $n | grep -q "$TMPINST_DIR"; then
+	    local n1=$(readlink $n | sed "s|${TMPINST_DIR}/${PKG}/cctools|$TARGET_INST_DIR|")
+	    echo "FIX SUMLINK: $n1 $n"
+	    ln -sf "$n1" "$n"
+	fi
+    done
+
+    if [ -d cctools/include -o -d cctools/lib/pkgconfig -o -d cctools/share/aclocal ]; then
+	rm -rf ${TMPINST_DIR}/${PKG}-dev
+	mkdir ${TMPINST_DIR}/${PKG}-dev
+	for n in cctools/include cctools/lib/pkgconfig cctools/share/aclocal; do
+	    if [ -d "$n" ]; then
+		mkdir -p "$(dirname ${TMPINST_DIR}/${PKG}-dev/${n})"
+		cp -R "$n" "$(dirname ${TMPINST_DIR}/${PKG}-dev/${n})"
+		rm -rf "$n"
+	    fi
+	done
+	find . -type f \( -name "*.h" -o -name "*.a" -o -name "*.la" -o -name "*.pc" -o -name "*.m4" \) | while read n; do
+	    mkdir -p ${TMPINST_DIR}/${PKG}-dev/$(dirname "$n")
+	    mv "$n" ${TMPINST_DIR}/${PKG}-dev/$(dirname "$n")
+	done
+
+	local filename="${PKG}-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename ${PKG}-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, development files" "${PKG}"
+	pushd .
+	cd ${TMPINST_DIR}/${PKG}-dev
+	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+	popd
+    fi
+
+    if [ -d cctools/share/man -o -d cctools/man ]; then
+	for n in cctools/share/man cctools/man; do
+	    if [ -d "$n" ]; then
+		mkdir -p "$(dirname ${TMPINST_DIR}/${PKG}-man/${n})"
+		cp -R "$n" "$(dirname ${TMPINST_DIR}/${PKG}-man/${n})"
+		rm -rf "$n"
+	    fi
+	done
+
+	local filename="${PKG}-man_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	build_package_desc ${TMPINST_DIR}/${PKG}-man $filename ${PKG}-man ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, manual files" "${PKG}"
+	pushd .
+	cd ${TMPINST_DIR}/${PKG}-man
+	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+	popd
+    fi
+
+    if [ -d cctools/share/doc -o -d cctools/doc ]; then
+	for n in cctools/share/doc cctools/doc; do
+	    if [ -d "$n" ]; then
+		mkdir -p "$(dirname ${TMPINST_DIR}/${PKG}-doc/${n})"
+		cp -R "$n" "$(dirname ${TMPINST_DIR}/${PKG}-doc/${n})"
+		rm -rf "$n"
+	    fi
+	done
+
+	local filename="${PKG}-doc_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+	build_package_desc ${TMPINST_DIR}/${PKG}-doc $filename ${PKG}-doc ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC, doc files" "${PKG}"
+	pushd .
+	cd ${TMPINST_DIR}/${PKG}-doc
+	rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
+	popd
+    fi
+    popd
+
+    ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/lib/*.so*
+
+    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
+    build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
+    cd ${TMPINST_DIR}/${PKG}
+    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 }
 
 case $TARGET_ARCH in
@@ -583,6 +667,8 @@ build_kernel_dev
 
 build_project_ctl
 
+export PKG_CONFIG_PATH=${TMPINST_DIR}/lib/pkgconfig
+
 # Xorg
 build_xproto
 build_bigreqsproto
@@ -610,3 +696,6 @@ build_xf86dgaproto
 build_xf86driproto
 build_xf86vidmodeproto
 build_xineramaproto
+
+build_freetype
+build_fontconfig

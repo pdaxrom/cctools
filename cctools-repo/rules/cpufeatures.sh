@@ -20,10 +20,10 @@ build_cpufeatures() {
         -O2 -Wall \
         -I$SRCDIR  \
         ${SRCDIR}/cpu-features.c -shared \
-        -o ${TMPINST_DIR}/lib/libcpufeatures.so
-    $INSTALL -D -m 644 ${SRCDIR}/cpu-features.h ${TMPINST_DIR}/include/cpu-features.h
+        -o ${SYSROOT}/usr/lib/libcpufeatures.so
+    $INSTALL -D -m 644 ${SRCDIR}/cpu-features.h ${SYSROOT}/usr/include/cpu-features.h
 
-    $INSTALL -D -m 755 ${TMPINST_DIR}/lib/libcpufeatures.so ${TMPINST_DIR}/${PKG}/cctools/lib/libcpufeatures.so
+    $INSTALL -D -m 755 ${SYSROOT}/usr/lib/libcpufeatures.so ${TMPINST_DIR}/${PKG}/cctools/lib/libcpufeatures.so
     $INSTALL -D -m 644 ${SRCDIR}/cpu-features.h             ${TMPINST_DIR}/${PKG}/cctools/include/cpu-features.h
 
     make_packages

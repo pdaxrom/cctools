@@ -775,6 +775,10 @@ build_libXxf86dga
 build_libdmx
 #build_libpciaccess
 
+build_xbitmaps
+build_xcursor_themes
+build_xkeyboard_config
+
 build_bdftopcf
 build_luit
 build_mkfontdir
@@ -788,7 +792,7 @@ build_xbacklight
 build_xcmsdb
 build_xcursorgen
 build_xdpyinfo
-build_xdriinfo
+#build_xdriinfo
 build_xev
 build_xgamma
 build_xhost

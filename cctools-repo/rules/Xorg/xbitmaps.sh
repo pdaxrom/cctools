@@ -1,9 +1,9 @@
-build_x11perf() {
-    PKG=x11perf
-    PKG_VERSION=1.5.4
+build_xbitmaps() {
+    PKG=xbitmaps
+    PKG_VERSION=1.1.1
     PKG_SUBVERSION=
-    PKG_URL="http://www.x.org/releases/X11R7.7/src/app/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="X11 server performance test program"
+    PKG_URL="http://www.x.org/releases/X11R7.7/src/data/${PKG}-${PKG_VERSION}.tar.bz2"
+    PKG_DESC="Base X bitmaps"
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
@@ -26,10 +26,6 @@ build_x11perf() {
 
     # Configure here
 
-    CFLAGS="-I$TMPINST_DIR/include -D_LINUX_IPC_H -Dipc_perm=debian_ipc_perm" \
-    CXXFLAGS="-I$TMPINST_DIR/include -D_LINUX_IPC_H -Dipc_perm=debian_ipc_perm" \
-    LDFLAGS="-L$TMPINST_DIR/lib -Wl,-rpath-link,${TMPINST_DIR}/lib -Wl,-rpath-link,${SYSROOT}/usr/lib" \
-    LIBS="-landroid-shmem" \
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
                         --prefix=$TMPINST_DIR \

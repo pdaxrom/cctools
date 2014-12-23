@@ -26,6 +26,7 @@ build_mkfontscale() {
 
     # Configure here
 
+    LDFLAGS="-L$TMPINST_DIR/lib -Wl,-rpath-link,${TMPINST_DIR}/lib -Wl,-rpath-link,${SYSROOT}/usr/lib" \
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
                         --prefix=$TMPINST_DIR \

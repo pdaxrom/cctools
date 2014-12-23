@@ -9,6 +9,8 @@ build_pkgman() {
 
     banner "Build $PKG"
 
+    pushd .
+
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/bin
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/bin/pkgman << EOF
@@ -23,5 +25,6 @@ EOF
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
+    popd
     s_tag ${PKG}
 }

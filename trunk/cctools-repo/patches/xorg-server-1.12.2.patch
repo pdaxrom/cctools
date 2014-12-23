@@ -1,0 +1,84 @@
+diff -Nur xorg-server-1.12.2-orig/configure xorg-server-1.12.2/configure
+--- xorg-server-1.12.2-orig/configure	2012-05-30 03:06:11.000000000 +0700
++++ xorg-server-1.12.2/configure	2014-12-24 00:48:06.097753702 +0600
+@@ -24192,6 +24192,10 @@
+ $as_echo "#define CONFIG_DBUS_API 1" >>confdefs.h
+ 
+ 	CONFIG_NEED_DBUS="yes"
++else
++	HAVE_DBUS="no"
++	DBUS_CFLAGS=""
++	DBUS_LIBS=""
+ fi
+  if test "x$CONFIG_DBUS_API" = xyes; then
+   CONFIG_DBUS_API_TRUE=
+@@ -29629,6 +29633,9 @@
+ $as_echo "#define TSLIB 1" >>confdefs.h
+ 
+         fi
++    else
++	HAVE_TSLIB="no"
++	TSLIB_LIBS=""
+     fi
+ 
+     if test "x$KDRIVE_KBD" = xyes; then
+diff -Nur xorg-server-1.12.2-orig/configure.ac xorg-server-1.12.2/configure.ac
+--- xorg-server-1.12.2-orig/configure.ac	2012-05-30 03:04:58.000000000 +0700
++++ xorg-server-1.12.2/configure.ac	2014-12-24 00:48:02.877753637 +0600
+@@ -860,6 +860,10 @@
+ 
+ 	AC_DEFINE(CONFIG_DBUS_API, 1, [Use the D-Bus input configuration API])
+ 	CONFIG_NEED_DBUS="yes"
++else
++	HAVE_DBUS="no"
++	DBUS_CFLAGS=""
++	DBUS_LIBS=""
+ fi
+ AM_CONDITIONAL(CONFIG_DBUS_API, [test "x$CONFIG_DBUS_API" = xyes])
+ 
+@@ -2007,6 +2011,9 @@
+         else
+             AC_DEFINE(TSLIB, 1, [Have tslib support])
+         fi
++    else
++	HAVE_TSLIB="no"
++	TSLIB_LIBS=""
+     fi
+ 
+     if test "x$KDRIVE_KBD" = xyes; then
+diff -Nur xorg-server-1.12.2-orig/hw/kdrive/linux/linux.c xorg-server-1.12.2/hw/kdrive/linux/linux.c
+--- xorg-server-1.12.2-orig/hw/kdrive/linux/linux.c	2012-05-18 00:09:03.000000000 +0700
++++ xorg-server-1.12.2/hw/kdrive/linux/linux.c	2014-12-24 00:42:17.665746744 +0600
+@@ -217,6 +217,8 @@
+ 
+ #ifdef FNONBLOCK
+ #define NOBLOCK FNONBLOCK
++#elif defined(O_NONBLOCK)
++#define NOBLOCK O_NONBLOCK
+ #else
+ #define NOBLOCK FNDELAY
+ #endif
+diff -Nur xorg-server-1.12.2-orig/hw/kdrive/src/kinput.c xorg-server-1.12.2/hw/kdrive/src/kinput.c
+--- xorg-server-1.12.2-orig/hw/kdrive/src/kinput.c	2012-05-18 00:09:03.000000000 +0700
++++ xorg-server-1.12.2/hw/kdrive/src/kinput.c	2014-12-23 22:26:22.413583904 +0600
+@@ -147,6 +147,8 @@
+ 
+ #ifdef FNONBLOCK
+ #define NOBLOCK FNONBLOCK
++#elif defined(O_NONBLOCK)
++#define NOBLOCK O_NONBLOCK
+ #else
+ #define NOBLOCK FNDELAY
+ #endif
+diff -Nur xorg-server-1.12.2-orig/os/osdep.h xorg-server-1.12.2/os/osdep.h
+--- xorg-server-1.12.2-orig/os/osdep.h	2012-05-18 00:09:04.000000000 +0700
++++ xorg-server-1.12.2/os/osdep.h	2014-12-23 22:26:22.417583904 +0600
+@@ -200,7 +200,7 @@
+ extern WorkQueuePtr workQueue;
+ 
+ /* in WaitFor.c */
+-#ifdef WIN32
++#if defined(WIN32) || defined(__BIONIC__)
+ typedef long int fd_mask;
+ #endif
+ #define ffs mffs

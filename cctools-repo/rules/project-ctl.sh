@@ -8,6 +8,8 @@ build_project_ctl() {
 
     banner "Build $PKG"
 
+    pushd .
+
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools
 
     $INSTALL -D -m 755 ${TOPDIR}/misc/project-ctl/project-ctl ${TMPINST_DIR}/${PKG}/cctools/bin/project-ctl
@@ -17,5 +19,6 @@ build_project_ctl() {
     cd ${TMPINST_DIR}/${PKG}
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
+    popd
     s_tag $PKG
 }

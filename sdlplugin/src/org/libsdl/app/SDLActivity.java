@@ -70,6 +70,10 @@ public class SDLActivity extends Activity {
             } else {
             	String sdlmain = getIntent().getExtras().getString("sdlmain");
             	Log.e(TAG, "sdlmain is " + sdlmain);
+            	
+            	if (sdlmain == null) {
+            		return;
+            	}
 
             	String libDir = getCacheDir().getParentFile().getAbsolutePath() + "/mylib";
     			String libFile = libDir + "/" + (new File(sdlmain)).getName();

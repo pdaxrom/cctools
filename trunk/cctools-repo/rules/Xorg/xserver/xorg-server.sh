@@ -32,7 +32,7 @@ build_xorg_server() {
     LIBS="-landroid-shmem" \
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH}	\
-			--prefix=$TMPINST_DIR	\
+			--prefix=$TARGET_INST_DIR \
 			--disable-xorg		\
 			--disable-dmx		\
 			--disable-xvfb		\
@@ -51,16 +51,14 @@ build_xorg_server() {
 			--disable-config-udev	\
 			--disable-config-dbus	\
 			--disable-config-hal	\
-			--enable-xsdl		\
 			--enable-xfake		\
 			--enable-kdrive		\
+			--enable-kdrive-kbd	\
+			--enable-kdrive-mouse	\
+			--disable-kdrive-evdev	\
 			|| error "Configure $PKG."
 
-#			--enable-kdrive-kbd=no	\
-#			--enable-kdrive-mouse=no\
-#			--enable-tslib=no	\
-#			--disable-kdrive-evdev	\
-
+#			--enable-xsdl		\
 #			--disable-tslib		\
 #			--enable-kdrive-evdev	\
 
@@ -68,11 +66,14 @@ build_xorg_server() {
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
-error "asd"
 
-    $MAKE install || error "make install"
+#    $MAKE install || error "make install"
 
-    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+    $MAKE install DESTDIR=${TMPINST_DIR}/${PKG}-fakeroot || error "package install"
+
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools
+    cp -R ${TMPINST_DIR}/${PKG}-fakeroot/${TARGET_INST_DIR}/* ${TMPINST_DIR}/${PKG}/cctools
 
     make_packages
 

@@ -856,3 +856,9 @@ build_font_util
 build_font_winitzki_cyrillic
 build_font_xfree86_type1
 
+build_cpufeatures
+build_pixman
+
+build_xorg_server
+
+build_rxvt_unicode

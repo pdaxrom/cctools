@@ -36,6 +36,7 @@ build_rxvt_unicode() {
 			--enable-transparency \
 			--enable-perl=no \
 			--enable-text-blink \
+			--enable-pixbuf=no \
 			|| error "Configure $PKG."
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"

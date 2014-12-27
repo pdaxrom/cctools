@@ -29,6 +29,7 @@ build_freetype() {
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
                         --prefix=$TMPINST_DIR \
+			--with-harfbuzz=no \
 			|| error "Configure $PKG."
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"

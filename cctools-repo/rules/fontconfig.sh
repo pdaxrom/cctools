@@ -29,6 +29,7 @@ build_fontconfig() {
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
                         --prefix=$TMPINST_DIR \
+			--disable-docs \
 			|| error "Configure $PKG."
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"

@@ -706,6 +706,8 @@ build_project_ctl
 
 export PKG_CONFIG_PATH=${TMPINST_DIR}/lib/pkgconfig
 
+build_libuuid
+#build_harfbuzz
 build_freetype
 build_fontconfig
 build_android_shmem

@@ -1,6 +1,6 @@
 diff -Nur libX11-1.5.0-orig/include/X11/Xlib.h libX11-1.5.0/include/X11/Xlib.h
 --- libX11-1.5.0-orig/include/X11/Xlib.h	2012-06-02 13:37:17.000000000 +0700
-+++ libX11-1.5.0/include/X11/Xlib.h	2014-12-23 02:37:02.792159027 +0600
++++ libX11-1.5.0/include/X11/Xlib.h	2014-12-28 17:36:21.701070776 +0600
 @@ -66,9 +66,16 @@
  #endif
  #endif
@@ -30,7 +30,7 @@ diff -Nur libX11-1.5.0-orig/include/X11/Xlib.h libX11-1.5.0/include/X11/Xlib.h
  #else
 diff -Nur libX11-1.5.0-orig/ltmain.sh libX11-1.5.0/ltmain.sh
 --- libX11-1.5.0-orig/ltmain.sh	2012-06-02 13:37:28.000000000 +0700
-+++ libX11-1.5.0/ltmain.sh	2014-12-23 02:37:02.796159027 +0600
++++ libX11-1.5.0/ltmain.sh	2014-12-28 17:36:21.705070776 +0600
 @@ -2963,8 +2963,8 @@
  	  # At present, this check doesn't affect windows .dll's that
  	  # are installed into $libdir/../bin (currently, that works fine)
@@ -44,7 +44,7 @@ diff -Nur libX11-1.5.0-orig/ltmain.sh libX11-1.5.0/ltmain.sh
  	    # Stick the inst_prefix_dir data into the link command.
 diff -Nur libX11-1.5.0-orig/src/GetDflt.c libX11-1.5.0/src/GetDflt.c
 --- libX11-1.5.0-orig/src/GetDflt.c	2012-06-02 13:37:19.000000000 +0700
-+++ libX11-1.5.0/src/GetDflt.c	2014-12-23 02:37:02.796159027 +0600
++++ libX11-1.5.0/src/GetDflt.c	2014-12-28 17:36:21.705070776 +0600
 @@ -95,19 +95,21 @@
      char *dest,
      int len)
@@ -70,7 +70,7 @@ diff -Nur libX11-1.5.0-orig/src/GetDflt.c libX11-1.5.0/src/GetDflt.c
  	sprintf (dest, "%s%s", ptr1, (ptr2) ? ptr2 : "");
 diff -Nur libX11-1.5.0-orig/src/util/Makefile.in libX11-1.5.0/src/util/Makefile.in
 --- libX11-1.5.0-orig/src/util/Makefile.in	2012-06-02 13:37:33.000000000 +0700
-+++ libX11-1.5.0/src/util/Makefile.in	2014-12-23 02:37:02.800159027 +0600
++++ libX11-1.5.0/src/util/Makefile.in	2014-12-28 17:36:21.709070777 +0600
 @@ -321,9 +321,9 @@
  	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
  	echo " rm -f" $$list; \
@@ -85,7 +85,7 @@ diff -Nur libX11-1.5.0-orig/src/util/Makefile.in libX11-1.5.0/src/util/Makefile.
  	-rm -f *.$(OBJEXT)
 diff -Nur libX11-1.5.0-orig/src/xlibi18n/lcStd.c libX11-1.5.0/src/xlibi18n/lcStd.c
 --- libX11-1.5.0-orig/src/xlibi18n/lcStd.c	2012-06-02 13:37:19.000000000 +0700
-+++ libX11-1.5.0/src/xlibi18n/lcStd.c	2014-12-23 02:39:31.556161997 +0600
++++ libX11-1.5.0/src/xlibi18n/lcStd.c	2014-12-28 17:36:21.717070777 +0600
 @@ -199,7 +199,7 @@
  int
  _Xmbtowc(
@@ -104,3 +104,15 @@ diff -Nur libX11-1.5.0-orig/src/xlibi18n/lcStd.c libX11-1.5.0/src/xlibi18n/lcStd
      char const *str,
      size_t len
  #else
+diff -Nur libX11-1.5.0-orig/src/xlibi18n/lcWrap.c libX11-1.5.0/src/xlibi18n/lcWrap.c
+--- libX11-1.5.0-orig/src/xlibi18n/lcWrap.c	2012-06-02 13:37:19.000000000 +0700
++++ libX11-1.5.0/src/xlibi18n/lcWrap.c	2014-12-28 22:34:15.157427666 +0600
+@@ -257,6 +257,8 @@
+ 
+     if (name == NULL) {
+ 	name = setlocale (LC_CTYPE, (char *)NULL);
++	if (name == NULL)
++	    return NULL;
+ #if !defined(X_LOCALE)
+         /*
+          * _XlMapOSLocaleName will return the same string or a substring

@@ -384,6 +384,7 @@ make_packages() {
     local nodev=""
     local noman=""
     local nodoc=""
+    local nodeldev=""
     local pkg_new_dep="$(string_to_lower $PKG)"
 
     while [ ! "$1" = "" ]; do
@@ -400,6 +401,9 @@ make_packages() {
 	    ;;
 	nodoc)
 	    nodoc="1"
+	    ;;
+	nodeldev)
+	    nodeldev="1"
 	    ;;
 	esac
 	shift
@@ -420,8 +424,10 @@ make_packages() {
     done
 
     if [ -d cctools/include -o -d cctools/lib/pkgconfig -o -d cctools/share/aclocal ]; then
-	rm -rf ${TMPINST_DIR}/${PKG}-dev
-	mkdir ${TMPINST_DIR}/${PKG}-dev
+	if [ ! "$nodeldev" = "1" ]; then
+	    rm -rf ${TMPINST_DIR}/${PKG}-dev
+	fi
+	mkdir -p ${TMPINST_DIR}/${PKG}-dev
 	for n in cctools/include cctools/lib/pkgconfig cctools/share/aclocal; do
 	    if [ -d "$n" ]; then
 		mkdir -p "$(dirname ${TMPINST_DIR}/${PKG}-dev/${n})"
@@ -429,7 +435,7 @@ make_packages() {
 		rm -rf "$n"
 	    fi
 	done
-	find . -type f \( -name "*.h" -o -name "*.a" -o -name "*.la" -o -name "*.pc" -o -name "*.m4" \) | while read n; do
+	find . -type f \( -name "*.h" -o -name "*.a" -o -name "*.la" -o -name "*.pc" -o -name "*.m4" -o -name "*.o" \) | while read n; do
 	    mkdir -p ${TMPINST_DIR}/${PKG}-dev/$(dirname "$n")
 	    mv "$n" ${TMPINST_DIR}/${PKG}-dev/$(dirname "$n")
 	done
@@ -711,6 +717,10 @@ build_libuuid
 build_freetype
 build_fontconfig
 build_android_shmem
+
+build_SDL2
+
+#exit 0
 
 # Xorg
 build_util_macros

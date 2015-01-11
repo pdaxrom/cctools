@@ -53,7 +53,7 @@ Version: $PKG_VERSION
 Requires:
 Conflicts:
 Libs: -L\${libdir} \${libdir}/SDL_android_main.o -lSDL2 -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
-Libs.private: -Wl,--undefined=Java_org_libsdl_app_SDLActivity_nativeInit -lSDL2 -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
+Libs.private: -Wl,--undefined=Java_org_libsdl_app_SDLActivity_nativeInit -lSDL2_static -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
 Cflags: -I\${includedir}/SDL2 -DGL_GLEXT_PROTOTYPES
 EOF
 

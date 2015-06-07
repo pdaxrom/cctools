@@ -1,7 +1,7 @@
 build_gcc() {
     PKG=gcc
     PKG_VERSION=$gcc_version
-    PKG_SUBVERSION="-2"
+    PKG_SUBVERSION="-1"
     PKG_DESC="The GNU C compiler"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}

@@ -2,8 +2,8 @@
 
 BUILD_START=$(date +%s)
 
-#WRKDIR=$PWD/tmp
-WRKDIR=/mnt/nfs/Work/cctools-pro/tmp
+WRKDIR=$PWD/tmp
+#WRKDIR=/mnt/nfs/Work/cctools-pro/tmp
 
 #
 # uncomment to build pie compiler
@@ -13,11 +13,11 @@ WRKDIR=${WRKDIR}-pie
 # -------------------------------
 #
 
-NDKDIR=/opt/android-ndk
+NDKDIR=/mnt/devel/Work/NDK/android-ndk-r10e
 #NDKSRC=/home/sash/Work/android/ndk-source
-NDKSRC=/mnt/nfs/Work/android/ndk-source
+NDKSRC=/mnt/devel/Work/NDK/nkd-source
 
-for d in binutils gcc gmp mpc mpfr cloog isl ppl llvm-3.3 llvm-3.4; do
+for d in binutils gcc gmp mpc mpfr cloog isl ppl llvm-3.5 llvm-3.6; do
     ln -sf ${NDKSRC}/${d} src/
 done
 

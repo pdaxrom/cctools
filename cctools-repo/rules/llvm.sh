@@ -1,6 +1,6 @@
 build_llvm() {
     PKG=llvm
-    PKG_VERSION=3.4
+    PKG_VERSION=3.6
     PKG_SUBVERSION="-1"
     PKG_URL="http://ya.ru/${PKG}-${PKG_VERSION}.tgz"
     PKG_DESC="Low-Level Virtual Machine (LLVM), runtime library"
@@ -41,7 +41,8 @@ build_llvm() {
 	CLAGS_TARGET="x86"
 	;;
     *)
-	CLANG_TARGET="arm,mips,x86"
+#	CLANG_TARGET="arm,mips,x86"
+	CLANG_TARGET="arm,mips,x86,arm64,mips64,x86_64"
 	;;
     esac
 

@@ -22,12 +22,13 @@ build_binutils() {
     mkdir -p $B_DIR
     cd $B_DIR
 
+    export ac_cv_func_strtod=no
     $S_DIR/configure \
 	--host=$TARGET_ARCH \
 	--prefix=$TARGET_DIR \
 	--target=$TARGET_ARCH \
 	--with-sysroot=$SYSROOT \
-	--enable-targets=arm-linux-androideabi,mipsel-linux-android,i686-linux-android \
+	--enable-targets=arm-linux-androideabi,mipsel-linux-android,i686-linux-android,aarch64-linux-android,mips64el-linux-android,x86_64-linux-android \
 	--enable-multilib \
 	--disable-nls \
 	--disable-static \

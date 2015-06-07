@@ -1,9 +1,9 @@
 #!/bin/bash
 
-ndk_version="r9c"
+ndk_version="r10e"
 
-binutils_version="2.23"
-gcc_version="4.8"
+binutils_version="2.25"
+gcc_version="4.9"
 gmp_version="5.0.5"
 mpc_version="1.0.1"
 mpfr_version="3.1.1"

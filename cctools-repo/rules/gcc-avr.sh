@@ -1,7 +1,7 @@
 build_gcc_avr() {
     PKG=gcc-avr
     PKG_VERSION=$gcc_avr_version
-    PKG_SUBVERSION="-2"
+    PKG_SUBVERSION="-1"
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_DIR=$SRC_PREFIX/gcc/gcc-${PKG_VERSION}
     S_DIR=$src_dir/gcc-${PKG_VERSION}

@@ -1,0 +1,7 @@
+CCTools
+- Build Android and Java projects from toolbar or menu.
+
+- Fixed installation from local repository.
+
+Repository
+- Android 19+ uses PIE repository by default.

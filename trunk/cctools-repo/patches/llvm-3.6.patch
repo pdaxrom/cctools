@@ -148,3 +148,27 @@ diff -Nur llvm-3.6.orig/llvm/include/llvm/Target/TargetLibraryInfo.h llvm-3.6/ll
        /// int stat64(const char *path, struct stat64 *buf);
        stat64,
        /// int statvfs(const char *path, struct statvfs *buf);
+--- llvm-3.6.orig/llvm/lib/Support/Unix/Memory.inc	2015-07-19 12:55:04.611066875 -0700
++++ llvm-3.6/llvm/lib/Support/Unix/Memory.inc	2015-07-19 12:55:17.855067269 -0700
+@@ -340,7 +340,7 @@
+   __clear_cache(const_cast<char *>(Start), const_cast<char *>(End));
+ #  elif defined(__mips__)
+   const char *Start = static_cast<const char *>(Addr);
+-#    if defined(ANDROID)
++#    if defined(__BIONIC__)
+   // The declaration of "cacheflush" in Android bionic:
+   // extern int cacheflush(long start, long end, long flags);
+   const char *End = Start + Len;
+--- llvm-3.6.orig/llvm/lib/Support/Unix/Process.inc	2015-07-19 23:55:14.348724689 -0700
++++ llvm-3.6/llvm/lib/Support/Unix/Process.inc	2015-07-20 00:14:26.956759040 -0700
+@@ -236,6 +236,10 @@
+   return std::error_code();
+ }
+ 
++#if LLVM_ENABLE_THREADS
++#include <pthread.h>
++#endif
++
+ std::error_code Process::SafelyCloseFileDescriptor(int FD) {
+   // Create a signal set filled with *all* signals.
+   sigset_t FullSet;

@@ -1,4 +1,36 @@
-diff -Nur gcc-4.9.orig/boehm-gc/include/bits/elfclass.h gcc-4.9/boehm-gc/include/bits/elfclass.h
+--- gcc-4.9.orig/libcpp/charset.c	2015-06-06 00:33:19.000000000 +0400
++++ gcc-4.9/libcpp/charset.c	2015-06-06 10:51:19.527904995 +0400
+@@ -1700,7 +1700,7 @@
+ uchar * 
+ _cpp_convert_input (cpp_reader *pfile, const char *input_charset,
+ 		    uchar *input, size_t size, size_t len,
+-		    const unsigned char **buffer_start, off_t *st_size)
++		    const unsigned char **buffer_start, loff_t *st_size)
+ {
+   struct cset_converter input_cset;
+   struct _cpp_strbuf to;
+--- gcc-4.9.orig/gcc/configure.ac	2015-06-06 00:33:17.000000000 +0400
++++ gcc-4.9/gcc/configure.ac	2015-06-06 10:51:19.523904995 +0400
+@@ -140,7 +140,7 @@
+     if test x$host != x$target; then
+        libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
+     fi
+-    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)$libstdcxx_incdir"
++    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)\$(target_noncanonical)/$libstdcxx_incdir"
+   fi
+ fi
+ 
+--- gcc-4.9.orig/gcc/configure	2015-06-06 00:33:17.000000000 +0400
++++ gcc-4.9/gcc/configure	2015-06-06 10:51:19.523904995 +0400
+@@ -3360,7 +3360,7 @@
+     if test x$host != x$target; then
+        libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
+     fi
+-    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)$libstdcxx_incdir"
++    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)\$(target_noncanonical)/$libstdcxx_incdir"
+   fi
+ fi
+ 
 --- gcc-4.9.orig/boehm-gc/include/bits/elfclass.h	1970-01-01 04:00:00.000000000 +0400
 +++ gcc-4.9/boehm-gc/include/bits/elfclass.h	2015-06-06 10:51:19.515904995 +0400
 @@ -0,0 +1,14 @@
@@ -16,7 +48,33 @@ diff -Nur gcc-4.9.orig/boehm-gc/include/bits/elfclass.h gcc-4.9/boehm-gc/include
 +
 +/* The entries in the .hash table always have a size of 32 bits.  */
 +typedef uint32_t Elf_Symndx;
-diff -Nur gcc-4.9.orig/boehm-gc/include/bits/link.h gcc-4.9/boehm-gc/include/bits/link.h
+--- gcc-4.9.orig/libiberty/getpagesize.c	2015-06-06 00:33:19.000000000 +0400
++++ gcc-4.9/libiberty/getpagesize.c	2015-06-06 10:51:19.527904995 +0400
+@@ -60,11 +60,13 @@
+ # endif /* PAGESIZE */
+ #endif /* GNU_OUR_PAGESIZE */
+ 
++#ifndef __BIONIC__
+ int
+ getpagesize (void)
+ {
+   return (GNU_OUR_PAGESIZE);
+ }
++#endif
+ 
+ #else /* VMS */
+ 
+--- gcc-4.9.orig/libcpp/internal.h	2015-06-06 00:33:19.000000000 +0400
++++ gcc-4.9/libcpp/internal.h	2015-06-06 10:51:19.527904995 +0400
+@@ -735,7 +735,7 @@
+ extern void _cpp_destroy_iconv (cpp_reader *);
+ extern unsigned char *_cpp_convert_input (cpp_reader *, const char *,
+ 					  unsigned char *, size_t, size_t,
+-					  const unsigned char **, off_t *);
++					  const unsigned char **, loff_t *);
+ extern const char *_cpp_default_encoding (void);
+ extern cpp_hashnode * _cpp_interpret_identifier (cpp_reader *pfile,
+ 						 const unsigned char *id,
 --- gcc-4.9.orig/boehm-gc/include/bits/link.h	1970-01-01 04:00:00.000000000 +0400
 +++ gcc-4.9/boehm-gc/include/bits/link.h	2015-06-06 10:51:19.515904995 +0400
 @@ -0,0 +1,66 @@
@@ -86,30 +144,6 @@ diff -Nur gcc-4.9.orig/boehm-gc/include/bits/link.h gcc-4.9/boehm-gc/include/bit
 +					const char *__symname);
 +
 +__END_DECLS
-diff -Nur gcc-4.9.orig/boehm-gc/include/bits/wordsize.h gcc-4.9/boehm-gc/include/bits/wordsize.h
---- gcc-4.9.orig/boehm-gc/include/bits/wordsize.h	1970-01-01 04:00:00.000000000 +0400
-+++ gcc-4.9/boehm-gc/include/bits/wordsize.h	2015-06-06 10:51:19.515904995 +0400
-@@ -0,0 +1,19 @@
-+/* Copyright (C) 1999 Free Software Foundation, Inc.
-+   This file is part of the GNU C Library.
-+
-+   The GNU C Library is free software; you can redistribute it and/or
-+   modify it under the terms of the GNU Lesser General Public
-+   License as published by the Free Software Foundation; either
-+   version 2.1 of the License, or (at your option) any later version.
-+
-+   The GNU C Library is distributed in the hope that it will be useful,
-+   but WITHOUT ANY WARRANTY; without even the implied warranty of
-+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-+   Lesser General Public License for more details.
-+
-+   You should have received a copy of the GNU Lesser General Public
-+   License along with the GNU C Library; if not, write to the Free
-+   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-+   02111-1307 USA.  */
-+
-+#define __WORDSIZE	32
-diff -Nur gcc-4.9.orig/boehm-gc/include/link.h gcc-4.9/boehm-gc/include/link.h
 --- gcc-4.9.orig/boehm-gc/include/link.h	1970-01-01 04:00:00.000000000 +0400
 +++ gcc-4.9/boehm-gc/include/link.h	2015-06-06 10:51:19.515904995 +0400
 @@ -0,0 +1,194 @@
@@ -307,67 +341,6 @@ diff -Nur gcc-4.9.orig/boehm-gc/include/link.h gcc-4.9/boehm-gc/include/link.h
 +#endif
 +
 +#endif /* link.h */
-diff -Nur gcc-4.9.orig/gcc/configure gcc-4.9/gcc/configure
---- gcc-4.9.orig/gcc/configure	2015-06-06 00:33:17.000000000 +0400
-+++ gcc-4.9/gcc/configure	2015-06-06 10:51:19.523904995 +0400
-@@ -3360,7 +3360,7 @@
-     if test x$host != x$target; then
-        libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
-     fi
--    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)$libstdcxx_incdir"
-+    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)\$(target_noncanonical)/$libstdcxx_incdir"
-   fi
- fi
- 
-diff -Nur gcc-4.9.orig/gcc/configure.ac gcc-4.9/gcc/configure.ac
---- gcc-4.9.orig/gcc/configure.ac	2015-06-06 00:33:17.000000000 +0400
-+++ gcc-4.9/gcc/configure.ac	2015-06-06 10:51:19.523904995 +0400
-@@ -140,7 +140,7 @@
-     if test x$host != x$target; then
-        libstdcxx_incdir="$target_alias/$libstdcxx_incdir"
-     fi
--    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)$libstdcxx_incdir"
-+    gcc_gxx_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)\$(target_noncanonical)/$libstdcxx_incdir"
-   fi
- fi
- 
-diff -Nur gcc-4.9.orig/gcc/system.h gcc-4.9/gcc/system.h
---- gcc-4.9.orig/gcc/system.h	2015-06-06 00:33:18.000000000 +0400
-+++ gcc-4.9/gcc/system.h	2015-06-06 10:51:19.527904995 +0400
-@@ -70,7 +70,7 @@
-    extensions and need to be prototyped by hand (since we do not
-    define _GNU_SOURCE).  */
- 
--#if defined HAVE_DECL_PUTC_UNLOCKED && HAVE_DECL_PUTC_UNLOCKED
-+#if defined HAVE_DECL_PUTC_UNLOCKED && HAVE_DECL_PUTC_UNLOCKED && !__BIONIC__
- 
- # ifdef HAVE_PUTC_UNLOCKED
- #  undef putc
-diff -Nur gcc-4.9.orig/libcpp/charset.c gcc-4.9/libcpp/charset.c
---- gcc-4.9.orig/libcpp/charset.c	2015-06-06 00:33:19.000000000 +0400
-+++ gcc-4.9/libcpp/charset.c	2015-06-06 10:51:19.527904995 +0400
-@@ -1700,7 +1700,7 @@
- uchar * 
- _cpp_convert_input (cpp_reader *pfile, const char *input_charset,
- 		    uchar *input, size_t size, size_t len,
--		    const unsigned char **buffer_start, off_t *st_size)
-+		    const unsigned char **buffer_start, loff_t *st_size)
- {
-   struct cset_converter input_cset;
-   struct _cpp_strbuf to;
-diff -Nur gcc-4.9.orig/libcpp/internal.h gcc-4.9/libcpp/internal.h
---- gcc-4.9.orig/libcpp/internal.h	2015-06-06 00:33:19.000000000 +0400
-+++ gcc-4.9/libcpp/internal.h	2015-06-06 10:51:19.527904995 +0400
-@@ -735,7 +735,7 @@
- extern void _cpp_destroy_iconv (cpp_reader *);
- extern unsigned char *_cpp_convert_input (cpp_reader *, const char *,
- 					  unsigned char *, size_t, size_t,
--					  const unsigned char **, off_t *);
-+					  const unsigned char **, loff_t *);
- extern const char *_cpp_default_encoding (void);
- extern cpp_hashnode * _cpp_interpret_identifier (cpp_reader *pfile,
- 						 const unsigned char *id,
-diff -Nur gcc-4.9.orig/libcpp/macro.c gcc-4.9/libcpp/macro.c
 --- gcc-4.9.orig/libcpp/macro.c	2015-06-06 00:33:19.000000000 +0400
 +++ gcc-4.9/libcpp/macro.c	2015-06-06 10:51:19.527904995 +0400
 @@ -250,7 +250,7 @@
@@ -379,119 +352,6 @@ diff -Nur gcc-4.9.orig/libcpp/macro.c gcc-4.9/libcpp/macro.c
  		if (tb)
  		  {
  		    char *str = asctime (tb);
-diff -Nur gcc-4.9.orig/libiberty/getpagesize.c gcc-4.9/libiberty/getpagesize.c
---- gcc-4.9.orig/libiberty/getpagesize.c	2015-06-06 00:33:19.000000000 +0400
-+++ gcc-4.9/libiberty/getpagesize.c	2015-06-06 10:51:19.527904995 +0400
-@@ -60,11 +60,13 @@
- # endif /* PAGESIZE */
- #endif /* GNU_OUR_PAGESIZE */
- 
-+#ifndef __BIONIC__
- int
- getpagesize (void)
- {
-   return (GNU_OUR_PAGESIZE);
- }
-+#endif
- 
- #else /* VMS */
- 
-diff -Nur gcc-4.9.orig/libstdc++-v3/src/Makefile.in gcc-4.9/libstdc++-v3/src/Makefile.in
---- gcc-4.9.orig/libstdc++-v3/src/Makefile.in	2015-06-06 00:33:27.000000000 +0400
-+++ gcc-4.9/libstdc++-v3/src/Makefile.in	2015-06-06 10:51:19.527904995 +0400
-@@ -343,7 +343,7 @@
- SUBDIRS = c++98 c++11
- 
- # Cross compiler support.
--toolexeclib_LTLIBRARIES = libgnustl_shared.la
-+toolexeclib_LTLIBRARIES = libstdc++.la
- @GLIBCXX_LDBL_COMPAT_FALSE@ldbl_compat_sources = 
- @GLIBCXX_LDBL_COMPAT_TRUE@ldbl_compat_sources = compatibility-ldbl.cc
- parallel_compat_sources = \
-@@ -554,7 +554,7 @@
- libstdc++.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES) 
- 	$(libstdc___la_LINK) -rpath $(toolexeclibdir) $(libstdc___la_OBJECTS) $(libstdc___la_LIBADD) $(LIBS)
- 
--libgnustl_shared.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES)
-+libstdc++.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES)
- 	$(libstdc___la_LINK) -rpath $(toolexeclibdir) $(libstdc___la_OBJECTS) $(libstdc___la_LIBADD) $(LIBS)
- 
- mostlyclean-compile:
-diff -Nur gcc-4.9.orig/gcc/gcov-tool.c gcc-4.9/gcc/gcov-tool.c
---- gcc-4.9.orig/gcc/gcov-tool.c	2015-06-06 00:33:18.000000000 +0400
-+++ gcc-4.9/gcc/gcov-tool.c	2015-06-06 13:53:06.880383435 +0400
-@@ -36,7 +36,7 @@
- #include <stdio.h>
- #include <sys/stat.h>
- #include <unistd.h>
--#if !defined(_WIN32)
-+#if !defined(_WIN32) && !defined(__BIONIC__)
- #include <ftw.h>
- #endif
- #include <getopt.h>
-@@ -84,7 +84,7 @@
- 
- /* Remove file NAME if it has a gcda suffix. */
- 
--#if !defined(_WIN32)
-+#if !defined(_WIN32) && !defined(__BIONIC__)
- static int
- unlink_gcda_file (const char *name,
-                   const struct stat *status ATTRIBUTE_UNUSED,
-@@ -110,7 +110,7 @@
- static int
- unlink_profile_dir (const char *path)
- {
--#if !defined(_WIN32)
-+#if !defined(_WIN32) && !defined(__BIONIC__)
-     return nftw(path, unlink_gcda_file, 64, FTW_DEPTH | FTW_PHYS);
- #else
-     return 0;
-diff -Nur gcc-4.9.orig/libgcc/libgcov-util.c gcc-4.9/libgcc/libgcov-util.c
---- gcc-4.9.orig/libgcc/libgcov-util.c	2015-06-06 00:33:19.000000000 +0400
-+++ gcc-4.9/libgcc/libgcov-util.c	2015-06-06 14:17:36.964447918 +0400
-@@ -53,9 +53,9 @@
- 
- #include "obstack.h"
- #include <unistd.h>
--#if !defined (_WIN32)
-+#if !defined (_WIN32) && !defined(__BIONIC__)
- #include <ftw.h>
--#else
-+#elif defined(_WIN32)
- #include <windows.h>
- #endif
- 
-@@ -586,7 +586,7 @@
- }
- 
- 
--#if !defined(_WIN32)
-+#if !defined(_WIN32) && !defined(__BIONIC__)
- /* This will be called by ftw(). It opens and reads a gcda file FILENAME.
-    Return a non-zero value to stop the tree walk.  */
- 
-@@ -602,7 +602,7 @@
-   return read_file_handler (filename);
- }
- 
--#else /* _WIN32 */
-+#elif defined(_WIN32) /* _WIN32 */
- 
- /* Funtion to find all the gcda files recursively in DIR.  */
- static void
-@@ -696,9 +696,9 @@
-     }
-   source_profile_dir = getcwd (NULL, 0);
- 
--#if !defined(_WIN32)
-+#if !defined(_WIN32) && !defined(__BIONIC__)
-   ftw (".", ftw_read_file, 50);
--#else
-+#elif defined(_WIN32)
-   myftw (".", "*.gcda",read_file_handler);
- #endif
-   ret = chdir (pwd);
 --- gcc-4.9.orig/libiberty/strtod.c	2015-07-18 10:33:04.723078888 -0700
 +++ gcc-4.9/libiberty/strtod.c	2015-07-18 10:36:38.703085265 -0700
 @@ -41,7 +41,50 @@
@@ -545,8 +405,36 @@ diff -Nur gcc-4.9.orig/libgcc/libgcov-util.c gcc-4.9/libgcc/libgcov-util.c
  
  /* Disclaimer: this is currently just used by CHILL in GDB and therefore
     has not been tested well.  It may have been tested for nothing except
---- gcc-4.9-orig/gcc/BASE-VER	2016-08-03 09:58:44.000000000 +0400
-+++ gcc-4.9/gcc/BASE-VER	2016-08-03 16:40:28.390576654 +0400
-@@ -1 +1 @@
--4.9.x
-+4.9
+--- gcc-4.9.orig/gcc/system.h	2015-06-06 00:33:18.000000000 +0400
++++ gcc-4.9/gcc/system.h	2015-06-06 10:51:19.527904995 +0400
+@@ -70,7 +70,7 @@
+    extensions and need to be prototyped by hand (since we do not
+    define _GNU_SOURCE).  */
+ 
+-#if defined HAVE_DECL_PUTC_UNLOCKED && HAVE_DECL_PUTC_UNLOCKED
++#if defined HAVE_DECL_PUTC_UNLOCKED && HAVE_DECL_PUTC_UNLOCKED && !__BIONIC__
+ 
+ # ifdef HAVE_PUTC_UNLOCKED
+ #  undef putc
+--- gcc-4.9.orig/boehm-gc/include/bits/wordsize.h	1970-01-01 04:00:00.000000000 +0400
++++ gcc-4.9/boehm-gc/include/bits/wordsize.h	2015-06-06 10:51:19.515904995 +0400
+@@ -0,0 +1,19 @@
++/* Copyright (C) 1999 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, write to the Free
++   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
++   02111-1307 USA.  */
++
++#define __WORDSIZE	32

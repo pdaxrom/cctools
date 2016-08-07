@@ -1,10 +1,10 @@
 build_gcc_mingw32() {
     PKG=gcc-mingw-w64
-    PKG_VERSION=$gcc_version
-    PKG_SUBVERSION=-1
+    PKG_VERSION=$gcc_mingw_version
+    PKG_URL="http://mirrors-usa.go-parts.com/gcc/releases/gcc-${PKG_VERSION}/${PKG}-${PKG_VERSION}.tar.bz2"
     PKG_DESC="The GNU C compiler (cross compiler for mingw32)"
-    O_DIR=$SRC_PREFIX/gcc/gcc-${PKG_VERSION}
-    S_DIR=$src_dir/gcc-${PKG_VERSION}
+    O_FILE=$SRC_PREFIX/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
+    S_DIR=$src_dir/gnu/gcc-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}-${1}
 
     c_tag ${PKG}-${1} && return
@@ -13,7 +13,7 @@ build_gcc_mingw32() {
 
     pushd .
 
-    preparesrc $O_DIR $S_DIR
+#    preparesrc $O_DIR $S_DIR
 
 #    copysrc $O_DIR $S_DIR
 

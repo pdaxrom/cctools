@@ -20,7 +20,7 @@ build_binutils_avr() {
     mkdir -p $B_DIR
     cd $B_DIR
 
-    export ac_cv_func_strtod=no
+#    export ac_cv_func_strtod=no
     $S_DIR/configure \
 	--target=avr \
 	--host=$TARGET_ARCH \

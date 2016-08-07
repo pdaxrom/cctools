@@ -22,7 +22,7 @@ build_binutils() {
     mkdir -p $B_DIR
     cd $B_DIR
 
-    export ac_cv_func_strtod=no
+#    export ac_cv_func_strtod=no
     $S_DIR/configure \
 	--host=$TARGET_ARCH \
 	--prefix=$TARGET_DIR \

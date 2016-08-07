@@ -14,8 +14,8 @@ build_ppl_host() {
 
     tar jxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
 
-#    cd $S_DIR
-#    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
+    cd $S_DIR
+    patch -p1 < $patch_dir/${PKG}-${PKG_VERSION}.patch
 
     mkdir -p $B_DIR
     cd $B_DIR

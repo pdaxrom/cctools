@@ -34,6 +34,9 @@ build_gcc_avr() {
 	--with-gmp=$TMPINST_DIR \
 	--with-mpfr=$TMPINST_DIR \
 	--with-mpc=$TMPINST_DIR \
+	--with-cloog=$TMPINST_DIR \
+	--with-isl=$TMPINST_DIR \
+	--with-ppl=$TMPINST_DIR \
 	--enable-long-long \
 	--disable-libssp \
 	--disable-nls \
@@ -42,6 +45,8 @@ build_gcc_avr() {
 	--with-mpfr-version=$mpfr_version \
 	--with-mpc-version=$mpc_version \
 	--with-gmp-version=$gmp_version \
+	--with-cloog-version=$cloog_version \
+	--with-isl-version=$isl_version \
 	--with-gcc-version=$gcc_version \
 	--disable-bootstrap \
 	--disable-libquadmath \

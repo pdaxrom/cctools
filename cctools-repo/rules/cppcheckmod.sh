@@ -10,7 +10,7 @@ build_cppcheck_module() {
     banner "Build $PKG"
 
     $INSTALL -D -m644 ${O_DIR}/modules/cppcheck.xml     ${TMPINST_DIR}/${PKG}/cctools/share/modules/cppcheck.xml
-    $INSTALL -D -m644 ${O_DIR}/modules/cppcheckfile.xml ${TMPINST_DIR}/${PKG}/cctools/share/modules/cppcheckfile.xml
+    #$INSTALL -D -m644 ${O_DIR}/modules/cppcheckfile.xml ${TMPINST_DIR}/${PKG}/cctools/share/modules/cppcheckfile.xml
 
     local filename="${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "cppcheck"

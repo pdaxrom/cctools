@@ -31,6 +31,9 @@ build_gcc_avr_host() {
 	--with-gmp=${TARGET_DIR}-host \
 	--with-mpfr=${TARGET_DIR}-host \
 	--with-mpc=${TARGET_DIR}-host \
+	--with-cloog=${TARGET_DIR}-host \
+	--with-isl=${TARGET_DIR}-host \
+	--with-ppl=${TARGET_DIR}-host \
 	--enable-long-long \
 	--disable-libssp \
 	--disable-nls \
@@ -39,6 +42,8 @@ build_gcc_avr_host() {
 	--with-mpfr-version=$mpfr_version \
 	--with-mpc-version=$mpc_version \
 	--with-gmp-version=$gmp_version \
+	--with-cloog-version=$cloog_version \
+	--with-isl-version=$isl_version \
 	--with-gcc-version=$gcc_version \
 	--disable-bootstrap \
 	--disable-libquadmath \

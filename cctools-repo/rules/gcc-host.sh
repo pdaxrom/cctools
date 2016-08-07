@@ -37,7 +37,7 @@ build_gcc_host() {
 	#EXTRA_CONF="--with-arch=armv7-a --with-float=softfp --with-fpu=vfpv3-d16"
 	;;
     *86*)
-	EXTRA_CONF="--disable-libquadmath-support"
+	EXTRA_CONF="--disable-libquadmath-support --disable-libcilkrts"
 	;;
     *)
 	;;
@@ -51,6 +51,8 @@ build_gcc_host() {
 	--with-gnu-as \
 	--with-gnu-ld \
 	--enable-languages=c,c++,fortran,objc,obj-c++ \
+	--enable-bionic-libs \
+	--enable-libatomic-ifuncs=no \
 	--with-gmp=${TARGET_DIR}-host \
 	--with-mpfr=${TARGET_DIR}-host \
 	--with-mpc=${TARGET_DIR}-host \

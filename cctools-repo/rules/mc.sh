@@ -35,6 +35,7 @@ build_mc() {
 	--with-libiconv-prefix=$TMPINST_DIR \
 	CFLAGS="-I${TMPINST_DIR}/include" \
 	LDFLAGS="-Wl,-rpath-link,${TMPINST_DIR}/lib -L${TMPINST_DIR}/lib" \
+	LIBS="-lncurses" \
 	|| error "Configure $PKG."
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"

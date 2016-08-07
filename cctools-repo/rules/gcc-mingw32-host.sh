@@ -5,7 +5,7 @@ build_gcc_mingw32_host() {
     PKG_DESC="The GNU C compiler (cross compiler for mingw32)"
     O_FILE=$SRC_PREFIX/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/gnu/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/${PKG}-host
+    B_DIR=$build_dir/${PKG}-mingw32-${1}-host
 
     c_tag ${PKG}-mingw32-host-${1} && return
 
@@ -15,9 +15,13 @@ build_gcc_mingw32_host() {
 
     download $PKG_URL $O_FILE
 
-    unpack $src_dir/gnu $O_FILE
+    if test ! -e ${S_DIR}/.unpacked; then
+	unpack $src_dir/gnu $O_FILE
 
-    patchsrc $S_DIR $PKG $PKG_VERSION
+	patchsrc $S_DIR $PKG $PKG_VERSION
+
+	touch ${S_DIR}/.unpacked
+    fi
 
     mkdir -p $B_DIR
     cd $B_DIR
@@ -48,15 +52,17 @@ build_gcc_mingw32_host() {
 	--with-mpfr-version=$mpfr_version \
 	--with-mpc-version=$mpc_version \
 	--with-gmp-version=$gmp_version \
-	--with-gcc-version=$gcc_version \
+	--with-gcc-version=$gcc_mingw_version \
 	--with-cloog-version=$cloog_version \
 	--with-isl-version=$isl_version \
+	--disable-libquadmath-support \
+	--disable-libcilkrts \
 	|| error "configure"
 
 #	--enable-multilib \
 #	--enable-64bit \
 #	--disable-libstdc__-v3 \
-#	--with-gxx-include-dir=${TARGET_DIR}-host/${1}/include/c++/${gcc_version} \
+#	--with-gxx-include-dir=${TARGET_DIR}-host/${1}/include/c++/${gcc_mingw_version} \
 
     $MAKE $MAKEARGS all-gcc CFLAGS="-g -O2 -DTARGET_ANDROID=0" CXXFLAGS="-g -O2 -DTARGET_ANDROID=0" || error "make all-gcc"
 
@@ -69,7 +75,7 @@ build_gcc_mingw32_host() {
     $MAKE $MAKEARGS || error "make $MAKEARGS"
     $MAKE install || error "make install"
 
-    cp  -f ${TARGET_DIR}-host/lib/gcc/${1}/lib/libgcc_s.a ${TARGET_DIR}-host/lib/gcc/${1}/${gcc_version}/
+    cp  -f ${TARGET_DIR}-host/lib/gcc/${1}/lib/libgcc_s.a ${TARGET_DIR}-host/lib/gcc/${1}/${gcc_mingw_version}/
     rm -rf ${TARGET_DIR}-host/lib/gcc/${1}/lib
 
 #    mkdir libstdc++-v3-build

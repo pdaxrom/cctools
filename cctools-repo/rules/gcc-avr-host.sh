@@ -1,10 +1,11 @@
 build_gcc_avr_host() {
     PKG=gcc
     PKG_VERSION=$gcc_avr_version
+    PKG_URL="http://mirrors-usa.go-parts.com/gcc/releases/gcc-${PKG_VERSION}/${PKG}-${PKG_VERSION}.tar.bz2"
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
-    O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
-    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-${PKG}-avr
+    O_FILE=$SRC_PREFIX/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
+    S_DIR=$src_dir/gnu/${PKG}-${PKG_VERSION}
+    B_DIR=$build_dir/${PKG}-avr-host
 
     c_tag ${PKG}-avr-host && return
 
@@ -12,7 +13,16 @@ build_gcc_avr_host() {
 
     pushd .
 
-    preparesrc $O_DIR $S_DIR
+    download $PKG_URL $O_FILE
+
+    if test ! -e ${S_DIR}/.unpacked; then
+	unpack $src_dir/gnu $O_FILE
+
+	patchsrc $S_DIR $PKG $PKG_VERSION
+	touch ${S_DIR}/.unpacked
+    fi
+
+#    preparesrc $O_DIR $S_DIR
 
 #    copysrc $O_DIR $S_DIR
 

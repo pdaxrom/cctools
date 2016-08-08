@@ -17,8 +17,10 @@ nano_version="2.2.6"
 busybox_version="1.21.1"
 emacs_version="24.2"
 
-binutils_avr_version="2.23"
-gcc_avr_version="4.8"
+binutils_avr_version="2.25"
+gcc_avr_version="4.9.3"
+
+gcc_mingw_version="4.9.3"
 
 TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/root/cctools"
 #TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/cache/cctools"
@@ -45,15 +47,15 @@ if [ "x$WORK_DIR" = "x" ]; then
 fi
 
 if [ "x$NDK_DIR" = "x" ]; then
-    NDK_DIR=/opt/android-ndk
+    NDK_DIR=/mnt/devel/Work/NDK/android-ndk-r10e
 fi
 
 if [ "x$SDK_DIR" = "x" ]; then
-    SDK_DIR=/opt/adt-bundle-linux/sdk
+    SDK_DIR=/mnt/devel/Work/NDK/android-sdk-linux
 fi
 
 if [ "x$MAKEARGS" = "x" ]; then
-    MAKEARGS=-j9
+    MAKEARGS=-j3
 fi
 
 TOPDIR="$PWD"
@@ -203,6 +205,8 @@ unpack() {
     local cmd=
 
     echo "Unpacking..."
+
+    mkdir -p $1
 
     case $2 in
     *.tar.gz|*.tgz)
@@ -582,6 +586,8 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
     exit 0
 fi
 
+# ----------------------------------------------------------
+
 build_sysroot_host
 
 build_gmp_host
@@ -593,6 +599,8 @@ build_cloog_host
 
 build_binutils_host
 build_gcc_host
+
+# ----------------------------------------------------------
 
 # Toolchain support libs
 build_gmp
@@ -616,19 +624,19 @@ build_objc_examples
 
 # Clang
 #build_zlib
-build_llvm
+#build_llvm
 
 # presets
-build_build_essential_clang
-build_build_essential_clang_objc
+#build_build_essential_clang
+#build_build_essential_clang_objc
 build_build_essential_gcc
 build_build_essential_fortran
 build_build_essential_gcc_avr
 build_build_essential_gcc_objc
 build_build_essential_gcc_objc_fortran
 
-build_build_essential_clang_compact
-build_build_essential_clang_objc_compact
+#build_build_essential_clang_compact
+#build_build_essential_clang_objc_compact
 build_build_essential_gcc_compact
 build_build_essential_fortran_compact
 build_build_essential_gcc_objc_compact
@@ -663,14 +671,17 @@ build_wget
 build_git
 build_ca_certificates
 build_dropbear
-#build_fpc
-#build_nano
-#build_emacs
+
+##build_fpc
+##build_nano
+##build_emacs
+
 build_binutils_avr_host
 build_binutils_avr
 build_gcc_avr_host
 build_gcc_avr
 build_avr_libc
+
 build_netcat
 build_file_host
 build_file
@@ -684,9 +695,9 @@ build_android_pre_233_libc_fix
 
 # MinGW
 build_binutils_mingw32_host i686-w64-mingw32
-#build_binutils_mingw32_host x86_64-w64-mingw32
+###build_binutils_mingw32_host x86_64-w64-mingw32
 build_gcc_mingw32_host i686-w64-mingw32
-#build_gcc_mingw32_host x86_64-w64-mingw32
+###build_gcc_mingw32_host x86_64-w64-mingw32
 build_binutils_mingw32 i686-w64-mingw32
 build_gcc_mingw32 i686-w64-mingw32
 build_mingw_w64_examples
@@ -723,6 +734,7 @@ build_SDL2
 #exit 0
 
 # Xorg
+if false; then
 build_util_macros
 build_xproto
 build_bigreqsproto
@@ -874,3 +886,4 @@ build_pixman
 build_xorg_server
 
 build_rxvt_unicode
+fi

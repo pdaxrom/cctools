@@ -53,12 +53,14 @@ build_cloog() {
     local filename="lib${PKG}_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename lib${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${PKG}
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     PKG_DESC="Chunky Loop Generator (development files)."
     local filename="lib${PKG}-dev_${PKG_VERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG}-dev $filename lib${PKG}-dev $PKG_VERSION $PKG_ARCH "$PKG_DESC" "lib${PKG}"
     cd ${TMPINST_DIR}/${PKG}-dev
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     popd

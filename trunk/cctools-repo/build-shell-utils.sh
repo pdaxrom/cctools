@@ -304,6 +304,28 @@ string_to_lower() {
 }
 
 #
+# remove RPATH from ELF
+#
+
+remove_rpath() {
+    local f
+
+    if which chrpath 2>/dev/null >/dev/null; then
+	for f in $(find $1 -executable -type f); do
+	    if file $f | grep -q ELF; then
+		echo -n "Checking $f for RPATH ... "
+		if chrpath -l $f | grep -q RPATH; then
+		    echo "removed"
+		    chrpath -d $f
+		else
+		    echo "clean"
+		fi
+	    fi
+	done
+    fi
+}
+
+#
 # build_package_desc <path> <filename> <name> <version> <arch> <description> [<depends> [<replaces>]]
 #
 
@@ -413,6 +435,7 @@ make_packages() {
 	shift
     done
 
+    remove_rpath ${TMPINST_DIR}/${PKG}/cctools
     fix_bionic_shell ${TMPINST_DIR}/${PKG}/cctools
     replace_string   ${TMPINST_DIR}/${PKG}/cctools "${TMPINST_DIR}" "${TARGET_INST_DIR}"
 

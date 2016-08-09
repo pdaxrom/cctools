@@ -50,6 +50,7 @@ build_libXpm() {
     PKG_DESC="X11 pixmap utilities"
     build_package_desc ${TMPINST_DIR}/${BINPKG} $filename ${BINPKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC"
     cd ${TMPINST_DIR}/${BINPKG}
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     popd

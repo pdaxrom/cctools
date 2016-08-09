@@ -47,6 +47,7 @@ build_pcre() {
     local filename="lib${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/lib${PKG} $filename lib${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
     cd ${TMPINST_DIR}/lib${PKG}
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     cd $B_DIR
@@ -61,6 +62,7 @@ build_pcre() {
     local filename="lib${PKG}-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/lib${PKG}-dev $filename lib${PKG}-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
     cd ${TMPINST_DIR}/lib${PKG}-dev
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     cd $B_DIR
@@ -73,6 +75,7 @@ build_pcre() {
     local filename="lib${PKG}cpp_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/lib${PKG}cpp $filename lib${PKG}cpp ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
     cd ${TMPINST_DIR}/lib${PKG}cpp
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     cd $B_DIR
@@ -86,6 +89,7 @@ build_pcre() {
     local filename="lib${PKG}cpp-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/lib${PKG}cpp-dev $filename lib${PKG}cpp-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
     cd ${TMPINST_DIR}/lib${PKG}cpp-dev
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     cd $B_DIR
@@ -98,6 +102,7 @@ build_pcre() {
     local filename="lib${PKG}posix_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/lib${PKG}posix $filename lib${PKG}posix ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
     cd ${TMPINST_DIR}/lib${PKG}posix
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     cd $B_DIR
@@ -110,6 +115,7 @@ build_pcre() {
     local filename="lib${PKG}posix-dev_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/lib${PKG}posix-dev $filename lib${PKG}posix-dev ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "$PKG_DEPS"
     cd ${TMPINST_DIR}/lib${PKG}posix-dev
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     popd

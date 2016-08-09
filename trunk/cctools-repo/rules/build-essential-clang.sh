@@ -12,6 +12,7 @@ build_build_essential_clang() {
     local filename="${PKG}_${PKG_VERSION}_all.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} $PKG_VERSION $PKG_ARCH "$PKG_DESC" "$PKG_DEPS" "build-essential-clang-compact"
     cd ${TMPINST_DIR}/${PKG}
+    remove_rpath cctools
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     s_tag ${PKG}

@@ -1,7 +1,6 @@
 CCTools
-- Build Android and Java projects from toolbar or menu.
-
-- Fixed installation from local repository.
+- Added support for NDK 24.
 
 Repository
-- Android 19+ uses PIE repository by default.
+- Added NDK 24.
+- GCC updated to 4.9

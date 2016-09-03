@@ -8,7 +8,7 @@ build_mc() {
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
 
-    c_tag $PKG && return
+    c_tag $FUNCNAME && return
 
     pushd .
 
@@ -51,12 +51,8 @@ build_mc() {
     replace_string ${TMPINST_DIR}/${PKG}/cctools/share/mc/extfs/ "/usr/bin/perl" "${TARGET_INST_DIR}/bin/perl"
     replace_string ${TMPINST_DIR}/${PKG}/cctools/share/mc/extfs/ "/usr/bin" "${TARGET_INST_DIR}/bin"
 
-    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC"
-    cd ${TMPINST_DIR}/${PKG}
-    remove_rpath cctools
-    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
+    make_packages
 
     popd
-    s_tag $PKG
+    s_tag $FUNCNAME
 }

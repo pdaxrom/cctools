@@ -9,6 +9,15 @@ build_ndk_sysroot() {
 
     pushd .
 
+    is_invalid() {
+	if [[ "$1" =~ "$2" ]]; then
+	    false
+	else
+	    true
+	fi
+    }
+
+
     cd ${NDK_DIR}/platforms/
 
     local d=
@@ -34,39 +43,58 @@ build_ndk_sysroot() {
 		y=aarch64
 		x=aarch64-linux-android
 		z=elf64-littleaarch64
+		if is_invalid $TARGET_ARCH "aarch64"; then
+		    continue
+		fi
 		;;
 	    mips64*)
 		dirs="lib libr2 libr6 lib64 lib64r2"
 		y=mips64el
 		x=mips64el-linux-android
 		z=(elf32-tradlittlemips elf32-tradlittlemips elf32-tradlittlemips elf64-tradlittlemips elf64-tradlittlemips)
+		if is_invalid $TARGET_ARCH "mips64"; then
+		    continue
+		fi
 		;;
 	    x86_64*|amd64*)
 		dirs="lib lib64 libx32"
-		y=amd64
+		y=x86-64
 		x=x86_64-linux-android
 		z=(elf32-i386 elf64-x86-64 elf32-x86-64)
+		if is_invalid $TARGET_ARCH "x86_64"; then
+		    continue
+		fi
 		;;
 	    mips*)
 		dirs="lib libr2 libr6"
 		y=mipsel
 		x=mipsel-linux-android
 		z=(elf32-tradlittlemips elf32-tradlittlemips elf32-tradlittlemips)
+		if is_invalid $TARGET_ARCH "mips"; then
+		    continue
+		fi
 		;;
 	    arm*)
 		y=armel
 		x=arm-linux-androideabi
 		z=elf32-littlearm
+		if is_invalid $TARGET_ARCH "arm"; then
+		    continue
+		fi
 		;;
 	    x86*)
 		y=i686
 		x=i686-linux-android
 		z=elf32-i386
+		if is_invalid $TARGET_ARCH "i686"; then
+		    continue
+		fi
 		;;
 	    *)
 		continue
 		;;
 	    esac
+
 	    if [ -d $a/usr/lib ]; then
 		banner "Build ndk sysroot $arch $vers"
 

@@ -28,6 +28,15 @@ build_gcc() {
 
     local EXTRA_CONF=
     case $TARGET_ARCH in
+    aarch64*)
+	EXTRA_CONF="--enable-fix-cortex-a53-835769"
+	;;
+    mips64el*)
+	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point"
+	;;
+    x86_64*)
+	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --with-multilib-list=m32,m64,mx32 --disable-libcilkrts"
+	;;
     mips*)
 	EXTRA_CONF="--with-arch=mips32 --disable-threads --disable-fixed-point"
 	;;
@@ -297,23 +306,6 @@ EOF
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
-    if [ "$PKG_ARCH" = "armel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "mipsel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "i686" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-    fi
-
-    rm -f ${REPO_DIR}/$filename
-
     #
     # LIBGCC-COMPACT
     #
@@ -357,6 +349,18 @@ EOF
     local src_dir="${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/$gcc_version"
 
     case $TARGET_ARCH in
+    aarch64*)
+	OFORM="elf64-littleaarch64"
+	ANAME="arm64-v8a"
+	;;
+    mips64el*)
+	OFORM="elf64-tradlittlemips"
+	ANAME="mips64"
+	;;
+    x86_64*)
+	OFORM="elf64-x86-64"
+	ANAME="x86_64"
+	;;
     mips*)
 	OFORM="elf32-tradlittlemips"
 	ANAME="mips"
@@ -373,6 +377,8 @@ EOF
 
     $INSTALL -D -m 644 $src_dir/libs/${ANAME}/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
     $INSTALL -D -m 644 $src_dir/libs/${ANAME}/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_static.a
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools/lib
+    ln -sf ../${TARGET_ARCH}/lib/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/lib/
 
     cat > ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.so <<EOF
 OUTPUT_FORMAT($OFORM)
@@ -393,23 +399,6 @@ EOF
     local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}${PKG_SUBVERSION}_all.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
-
-    if [ "$PKG_ARCH" = "armel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "mipsel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "i686" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-    fi
-
-    rm -f ${REPO_DIR}/$filename
 
     #
     # LIBSTDC++-COMPACT
@@ -463,23 +452,6 @@ EOF
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
-    if [ "$PKG_ARCH" = "armel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "mipsel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "i686" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-    fi
-
-    rm -f ${REPO_DIR}/$filename
-
     #
     # LIBGFORTRAN-COMPACT
     #
@@ -530,23 +502,6 @@ EOF
     local filename="${PKG}-${PKG_ARCH}_${PKG_VERSION}${PKG_SUBVERSION}_all.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG}-${PKG_ARCH} ${PKG_VERSION}${PKG_SUBVERSION} all "$PKG_DESC"
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
-
-    if [ "$PKG_ARCH" = "armel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "mipsel" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../x86/
-    fi
-
-    if [ "$PKG_ARCH" = "i686" ]; then
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../armeabi/
-	cp -f ${REPO_DIR}/$filename ${REPO_DIR}/../mips/
-    fi
-
-    rm -f ${REPO_DIR}/$filename
 
     #
     # LIBOBJC-COMPACT

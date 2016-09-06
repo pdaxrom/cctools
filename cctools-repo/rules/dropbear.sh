@@ -1,83 +1,67 @@
-dropbear_version=0.52
 build_dropbear() {
     PKG=dropbear
-    PKG_VERSION=$dropbear_version
-    PKG_SUBVERSION="-2"
-    PKG_DESC="Dropbear is a software package written by Matt Johnston that provides a Secure Shell-compatible server and client. It is designed as a replacement for standard OpenSSH for environments with low memory and processor resources, such as embedded systems."
-    PKG_URL="http://matt.ucc.asn.au/dropbear/releases/dropbear-$dropbear_version.tar.gz"
-    O_FILE=$SRC_PREFIX/dropbear/dropbear-$dropbear_version.tar.gz
-    S_DIR=$src_dir/dropbear-$dropbear_version
-    B_DIR=$build_dir/dropbear
-    c_tag $PKG && return
+    PKG_VERSION=2016.74
+    PKG_SUBVERSION=
+    PKG_URL="https://matt.ucc.asn.au/dropbear/${PKG}-${PKG_VERSION}.tar.bz2"
+    PKG_DESC="Small SSH client and server."
+    PKG_DEPS=""
+    O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
+    S_DIR=$src_dir/${PKG}-${PKG_VERSION}
+    B_DIR=$build_dir/${PKG}
+
+    c_tag $FUNCNAME && return
+
+    pushd .
 
     banner "Build $PKG"
 
-    pushd .
-    mkdir -p $SRC_PREFIX/dropbear
-    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
+    download $PKG_URL $O_FILE
 
-    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
+    unpack $src_dir $O_FILE
 
-    cd $S_DIR
-    patch -p1 < $patch_dir/dropbear-$dropbear_version.patch || error "patch"
+    patchsrc $S_DIR $PKG $PKG_VERSION
 
-    mkdir -p $B_DIR
+    copysrc $S_DIR $B_DIR
+
     cd $B_DIR
 
-    case "$TARGET_ARCH" in
-    mips*)
-	EXTRA_CPPFLAGS="-EL"
-	EXTRA_LDFLAGS="-EL"
-	;;
-    *)
-	EXTRA_CPPFLAGS=
-	EXTRA_LDFLAGS=
-	;;
-    esac
+    # Configure here
 
-    CPPFLAGS="$EXTRA_CPPFLAGS" \
-    LDFLAGS="-static $EXTRA_LDFLAGS" \
-    $S_DIR/configure --target=$TARGET_ARCH_GLIBC --host=$TARGET_ARCH_GLIBC --prefix=$TMPINST_DIR \
-	--disable-largefile \
-	--disable-loginfunc \
-	--disable-shadow \
-	--disable-utmp \
-	--disable-utmpx \
-	--disable-wtmp \
-	--disable-wtmpx \
-	--disable-pututline \
-	--disable-pututxline \
-	--disable-lastlog \
-	--disable-zlib
+    ./configure	\
+		--host=${TARGET_ARCH} \
+		--prefix=$TMPINST_DIR \
+		--disable-loginfunc \
+		--disable-shadow \
+		--disable-utmp \
+		--disable-wtmp \
+		--disable-pututline \
+		--disable-pututxline \
+		--disable-lastlog \
+			|| error "Configure $PKG."
 
-    $MAKE $MAKEARGS PROGRAMS="dropbear dropbearkey scp dbclient dropbearconvert" || error "make $MAKEARGS"
+    echo "#define USE_DEV_PTMX 1" >> config.h
 
-    $MAKE install PROGRAMS="dropbear dropbearkey scp dbclient dropbearconvert" || error "make install"
+    $MAKE $MAKEARGS || error "make $MAKEARGS"
 
-    rm -rf $TARGET_DIR/share
+    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    make prefix=${TMPINST_DIR}/${PKG}/cctools/ install PROGRAMS="dropbear dropbearkey scp dbclient dropbearconvert" || error "pkg install"
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/share
-
-    ${TARGET_ARCH_GLIBC}-strip ${TMPINST_DIR}/${PKG}/cctools/bin/* ${TMPINST_DIR}/${PKG}/cctools/sbin/*
-
-    mkdir ${TMPINST_DIR}/${PKG}/cctools/services
-    mkdir ${TMPINST_DIR}/${PKG}/cctools/etc
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools/services
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools/etc/dropbear
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/var/run
 
-    echo "alpine" >> ${TMPINST_DIR}/${PKG}/cctools/etc/dropbear.passwd
+    echo "alpine" >> ${TMPINST_DIR}/${PKG}/cctools/etc/dropbear/dropbear.passwd
 
     cat >> ${TMPINST_DIR}/${PKG}/cctools/services/dropbear << EOF
 #!/system/bin/sh
 
 case \$1 in
 start)
-    if [ ! -f \${CCTOOLSDIR}/etc/dropbear_rsa_host_key ]; then
-	dropbearkey -t rsa -f \${CCTOOLSDIR}/etc/dropbear_rsa_host_key
-	dropbearconvert dropbear openssh \${CCTOOLSDIR}/etc/dropbear_rsa_host_key \${EXTERNAL_STORAGE}/CCTools/cctools_id_rsa_openssh
+    if [ ! -f \${CCTOOLSDIR}/etc/dropbear/dropbear_rsa_host_key ]; then
+	dropbearkey -t rsa -f \${CCTOOLSDIR}/etc/dropbear/dropbear_rsa_host_key
+	dropbearconvert dropbear openssh \${CCTOOLSDIR}/etc/dropbear/dropbear_rsa_host_key \${EXTERNAL_STORAGE}/CCTools/cctools_id_rsa_openssh
     fi
 
-    dropbear -A -N cctools -C \`cat \${CCTOOLSDIR}/etc/dropbear.passwd\` -r \${CCTOOLSDIR}/etc/dropbear_rsa_host_key -p 22022 -P \${CCTOOLSDIR}/var/run/dropbear.pid
+    dropbear -A -N cctools -C \`cat \${CCTOOLSDIR}/etc/dropbear/dropbear.passwd\` -r \${CCTOOLSDIR}/etc/dropbear/dropbear_rsa_host_key -p 22022 -P \${CCTOOLSDIR}/var/run/dropbear.pid
 
     ;;
 stop)
@@ -103,7 +87,7 @@ status=\`echo \$ret | cut -f1 -d' '\`
 case \$status in
 ok)
     passwd=\`echo \$ret | cut -f2 -d' '\`
-    echo \$passwd > \${CCTOOLSDIR}/etc/dropbear.passwd
+    echo \$passwd > \${CCTOOLSDIR}/etc/dropbear/dropbear.passwd
     ;;
 *)
     ;;
@@ -127,7 +111,7 @@ EOF
     cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/dropbearpasswd << EOF
 #!/system/bin/sh
 
-echo "\$1" > \${CCTOOLSDIR}/etc/dropbear.passwd
+echo "\$1" > \${CCTOOLSDIR}/etc/dropbear/dropbear.passwd
 
 \${CCTOOLSDIR}/services/dropbear stop
 \${CCTOOLSDIR}/services/dropbear start
@@ -139,12 +123,8 @@ EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/dropbearpasswd
 
-    local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-    build_package_desc ${TMPINST_DIR}/${PKG} $filename $PKG ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "adialog"
-    cd ${TMPINST_DIR}/${PKG}
-    remove_rpath cctools
-    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc postinst prerm
+    make_packages
 
     popd
-    s_tag $PKG
+    s_tag $FUNCNAME
 }

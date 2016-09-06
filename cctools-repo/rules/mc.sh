@@ -1,7 +1,7 @@
 build_mc() {
     PKG=mc
     PKG_VERSION=4.6.2
-    PKG_SUBVERSION="-2"
+    PKG_SUBVERSION="-3"
     PKG_URL="http://cctools.info/src/${PKG}/${PKG}-${PKG_VERSION}.tar.gz"
     PKG_DESC="Midnight Commander - a powerful file manager"
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.gz

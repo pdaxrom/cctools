@@ -13,7 +13,6 @@ ppl_version="1.0"
 
 make_version="4.0"
 nano_version="2.2.6"
-busybox_version="1.21.1"
 emacs_version="24.2"
 
 binutils_avr_version="2.25"
@@ -145,8 +144,8 @@ makedirs() {
     mkdir -p ${WORK_DIR}/../repo/armeabi
     mkdir -p ${WORK_DIR}/../repo/mips
     mkdir -p ${WORK_DIR}/../repo/x86
-    mkdir -p ${WORK_DIR}/../repo/aarch64
-    mkdir -p ${WORK_DIR}/../repo/mips64el
+    mkdir -p ${WORK_DIR}/../repo/arm64-v8a
+    mkdir -p ${WORK_DIR}/../repo/mips64
     mkdir -p ${WORK_DIR}/../repo/x86_64
 }
 
@@ -724,12 +723,13 @@ build_openssl
 build_expat
 build_sqlite
 build_apr
-build_aprutil
+build_apr_util
 build_neon
 build_subversion
 build_curl
 build_wget
 build_git
+
 build_ca_certificates
 build_dropbear
 

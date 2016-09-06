@@ -560,6 +560,14 @@ public class FlexiDialogActivity extends SherlockActivity {
 		if (bootClassPath == null) {
 			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
 		}
+
+		String libSuffix = "/lib";
+		
+		if (Build.CPU_ABI.startsWith("arm64") || Build.CPU_ABI.startsWith("mips64")
+				|| Build.CPU_ABI.startsWith("x86_64")) {
+			libSuffix = "/lib64";
+		}
+
 		String[] envp = {
 				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
 				"PATH=" + cctoolsDir + "/bin:" + cctoolsDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
@@ -571,7 +579,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 				"BOOTCLASSPATH=" + bootClassPath,
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system/lib:/vendor/lib",
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system" + libSuffix + ":/vendor" + libSuffix,
 				"HOME=" + cctoolsDir + "/home",
 				"SHELL=" + getShell(),
 				"TERM=xterm",

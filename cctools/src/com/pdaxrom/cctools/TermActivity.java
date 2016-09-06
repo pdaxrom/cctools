@@ -8,6 +8,7 @@ import com.pdaxrom.utils.Utils;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -130,6 +131,14 @@ public class TermActivity extends Activity {
 	private ShellTermSession createShellTermSession() {
 		cmdline = cmdline.replaceAll("\\s+", " ");
 		Log.i(TAG, "Shell sesion for " + cmdline + "\n");
+		
+		String libSuffix = "/lib";
+		
+		if (Build.CPU_ABI.startsWith("arm64") || Build.CPU_ABI.startsWith("mips64")
+				|| Build.CPU_ABI.startsWith("x86_64")) {
+			libSuffix = "/lib64";
+		}
+		
 		String[] envp = {
 				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
 				"PATH=" + cctoolsDir + "/bin:" + cctoolsDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
@@ -139,7 +148,7 @@ public class TermActivity extends Activity {
 				"ANDROID_ROOT=/system",
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system/lib:/vendor/lib",
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system" + libSuffix + ":/vendor" + libSuffix,
 				"HOME=" + cctoolsDir + "/home",
 				"SHELL=" + getShell(cctoolsDir),
 				"TERM=xterm",

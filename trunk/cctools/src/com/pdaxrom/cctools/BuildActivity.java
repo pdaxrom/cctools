@@ -383,6 +383,14 @@ public class BuildActivity extends Activity {
     	        show_progress(true);
     			Log.i(TAG, "execute " + cmdline + "\n");
 //    			output(cmdline + "\n");
+    			
+    			String libSuffix = "/lib";
+    			
+    			if (Build.CPU_ABI.startsWith("arm64") || Build.CPU_ABI.startsWith("mips64")
+    					|| Build.CPU_ABI.startsWith("x86_64")) {
+    				libSuffix = "/lib64";
+    			}
+
     			String[] envp = {
     					"PWD=" + workDir,
     					"TMPDIR=" + tmpDir,
@@ -393,7 +401,7 @@ public class BuildActivity extends Activity {
     					"ANDROID_ROOT=/system",
     					"CCTOOLSDIR=" + getCacheDir().getParentFile().getAbsolutePath() + "/root" + "/cctools",
     					"CCTOOLSRES=" + getPackageResourcePath(),
-    					"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system/lib:/vendor/lib",
+    					"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system" + libSuffix + ":/vendor" + libSuffix,
     					"HOME=" + cctoolsDir + "/home",
     					"TMPEXEDIR=" + tmpExeDir,
     					"PS1=''"

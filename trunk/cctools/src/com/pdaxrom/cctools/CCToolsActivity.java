@@ -8,10 +8,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.BindException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,10 +120,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	private int showFileLine;
 	private int showFilePos;
 	
-	private Thread dialogServiceThread;
-	private ServerSocket dialogServerSocket;
-	public static Socket dialogServiceSocket;
-
 	private static final int SERVICE_STOP = 0;
 	private static final int SERVICE_START = 1;
 	
@@ -227,7 +219,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         
         buttBar = (View) findViewById(R.id.toolButtonsBar);
 
-        dialogServiceThread = dialogService(13527);
         serviceStartStop(SERVICE_START);
 
         mPrefs.registerOnSharedPreferenceChangeListener(this);
@@ -283,19 +274,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		saveTabs();
         serviceStartStop(SERVICE_STOP);
 
-        if (dialogServiceThread.isAlive()) {
-			Log.i(TAG, "Stop dialog service");
-			dialogServiceThread.interrupt();
-		}
-		if ((dialogServerSocket != null) && 
-			(!dialogServerSocket.isClosed())) {
-			try {
-				dialogServerSocket.close();
-			} catch (IOException e) {
-				Log.e(TAG, "Error close dialogServerSocket " + e);
-			}
-		}
-		
 		Log.i(TAG, "Clean temp directory");
 		Utils.deleteDirectory(new File(getToolchainDir() + "/tmp"));
 		super.onDestroy();
@@ -1282,42 +1260,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		}
     }
     
-	private Thread dialogService(final int port) {
-		Log.i(TAG, "Launch dialog service (port " + port + ")");
-		Thread t = new Thread() {
-			public void run() {
-				try {
-					dialogServerSocket = new ServerSocket();
-					dialogServerSocket.setReuseAddress(true);
-					dialogServerSocket.bind(new InetSocketAddress(port));
-					Log.i(TAG, "Waiting for incoming requests");
-					while (true) {
-						dialogServiceSocket = dialogServerSocket.accept();
-						Log.i(TAG, "Dialog request from " + dialogServiceSocket.getInetAddress().toString());
-						if (!dialogServiceSocket.getInetAddress().toString().equals("/127.0.0.1")) {
-							continue;
-						}
-						Intent intent = new Intent(CCToolsActivity.this, DialogWindow.class);
-						startActivity(intent);
-						Log.i(TAG, "Waiting for finish dialog activity");
-						while(!dialogServiceSocket.isClosed()) {
-							Thread.sleep(300);
-						}
-						Log.i(TAG, "Dialog activity finished");
-					}
-				} catch (BindException e) {
-					Log.e(TAG, "bind failed, try again");
-				} catch (IOException e) {
-					Log.e(TAG, "ServerSocket " + e);
-				} catch (InterruptedException e) {
-					Log.e(TAG, "Interrupted " + e);
-				}
-			}
-		};
-		t.start();
-		return t;
-	}
-	
 	private void serviceStartStop(final int cmd) {
 		String serviceCmd;
 		if (cmd == SERVICE_START) {

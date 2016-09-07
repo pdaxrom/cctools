@@ -61,7 +61,7 @@
         <activity android:name="com.pdaxrom.pkgmanager.PkgManagerActivity"
             	  android:label="@string/pkgmgr_name"
             	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
-        <activity android:name="com.pdaxrom.cctools.DialogWindow"
+        <activity android:name="com.pdaxrom.cctools.ADialog"
             	  android:label="@string/app_name"
             	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             	  android:theme="@style/Theme.Transparent" />

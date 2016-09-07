@@ -41,9 +41,11 @@ build_dropbear() {
 
     echo "#define USE_DEV_PTMX 1" >> config.h
 
-    $MAKE $MAKEARGS || error "make $MAKEARGS"
+    #sed -i -e 's|\/\*#define DEBUG_TRACE\*\/|#define DEBUG_TRACE 1|' debug.h
 
-    $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
+    $MAKE $MAKEARGS PROGRAMS="dropbear dbclient scp dropbearkey dropbearconvert" SCPPROGRESS=1 || error "make $MAKEARGS"
+
+    $MAKE PROGRAMS="dropbear dbclient scp dropbearkey dropbearconvert" SCPPROGRESS=1 install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/services
     mkdir -p ${TMPINST_DIR}/${PKG}/cctools/etc/dropbear
@@ -51,7 +53,7 @@ build_dropbear() {
 
     echo "alpine" >> ${TMPINST_DIR}/${PKG}/cctools/etc/dropbear/dropbear.passwd
 
-    cat >> ${TMPINST_DIR}/${PKG}/cctools/services/dropbear << EOF
+    cat > ${TMPINST_DIR}/${PKG}/cctools/services/dropbear << EOF
 #!/system/bin/sh
 
 case \$1 in
@@ -77,38 +79,85 @@ esac
 
 EOF
 
-    cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
+    cat > ${TMPINST_DIR}/${PKG}/postinst << EOF
 #!/system/bin/sh
 
-ret=\`adialog --editbox --title "Dropbear SSH server" --message "Create a new password"\`
+fret=\${CCTOOLSDIR}/tmp/adialog\$\$
 
-status=\`echo \$ret | cut -f1 -d' '\`
+am start \$(am 2>&1 | grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools/.ADialog \\
+    --es type editbox \\
+    --ez password true \\
+    --es title "Dropbear SSH server" \\
+    --es message "Create a new password" \\
+    --es return \$fret
 
-case \$status in
-ok)
-    passwd=\`echo \$ret | cut -f2 -d' '\`
-    echo \$passwd > \${CCTOOLSDIR}/etc/dropbear/dropbear.passwd
-    ;;
-*)
-    ;;
-esac
+sleep 1
 
-iface=\`ip r l | grep default | head -n1 | awk '{ for (i = 1; \$i != ""; i++) { if (\$i == "dev") print \$(i + 1) } }'\`
-ip=\`ifconfig \$iface | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'\`
-adialog --msgbox --title "Dropbear SSH server" --message "SSH access to CCTools shell: ssh -p 22022 alpine@\${ip}" --text "Use dropbearpasswd to change SSH password from console."
+if [ -f \${fret}.lock ]; then
+
+    while [ -f \${fret}.lock ]; do
+	sleep 1
+    done
+    status=\$(cat \$fret)
+
+    case \$status in
+    ok)
+	cat \${fret}.out > \${CCTOOLSDIR}/etc/dropbear/dropbear.passwd
+	;;
+    *)
+	;;
+    esac
+
+    rm -f \${fret}
+    rm -f \${fret}.out
+
+
+    iface=\`ip r l | grep default | head -n1 | awk '{ for (i = 1; \$i != ""; i++) { if (\$i == "dev") print \$(i + 1) } }'\`
+    ip=\`ifconfig \$iface | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'\`
+
+    am start \$(am 2>&1 | grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools/.ADialog \\
+	--es type textview \\
+	--es title "Dropbear SSH server" \\
+	--es message "SSH access to CCTools shell: ssh -p 22022 cctools@\${ip}" \\
+	--es text "Use command 'dropbearpasswd <new password>' to change SSH password from console."
+
+else
+
+    #
+    # Obsolete and removed from CCTools 1.21+
+    #
+
+    ret=\`adialog --editbox --title "Dropbear SSH server" --message "Create a new password"\`
+    status=\`echo \$ret | cut -f1 -d' '\`
+
+    case \$status in
+    ok)
+	passwd=\`echo \$ret | cut -f2 -d' '\`
+	echo \$passwd > \${CCTOOLSDIR}/etc/dropbear/dropbear.passwd
+	;;
+    *)
+	;;
+    esac
+
+    iface=\`ip r l | grep default | head -n1 | awk '{ for (i = 1; \$i != ""; i++) { if (\$i == "dev") print \$(i + 1) } }'\`
+    ip=\`ifconfig \$iface | grep 'inet addr:' | cut -d: -f2 | awk '{ print \$1}'\`
+
+    adialog --msgbox --title "Dropbear SSH server" --message "SSH access to CCTools shell: ssh -p 22022 alpine@\${ip}" --text "Use dropbearpasswd to change SSH password from console."
+
+fi
 
 \${CCTOOLSDIR}/services/dropbear start
 
 EOF
 
-    cat >> ${TMPINST_DIR}/${PKG}/prerm << EOF
+    cat > ${TMPINST_DIR}/${PKG}/prerm << EOF
 #!/system/bin/sh
 
 \${CCTOOLSDIR}/services/dropbear stop
 
 EOF
 
-    cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/dropbearpasswd << EOF
+    cat > ${TMPINST_DIR}/${PKG}/cctools/bin/dropbearpasswd << EOF
 #!/system/bin/sh
 
 echo "\$1" > \${CCTOOLSDIR}/etc/dropbear/dropbear.passwd

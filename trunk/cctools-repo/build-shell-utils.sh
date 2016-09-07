@@ -374,7 +374,7 @@ fix_bionic_shell() {
 
     for f in $(find $p -type f); do
         if file $f | grep -q 'ASCII text\|shell script'; then
-	    if grep -q '/bin/sh' $f; then
+	    if [ ! "$(grep -q '/system/bin/sh' $f || grep '/bin/sh' $f)" = "" ]; then
 		echo "fix bionic shell in $f"
 		touch -r $f ${f}.timestamp
 		sed -i -e 's|/bin/sh|/system/bin/sh|g' $f
@@ -546,6 +546,7 @@ make_packages() {
 
     ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/bin/*
     ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/lib/*.so*
+    test -d ${TMPINST_DIR}/${PKG}/cctools/sbin && ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/sbin/*
 
     if [ ! "$nomain" = "1" ]; then
 	local filename="$(string_to_lower ${PKG})_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
@@ -558,11 +559,11 @@ make_packages() {
 case $TARGET_ARCH in
 aarch64*)
     PKG_ARCH="aarch64"
-    REPO_DIR="${WORK_DIR}/../repo/aarch64"
+    REPO_DIR="${WORK_DIR}/../repo/arm64-v8a"
     ;;
 mips64el*)
     PKG_ARCH="mips64el"
-    REPO_DIR="${WORK_DIR}/../repo/mips64el"
+    REPO_DIR="${WORK_DIR}/../repo/mips64"
     ;;
 x86_64*)
     PKG_ARCH="x86-64"

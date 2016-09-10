@@ -201,13 +201,7 @@ public class ADialog extends Activity {
     		return;
     	}
     	
-    	File temp = new File(name + ".lock");
-    	
-    	try {
-			temp.createNewFile();
-		} catch (IOException e) {
-			Log.e(TAG, "lock exception " + e);
-		}
+    	writeFile(name + ".lock", "locked");
     }
 
     private void unlock(Intent intent) {

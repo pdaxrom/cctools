@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.os.Build;
-
 import com.pdaxrom.utils.Utils;
 
 class Main {
@@ -216,21 +214,21 @@ class Main {
         sdkVersion = Integer.parseInt(getProperties("ro.build.version.sdk"));
         ndkVersion = -1;
         ndkArch = "all";
-        if (Build.CPU_ABI.startsWith("arm64")) {
+        if (cpuAbi.startsWith("arm64")) {
         	ndkArch = "aarch64";
         	if (sdk2ndk_arm64.length > sdkVersion) {
         		ndkVersion = sdk2ndk_arm64[sdkVersion];
         	} else {
         		ndkVersion = sdk2ndk_arm64[sdk2ndk_arm64.length -1];
         	}     	
-        } else if (Build.CPU_ABI.startsWith("mips64")) {
+        } else if (cpuAbi.startsWith("mips64")) {
             ndkArch = "mips64el";
             if (sdk2ndk_mips64.length > sdkVersion) {
             	ndkVersion = sdk2ndk_mips64[sdkVersion];
             } else {
             	ndkVersion = sdk2ndk_mips64[sdk2ndk_mips64.length -1];
             }     	
-        } else if (Build.CPU_ABI.startsWith("x86_64")) {
+        } else if (cpuAbi.startsWith("x86_64")) {
             ndkArch = "amd64";
             if (sdk2ndk_x86_64.length > sdkVersion) {
             	ndkVersion = sdk2ndk_x86_64[sdkVersion];

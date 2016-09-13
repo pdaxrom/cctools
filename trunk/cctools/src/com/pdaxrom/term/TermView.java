@@ -2,6 +2,9 @@ package com.pdaxrom.term;
 
 import java.io.File;
 
+import com.actionbarsherlock.app.ActionBar;
+
+import android.R;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
@@ -27,19 +30,30 @@ public class TermView extends EmulatorView {
 	private Context context;
 
 	private boolean isRunning = false;
-	
-    private Handler handler = new Handler();
 
+	private TermViewInterface termViewInterface = null;
+	private ActionBar.Tab tab;
+	
     private Handler mMsgHandler = new Handler() {
 	    @Override
 	    public void handleMessage(Message msg) {
-	    	if (!isRunning) {
-	    		return;
-	    	}
-	    	if (msg.what == 123) {
-	    		Log.i(TAG, "Message - Process exited!!!");
-	    		//showTitle(getString(R.string.console_name) + " - " + getString(R.string.console_finished));
-	    		isRunning = false;
+	    	switch(msg.what) {
+	    	case ShellTermSession.MSG_FINISH:
+	    		if (isRunning) {
+		    		Log.i(TAG, "Message - Process exited!!!");
+		    		//showTitle(getString(R.string.console_name) + " - " + getString(R.string.console_finished));
+		    		if (termViewInterface != null) {
+		    			termViewInterface.titleHasChanged(tab, "- " + session.getTitle() + " -");
+		    		}
+		    		isRunning = false;
+	    		}
+	    		break;
+	    	case ShellTermSession.MSG_TITLE:
+	    		Log.i(TAG, "Title changed to " + session.getTitle());
+	    		if (termViewInterface != null) {
+	    			termViewInterface.titleHasChanged(tab, session.getTitle());
+	    		}
+	    		break;
 	    	}
 	    }
 	};
@@ -67,6 +81,11 @@ public class TermView extends EmulatorView {
 		return super.onSingleTapUp(e);
 	}
 
+	public void setTermViewInterface(TermViewInterface termViewInterface, ActionBar.Tab tab) {
+		this.termViewInterface = termViewInterface;
+		this.tab = tab;
+	}
+	
 	public void start(String cmdLine, String workDir, String cctoolsDir) {
 		this.cmdLine = cmdLine;
 		this.workDir = workDir;
@@ -77,6 +96,7 @@ public class TermView extends EmulatorView {
 	}
 	
 	public void stop() {
+		this.termViewInterface = null;
 		if (session != null) {
 			session.finish();
 		}

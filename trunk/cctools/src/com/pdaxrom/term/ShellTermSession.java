@@ -16,28 +16,25 @@ import jackpal.androidterm.emulatorview.UpdateCallback;
 
 public class ShellTermSession extends TermSession {
 	private final static String TAG = "ShellTermSession";
+	
+	public final static int MSG_FINISH = 1;
+	public final static int MSG_TITLE = 2;
+	
 	private int mProcId;
 	private FileDescriptor mFd;
-    private Thread mWatcherThread;
+    private Thread watcherThread;
 
-/*
-	private Handler mMsgHandler = new Handler() {
-	    @Override
-	    public void handleMessage(Message msg) {
-	    	if (!isRunning()) {
-	    		return;
-	    	}
-	    	if (msg.what == PROCESS_EXITED) {
-	    		onProcessExit((Integer) msg.obj);
-	    	}
-	    }
-	};
- */
 	private Handler mMsgHandler;
 	
-	private UpdateCallback mUTF8ModeNotify = new UpdateCallback() {
+	private UpdateCallback utf8ModeChangedListener = new UpdateCallback() {
 		public void onUpdate() {
 			Utils.setPtyUTF8Mode(mFd, getUTF8Mode());
+		}
+	};
+	
+	private UpdateCallback titleChangedCallback = new UpdateCallback() {
+		public void onUpdate() {
+			mMsgHandler.sendEmptyMessage(MSG_TITLE);
 		}
 	};
 	
@@ -50,17 +47,17 @@ public class ShellTermSession extends TermSession {
 		
 		createSubProcess(argv, envp, cwd);
 		
-        mWatcherThread = new Thread() {
+        watcherThread = new Thread() {
             @Override
             public void run() {
                Log.i(TAG, "waiting for: " + mProcId);
                int result = Utils.waitFor(mProcId);
                Log.i(TAG, "Subprocess exited: " + result);
                //mMsgHandler.sendMessage(mMsgHandler.obtainMessage(PROCESS_EXITED, result));
-               mMsgHandler.sendEmptyMessage(123);
+               mMsgHandler.sendEmptyMessage(MSG_FINISH);
             }
        };
-       mWatcherThread.setName("Process watcher");
+       watcherThread.setName("Process watcher");
 	}
 	
 	@Override
@@ -113,9 +110,11 @@ public class ShellTermSession extends TermSession {
 		super.initializeEmulator(columns, rows);
 		
 		Utils.setPtyUTF8Mode(mFd, getUTF8Mode());
-		setUTF8ModeUpdateCallback(mUTF8ModeNotify);
+		setUTF8ModeUpdateCallback(utf8ModeChangedListener);
+
+		setTitleChangedListener(titleChangedCallback);
 		
-        mWatcherThread.start();
+        watcherThread.start();
 	}
 	
 	@Override

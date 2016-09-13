@@ -30,6 +30,7 @@ import com.pdaxrom.utils.SelectionMode;
 import com.pdaxrom.utils.Utils;
 import com.pdaxrom.utils.XMLParser;
 import com.pdaxrom.term.TermView;
+import com.pdaxrom.term.TermViewInterface;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -74,6 +75,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 								implements ActionBar.TabListener,
 											OnSharedPreferenceChangeListener,
 											CodeEditorInterface,
+											TermViewInterface,
 											FlexiDialogInterface {
 	private Context context = this;
 	public static final String SHARED_PREFS_NAME = "cctoolsSettings";
@@ -206,7 +208,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         terminalButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				addTab(TAB_TERMINAL);
-				newTitle("Terminal");
+				newTitle(getString(R.string.console_name));
 			}
         });
         
@@ -408,8 +410,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         		showLog();
         		break;
         	case R.id.item_terminal:
-        		//runTerminal();
         		addTab(TAB_TERMINAL);
+				newTitle(getString(R.string.console_name));
         		break;
         	case R.id.item_pkgmgr:
         		packageManager();
@@ -469,6 +471,14 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 			}
 			getSupportActionBar().getSelectedTab().setText(title);
 		}
+	}
+
+	public void titleHasChanged(ActionBar.Tab tab, String title) {
+//		if (getSupportActionBar().getSelectedTab().getText() == null) {
+//			return;
+//		}
+//		Log.i(TAG, "New term title " + title);
+		tab.setText(title);
 	}
 
     private int loadTabs() {
@@ -551,6 +561,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void addTab(int type) {
+    	TermView term = null;
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (type == TAB_EDITOR) {
         	View view = inflater.inflate(R.layout.editor, flipper, false);
@@ -573,16 +584,22 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         	View view = inflater.inflate(R.layout.term, flipper, false);
         	flipper.addView(view);
         	
-        	TermView term = (TermView) view.findViewById(R.id.emulatorView);
+        	term = (TermView) view.findViewById(R.id.emulatorView);
         	tabViews.add(term);
+//        	term.setTermViewInterface(this, tab);
         	term.start("-" + getShell(), workDir, getToolchainDir() + "/cctools");
         	updateEditorPrefs(mPrefs, term);
         	//registerForContextMenu(tabView);
         }
+
         ActionBar.Tab tab = getSupportActionBar().newTab();
         tab.setTabListener(this);
         getSupportActionBar().addTab(tab);
         getSupportActionBar().selectTab(tab);
+        
+        if (type == TAB_TERMINAL) {
+        	term.setTermViewInterface(this, tab);        	
+        }
     }
     
     private String getLastOpenedDir() {

@@ -466,8 +466,9 @@ public class FlexiDialogActivity extends SherlockActivity {
 					Intent intent = null;
 					if (intentName.contentEquals("BuildActivity")) {
 						intent = new Intent(FlexiDialogActivity.this, BuildActivity.class);
-					} else if (intentName.contentEquals("TermActivity")) {
-						intent = new Intent(FlexiDialogActivity.this, TermActivity.class);
+// FIXME: Add new Terminal tab launcher
+//					} else if (intentName.contentEquals("TermActivity")) {
+//						intent = new Intent(FlexiDialogActivity.this, TermActivity.class);
 					} else if (intentName.contentEquals("NativeActivity")) {
 						intent = new Intent(FlexiDialogActivity.this, NativeActivity.class);
 					} else if (intentName.contentEquals("LauncherConsoleActivity")) {

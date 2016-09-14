@@ -36,6 +36,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -275,6 +276,21 @@ public class FlexiDialogActivity extends SherlockActivity {
 		return value;
     }
     
+    private String getValueFromView(View view) {
+    	if (view != null) {
+        	if (view instanceof EditText) {
+        		return ((EditText) view).getText().toString();
+        	} else if (view instanceof CheckBox) {
+        		if (((CheckBox) view).isChecked()) {
+        			return "true";
+        		} else {
+        			return "false";
+        		}
+        	}
+    	}
+    	return null;
+    }
+    
     /**
      * Show module actions
      * @param nl NodeList
@@ -372,6 +388,23 @@ public class FlexiDialogActivity extends SherlockActivity {
 
 				row.addView(view);
 				row.addView(edit);
+				table.addView(row);
+			} else if (ne.getAttribute("type").equals("checkbox")) {
+				TableRow row = new TableRow(context);
+				
+				TextView view = new TextView(context);
+				view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
+				//view.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
+				
+				CheckBox check = new CheckBox(context);
+				
+				String value = getPrefString(title + "@" + ne.getAttribute("name") + "@");
+				check.setChecked(Boolean.valueOf(value));
+				
+				namedViews.add(new NamedView(check, ne.getAttribute("name")));
+				
+				row.addView(check);
+				row.addView(view);
 				table.addView(row);
 			} else if (ne.getAttribute("type").equals("dirpath") || ne.getAttribute("type").equals("filepath")) {
 				TableRow row = new TableRow(context);
@@ -487,11 +520,10 @@ public class FlexiDialogActivity extends SherlockActivity {
 						
 				    	for (NamedView view: namedViews) {
 				    		if (value.contains("@" + view.getName() + "@")) {
-								EditText edit = (EditText) view.getView();
-								if (edit != null) {
-					    			value = value.replace("@" + view.getName() + "@", edit.getText().toString());
-					    			setPrefString(title + "@" + view.getName() + "@", edit.getText().toString());
-								}
+				    			value = value.replace("@" + view.getName() + "@", getValueFromView(view.getView()));
+				    			if (view.getView() != null) {
+				    				setPrefString(title + "@" + view.getName() + "@", getValueFromView(view.getView()));
+				    			}
 				    		}
 				    	}
 						
@@ -519,10 +551,9 @@ public class FlexiDialogActivity extends SherlockActivity {
 					for (int i = 0; i < argv.length; i++) {
 						if (argv[i].startsWith("@") && argv[i].endsWith("@")) {
 							String var = argv[i].substring(1, argv[i].length() - 1);
-							EditText edit = (EditText) getNamedView(namedViews, var);
-							if (edit != null) {
-								argv[i] = edit.getText().toString();
-				    			setPrefString(title + "@" + var + "@", edit.getText().toString());
+							argv[i] = getValueFromView(getNamedView(namedViews, var));
+							if (getNamedView(namedViews, var) != null) {
+				    			setPrefString(title + "@" + var + "@", argv[i]);
 							}
 						} else {
 							argv[i] = getBuiltinVariable(argv[i]);

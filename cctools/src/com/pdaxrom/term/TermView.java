@@ -1,8 +1,10 @@
 package com.pdaxrom.term;
 
 import java.io.File;
+import java.util.List;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.pdaxrom.utils.CommandLineSupport;
 
 import android.R;
 import android.annotation.SuppressLint;
@@ -114,7 +116,7 @@ public class TermView extends EmulatorView {
 	
 	@SuppressLint("NewApi")
 	private ShellTermSession createShellTermSession() {
-		cmdLine = cmdLine.replaceAll("\\s+", " ");
+		//cmdLine = cmdLine.replaceAll("\\s+", " ");
 		Log.i(TAG, "Shell sesion for " + cmdLine + "\n");
 		
 		String libSuffix = "/lib";
@@ -139,14 +141,16 @@ public class TermView extends EmulatorView {
 				"TERM=xterm",
 				"PS1=$ ",
 				};
-		String[] argv = cmdLine.split("\\s+");
+		List<String> argv = CommandLineSupport.split(cmdLine);
+		
+//		String[] argv = cmdLine.split("\\s+");
 
-		Log.i(TAG, "argv " + argv[0]);
+		Log.i(TAG, "argv " + argv);
 		Log.i(TAG, "envp " + envp);
 		
 		isRunning = true;
 		
-		return new ShellTermSession(argv, envp, workDir, mMsgHandler);
+		return new ShellTermSession(argv.toArray(new String[argv.size()]), envp, workDir, mMsgHandler);
 	}
 	
 	private String getShell(String toolchainDir) {

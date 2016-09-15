@@ -293,6 +293,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
                 		title = getString(R.string.console_name);
                 	}
                 	if (cmdline != null) {
+                		Log.i(TAG, "CMDLINE = " + cmdline);
                 		addTerminalTab(cmdline, workDir);
         				newTitle(title);
                 	}                	
@@ -593,6 +594,10 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private boolean findAndShowEditorTab(String filename) {
+    	return findAndShowTab(TAB_EDITOR, filename);
+    }
+    
+    private boolean findAndShowTab(int type, String filename) {
     	for (int i = 0; i < flipper.getChildCount(); i++) {
     		CodeEditor code = (CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor);
     		if (code != null) {
@@ -644,6 +649,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         		BuildView build = (BuildView) view.findViewById(R.id.buildLog);
         		tabViews.add(build);
         		updateEditorPrefs(mPrefs, build);
+        	} else {
+        		return;
         	}
         }
 

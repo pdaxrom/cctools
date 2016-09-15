@@ -1,0 +1,142 @@
+#!/system/bin/sh
+
+native=false
+executable=false
+run=false
+buildwindow=false
+runwindow=false
+
+while true; do
+
+    if [ "$1" = "--native" ]; then
+	native=$2
+	shift 2
+	continue
+    elif [ "$1" = "--executable" ]; then
+	executable=$2
+	shift 2
+	continue
+    elif [ "$1" = "--run" ]; then
+	run=$2
+	shift 2
+	continue
+    elif [ "$1" = "--buildwindow" ]; then
+	buildwindow=$2
+	shift 2
+	continue
+    elif [ "$1" = "--runwindow" ]; then
+	runwindow=$2
+	shift 2
+	continue
+    fi
+    
+    break
+
+done
+
+ext=${1/*.}
+
+out=${1/.*}
+
+unsupported_file() {
+    echo "Unsupported extension $1."
+    exit 1
+}
+
+check_utility() {
+    if which $1 >/dev/null 2>/dev/null; then
+	return
+    fi
+    
+    echo "$2 $1 is not installed on your system."
+    exit 1
+}
+
+run_gnu_compiler() {
+    local compiler=$1
+    shift
+
+    check_utility $compiler "$1 compiler"
+
+    local params="$@"
+
+    if [ "$native" = "true" ]; then
+	params="$params -I$CCTOOLSDIR/sources/native_app_glue"
+	if [ "$executable" = "true" -o "$run" = "true" ]; then
+	    out="lib${out}.so"
+	    params="$params ${CCTOOLSDIR}/sources/native_app_glue/android_native_app_glue.c -Wl,-soname,$out -shared -Wl,--no-undefined -Wl,-z,noexecstack -llog -landroid -lm"
+	fi
+    fi
+
+    if [ "$executable" = "true" ]; then
+	$compiler $params -o $out
+    else
+	$compiler -c $params
+    fi
+    
+    local ret="$?"
+
+    if [ "$ret" = "0" ]; then
+	if [ "$run" = "true" ]; then
+	    echo "run"
+	fi
+    fi
+}
+
+run_makefile() {
+    check_utility make "make utility"
+
+    make -f $@
+}
+
+run_java() {
+    check_utility project-ctl "project-ctl utility"
+
+    project-ctl -b -r $out
+}
+
+echo "- $native $executable $run"
+
+if [ "$buildwindow" = "true" ]; then
+    for m in ${CCTOOLSDIR} ${EXTERNAL_STORAGE}/CCTools; do
+	if [ -e ${m}/share/modules/compile.xml ]; then
+	    am start $(am 2>&1 | grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools/.CCToolsActivity \
+		--es type module \
+		--es path ${m}/share/modules/compile.xml \
+		--es workdir $PWD \
+		--es file $1
+	    exit 0
+	fi
+    done
+
+    echo "Compilation module not found."
+
+    exit 1
+fi
+
+case $ext in
+c)
+    run_gnu_compiler gcc $@
+    ;;
+m)
+    run_gnu_compiler gcc $@ -lobjc
+    ;;
+cpp|c++|cc|cxx)
+    run_gnu_compiler g++ $@
+    ;;
+mm)
+    run_gnu_compiler g++ $@ -lobjc
+    ;;
+f*)
+    run_gnu_compiler f77 $@
+    ;;
+Makefile|makefile|mk|mak)
+    run_makefile $@
+    ;;
+java)
+    run_java $@
+    ;;
+*)
+    unsupported_file $ext $1
+    ;;
+esac

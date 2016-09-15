@@ -52,11 +52,25 @@ check_utility() {
     exit 1
 }
 
+run_exec() {
+    if [ "$runwindow" != true ]; then
+	mkdir -p ${CCTOOLSDIR}/tmp
+	cp -f $out ${CCTOOLSDIR}/tmp/$out
+	chmod 755 ${CCTOOLSDIR}/tmp/$out
+	am start $(am 2>&1 | grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools/.CCToolsActivity \
+	    --es type terminal \
+	    --es title "$out" \
+	    --es cmdline "/system/bin/sh -c ${CCTOOLSDIR}/tmp/$out" \
+	    --es workdir $PWD
+	exit 0
+    fi
+}
+
 run_gnu_compiler() {
     local compiler=$1
     shift
 
-    check_utility $compiler "$1 compiler"
+    check_utility $compiler "$compiler compiler"
 
     local params="$@"
 
@@ -78,7 +92,7 @@ run_gnu_compiler() {
 
     if [ "$ret" = "0" ]; then
 	if [ "$run" = "true" ]; then
-	    echo "run"
+	    run_exec $1
 	fi
     fi
 }

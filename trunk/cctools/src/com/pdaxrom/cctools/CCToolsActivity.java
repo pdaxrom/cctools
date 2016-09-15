@@ -285,6 +285,17 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
                 	Log.i(TAG, "module " + path + " " + workdir + " " + file);
                 	
                 	dialogFromModule(path, workdir, file);
+                } else if (type.contentEquals("terminal")) {
+                	String cmdline = intent.getStringExtra("cmdline");
+                	String workDir = intent.getStringExtra("workdir");
+                	String title = intent.getStringExtra("title");
+                	if (title == null) {
+                		title = getString(R.string.console_name);
+                	}
+                	if (cmdline != null) {
+                		addTerminalTab(cmdline, workDir);
+        				newTitle(title);
+                	}                	
                 }
             }
         }
@@ -644,6 +655,28 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         if (type == TAB_TERMINAL) {
         	term.setTermViewInterface(this, tab);        	
         }
+    }
+    
+    private void addTerminalTab(String cmdline, String workDir) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+    	View view = inflater.inflate(R.layout.term, flipper, false);
+    	flipper.addView(view);
+    	
+    	TermView term = (TermView) view.findViewById(R.id.emulatorView);
+    	tabViews.add(term);
+    	if (workDir == null) {
+    		workDir = getToolchainDir() + "/cctools/home";
+    	}
+    	term.start(cmdline, workDir, getToolchainDir() + "/cctools");
+    	updateEditorPrefs(mPrefs, term);
+    	
+        ActionBar.Tab tab = getSupportActionBar().newTab();
+        tab.setTabListener(this);
+        getSupportActionBar().addTab(tab);
+        getSupportActionBar().selectTab(tab);
+        
+        term.setTermViewInterface(this, tab);        	
     }
     
     private String getLastOpenedDir() {

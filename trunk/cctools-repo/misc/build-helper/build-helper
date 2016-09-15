@@ -34,9 +34,11 @@ while true; do
 
 done
 
-ext=${1/*.}
+src=$1
 
-out=${1/.*}
+ext=${src/*.}
+
+out=${src/.*}
 
 unsupported_file() {
     echo "Unsupported extension $1."
@@ -54,15 +56,22 @@ check_utility() {
 
 run_exec() {
     if [ "$runwindow" != true ]; then
-	mkdir -p ${CCTOOLSDIR}/tmp
-	cp -f $out ${CCTOOLSDIR}/tmp/$out
-	chmod 755 ${CCTOOLSDIR}/tmp/$out
-	am start $(am 2>&1 | grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools/.CCToolsActivity \
-	    --es type terminal \
-	    --es title "$out" \
-	    --es cmdline "/system/bin/sh -c ${CCTOOLSDIR}/tmp/$out" \
-	    --es workdir $PWD
-	exit 0
+	exec run-helper $1
+    else
+	for m in ${CCTOOLSDIR} ${EXTERNAL_STORAGE}/CCTools; do
+	    if [ -e ${m}/share/modules/runargs.xml ]; then
+		am start $(am 2>&1 | grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools/.CCToolsActivity \
+		    --es type module \
+		    --es path ${m}/share/modules/runargs.xml \
+		    --es workdir $PWD \
+		    --es file ${PWD}/$1 &>/dev/null
+		exit 0
+	    fi
+	done
+
+	echo ":( Run with args module not found."
+
+	exit 1
     fi
 }
 
@@ -83,18 +92,23 @@ run_gnu_compiler() {
     fi
 
     if [ "$executable" = "true" ]; then
+	echo "$compiler $params -o $out"
 	$compiler $params -o $out
     else
+	echo "$compiler -c $params"
 	$compiler -c $params
     fi
     
     local ret="$?"
 
     if [ "$ret" = "0" ]; then
+	echo ":)"
 	if [ "$run" = "true" ]; then
-	    run_exec $1
+	    run_exec $out
 	fi
+	exit 0
     fi
+    echo ":("
 }
 
 run_makefile() {
@@ -109,8 +123,6 @@ run_java() {
     project-ctl -b -r $out
 }
 
-echo "- $native $executable $run"
-
 if [ "$buildwindow" = "true" ]; then
     for m in ${CCTOOLSDIR} ${EXTERNAL_STORAGE}/CCTools; do
 	if [ -e ${m}/share/modules/compile.xml ]; then
@@ -118,7 +130,7 @@ if [ "$buildwindow" = "true" ]; then
 		--es type module \
 		--es path ${m}/share/modules/compile.xml \
 		--es workdir $PWD \
-		--es file $1
+		--es file $src &>/dev/null
 	    exit 0
 	fi
     done
@@ -151,6 +163,6 @@ java)
     run_java $@
     ;;
 *)
-    unsupported_file $ext $1
+    unsupported_file $ext $src
     ;;
 esac

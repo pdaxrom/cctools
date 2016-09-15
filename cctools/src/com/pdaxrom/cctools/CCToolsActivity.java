@@ -21,6 +21,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.pdaxrom.build.BuildView;
 import com.pdaxrom.editor.CodeEditor;
 import com.pdaxrom.editor.CodeEditorInterface;
 import com.pdaxrom.pkgmanager.PkgManagerActivity;
@@ -102,6 +103,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	private List<View> tabViews = null;	
 	private CodeEditor codeEditor = null;
 	private TermView termView = null;
+	private BuildView buildView = null;
 	
 	private static final int TAB_EDITOR = 1;
 	private static final int TAB_TERMINAL = 2;
@@ -236,9 +238,14 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 
         mPrefs.registerOnSharedPreferenceChangeListener(this);
         onSharedPreferenceChanged(mPrefs, null);
+        
+        onNewIntent(getIntent());
+    }
+    
+    protected void onNewIntent(Intent intent) {
+    	Log.i(TAG, "onNewIntent !!!!!!!!!!");
 
         // Get intent, action and MIME type
-        Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
 
@@ -250,14 +257,35 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
             	String fileName = uri.getPath();
             	Log.i(TAG, "Load external file " + fileName);
             	if (!findAndShowEditorTab(fileName)) {
-                	if (tabsLoaded != 0) {
-                		addTab(TAB_EDITOR);
-                	}
+                	addTab(TAB_EDITOR);
                 	if (codeEditor.loadFile(fileName)) {
         				loadFileEditPos(codeEditor);
         				newTitle(new File(fileName).getName());
                 	}
             	}
+            }
+        } else {
+            type = intent.getStringExtra("type");
+            
+            Log.w(TAG, "type = " + type);
+            
+            if (type != null) {
+                if (type.contentEquals("build")) {
+                	String cmdline = intent.getStringExtra("cmdline");
+                	String workDir = intent.getStringExtra("workdir");
+                	if (cmdline != null) {
+                		addTab(TAB_BUILD);
+                		buildView.start(cmdline, workDir, getToolchainDir() + "/cctools", getPackageResourcePath(), getTempDir());
+                	}
+                } else if (type.contentEquals("module")) {
+                	String path = intent.getStringExtra("path");
+                	String workdir = intent.getStringExtra("workdir");
+                	String file = intent.getStringExtra("file");
+                	
+                	Log.i(TAG, "module " + path + " " + workdir + " " + file);
+                	
+                	dialogFromModule(path, workdir, file);
+                }
             }
         }
     }
@@ -387,18 +415,24 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         	case R.id.item_close:
         		if (codeEditor != null) {
         			warnSaveDialog(WARN_SAVE_AND_CLOSE);
+        			break;
         		} else if (termView != null) {
         			if (termView.isAlive()) {
         				termView.hangup();
         			}
         			termView.stop();
-        			int i = flipper.getDisplayedChild();
-        			flipper.removeViewAt(i);
-        			getSupportActionBar().removeTabAt(i);				
-        			if (flipper.getChildCount() == 0) {
-        				finish();
+        		} else if (buildView != null) {
+        			if (buildView.isRunning()) {
+        				buildView.stop();
         			}
+        			
         		}
+    			int i = flipper.getDisplayedChild();
+    			flipper.removeViewAt(i);
+    			getSupportActionBar().removeTabAt(i);				
+    			if (flipper.getChildCount() == 0) {
+    				finish();
+    			}
         		break;
         	case R.id.item_run:
         		warnSaveDialog(WARN_SAVE_AND_BUILD_FORCE);
@@ -450,6 +484,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		flipper.setDisplayedChild(tab.getPosition());
         codeEditor = (CodeEditor) flipper.getChildAt(tab.getPosition()).findViewById(R.id.codeEditor);
         termView = (TermView) flipper.getChildAt(tab.getPosition()).findViewById(R.id.emulatorView);
+        buildView = (BuildView) flipper.getChildAt(tab.getPosition()).findViewById(R.id.buildLog);
 	}
 
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
@@ -590,6 +625,15 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         	term.start("-" + getShell(), workDir, getToolchainDir() + "/cctools");
         	updateEditorPrefs(mPrefs, term);
         	//registerForContextMenu(tabView);
+        } else if (type == TAB_BUILD) {
+        	if (buildView == null) {
+        		View view = inflater.inflate(R.layout.build, flipper, false);
+        		flipper.addView(view);
+        		
+        		BuildView build = (BuildView) view.findViewById(R.id.buildLog);
+        		tabViews.add(build);
+        		updateEditorPrefs(mPrefs, build);
+        	}
         }
 
         ActionBar.Tab tab = getSupportActionBar().newTab();
@@ -1142,7 +1186,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 					int position, long id) {
 				Log.i(TAG, "selected action " + position);
 				dialog.dismiss();
-				dialogFromModule(modules.get(position), getLastOpenedDir());
+				dialogFromModule(modules.get(position));
 			}
     	});
     }

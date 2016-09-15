@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -63,6 +65,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 
 	private Context context = this;
 	private FlexiDialogInterface flexiDialogInterface = null;
+	private Map <String, String> varOverrides = null;
 	
     List<NamedView> namedViews = null;
     private int fileSelectorId;
@@ -221,6 +224,15 @@ public class FlexiDialogActivity extends SherlockActivity {
     }
     
     private String getBuiltinVariable(String name) {
+    	if (varOverrides != null) {
+    		for (Map.Entry<String, String> entry: varOverrides.entrySet()) {
+    			String key = entry.getKey();
+    			String value = entry.getValue();
+    			Log.i(TAG, "Override variable " + key + " with " + value);
+    			name = name.replace(key, value);
+    		}
+    	}
+    	
     	if (flexiDialogInterface != null) {
     		name = flexiDialogInterface.getBuiltinVariable(name);
     	}
@@ -331,14 +343,28 @@ public class FlexiDialogActivity extends SherlockActivity {
     /**
      * Create Dialog popup window from xml template
      * @param ruleFile xml template file
-     * @param lastOpenedDir last opened directory
+     * @param pwd current working directory (null for CCTools last opened directory)
+     * @param file current file (null for CCTools current opened file)
      */
-    protected void dialogFromModule(String ruleFile, final String lastOpenedDir) {
+    protected void dialogFromModule(String ruleFile, final String pwd, final String file) {
 		XMLParser xmlParser = new XMLParser();
 		String xml = xmlParser.getXmlFromFile(ruleFile);
 		if (xml != null) {
 			Document doc = xmlParser.getDomElement(xml);
 			if (doc != null) {
+				if (varOverrides == null) {
+					varOverrides = new HashMap<String, String>();
+				}
+				if (pwd != null) {
+					varOverrides.put("$current_dir$", pwd);
+				} else {
+					varOverrides.remove("$current_dir$");
+				}
+				if (file != null) {
+					varOverrides.put("$current_file$", file);
+				} else {
+					varOverrides.remove("$current_file$");
+				}
 				NodeList nl = doc.getElementsByTagName("cctools-module");
 				Element e = (Element) nl.item(0);
 				String title = getLocalizedAttribute(e, "title");
@@ -351,6 +377,14 @@ public class FlexiDialogActivity extends SherlockActivity {
 				showAction((Element) nl.item(0));
 			}
 		}
+    }
+    
+    protected void dialogFromModule(String ruleFile, final String pwd) {
+    	dialogFromModule(ruleFile, pwd, null);
+    }
+    
+    protected void dialogFromModule(String ruleFile) {
+    	dialogFromModule(ruleFile, null, null);
     }
     
     /**
@@ -500,8 +534,8 @@ public class FlexiDialogActivity extends SherlockActivity {
 					if (intentName.contentEquals("BuildActivity")) {
 						intent = new Intent(FlexiDialogActivity.this, BuildActivity.class);
 // FIXME: Add new Terminal tab launcher
-//					} else if (intentName.contentEquals("TermActivity")) {
-//						intent = new Intent(FlexiDialogActivity.this, TermActivity.class);
+					} else if (intentName.contentEquals("CCToolsActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, CCToolsActivity.class);
 					} else if (intentName.contentEquals("NativeActivity")) {
 						intent = new Intent(FlexiDialogActivity.this, NativeActivity.class);
 					} else if (intentName.contentEquals("LauncherConsoleActivity")) {

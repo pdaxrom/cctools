@@ -32,25 +32,11 @@
 				<data android:mimeType="text/*" />
 			</intent-filter>
         </activity>
-        <activity android:name="TermActivity"
-            	  android:label="@string/console_name"
-            	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            	  android:windowSoftInputMode="adjustResize" />
-        <activity android:name="BuildActivity"
-            	  android:label="@string/buildwindow_name"
-            	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            	  android:windowSoftInputMode="adjustResize" />
         <activity android:name="com.pdaxrom.utils.FileDialog"
             	  android:label="@string/filebrowser_name"
             	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
    		<activity android:name="Preferences" android:label="@string/preferences" />
         <activity android:name="LauncherNativeActivity">
-			<intent-filter>
-			    <action android:name="com.pdaXrom.cctools.action.RUN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>   		
-        <activity android:name="LauncherConsoleActivity">
 			<intent-filter>
 			    <action android:name="com.pdaXrom.cctools.action.RUN" />
                 <category android:name="android.intent.category.LAUNCHER" />

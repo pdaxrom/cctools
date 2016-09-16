@@ -829,63 +829,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     	if (codeEditor == null) {
     		return;
     	}
-    	String fileName = codeEditor.getFileName();
-		Log.i(TAG, "build activity " + fileName);
-		if ((new File(fileName)).exists()) {
-			buildBaseDir = (new File(fileName)).getParentFile().getAbsolutePath();
-			String infile = (new File(fileName)).getName();
-			if (infile.lastIndexOf(".") != -1) {
-				String ext = infile.substring(infile.lastIndexOf("."));
-				if (ext.contentEquals(".sh")) {
-		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
-		    		intent.putExtra("executable_file", fileName);
-		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
-		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
-		    		if (force) {
-		    			intent.putExtra("force", mPrefs.getBoolean("force_run", false));
-		    		} else {
-		    			intent.putExtra("force", false);
-		    		}
-		    		startActivity(intent);
-		    		return;
-				}
-				if (ext.contentEquals(".lua") && (new File(getToolchainDir() + "/cctools/bin/luajit")).exists()) {
-		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
-		    		intent.putExtra("executable_file", getToolchainDir() + "/cctools/bin/luajit " + fileName);
-		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
-		    		intent.putExtra("workdir", (new File(fileName)).getParentFile().getAbsolutePath());
-		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
-		    		if (force) {
-		    			intent.putExtra("force", mPrefs.getBoolean("force_run", true));
-		    		} else {
-		    			intent.putExtra("force", false);
-		    		}
-		    		startActivity(intent);
-		    		return;					
-				}
-				if ((ext.equals(".pl") || ext.equals(".pm")) &&
-					(new File(getToolchainDir() + "/cctools/bin/perl")).exists()) {
-		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
-		    		intent.putExtra("executable_file", getToolchainDir() + "/cctools/bin/perl " + fileName);
-		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
-		    		intent.putExtra("workdir", (new File(fileName)).getParentFile().getAbsolutePath());
-		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
-		    		if (force) {
-		    			intent.putExtra("force", mPrefs.getBoolean("force_run", true));
-		    		} else {
-		    			intent.putExtra("force", false);
-		    		}
-		    		startActivity(intent);
-		    		return;					
-				}
-			}
-			Intent intent = new Intent(CCToolsActivity.this, BuildActivity.class);
-			intent.putExtra("filename", fileName);
-			intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
-			intent.putExtra("tmpdir", getTempDir());
-			intent.putExtra("force", force);
-			startActivity(intent);
-		}
     }
     
 	static private final String KEY_FILE = "file";
@@ -905,12 +848,15 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	}
 	
     private void showLog() {
-    	if (BuildActivity.errorsList.isEmpty()) {
+    	if (buildView == null) {
+    		return;
+    	}
+    	if (buildView.getLog().isEmpty()) {
     		Toast.makeText(getBaseContext(), getString(R.string.log_empty), Toast.LENGTH_SHORT).show();
     		return;
     	}
     	ArrayList<HashMap<String, String>> menuItems = new ArrayList<HashMap<String, String>>();
-    	for (LogItem item: BuildActivity.errorsList) {
+    	for (LogItem item: buildView.getLog()) {
     		HashMap<String, String> map = new HashMap<String, String>();
     		map.put(KEY_FILE, item.getFile());
     		map.put(KEY_LINE, Integer.toString(item.getLine()));

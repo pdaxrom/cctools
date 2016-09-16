@@ -5,6 +5,7 @@ executable=false
 run=false
 buildwindow=false
 runwindow=false
+dialogid=""
 
 while true; do
 
@@ -26,6 +27,10 @@ while true; do
 	continue
     elif [ "$1" = "--runwindow" ]; then
 	runwindow=$2
+	shift 2
+	continue
+    elif [ "$1" = "--dialogid" ]; then
+	dialogid=$2
 	shift 2
 	continue
     fi
@@ -64,6 +69,7 @@ run_exec() {
 		    --es type module \
 		    --es path ${m}/share/modules/runargs.xml \
 		    --es workdir $PWD \
+		    --es dialogid $dialogid \
 		    --es file ${PWD}/$1 &>/dev/null
 		exit 0
 	    fi
@@ -123,6 +129,10 @@ run_java() {
     project-ctl -b -r $out
 }
 
+if [ "$dialogid" = "" ]; then
+    dialogid=$out
+fi
+
 if [ "$buildwindow" = "true" ]; then
     for m in ${CCTOOLSDIR} ${EXTERNAL_STORAGE}/CCTools; do
 	if [ -e ${m}/share/modules/compile.xml ]; then
@@ -130,6 +140,7 @@ if [ "$buildwindow" = "true" ]; then
 		--es type module \
 		--es path ${m}/share/modules/compile.xml \
 		--es workdir $PWD \
+		--es dialogid $dialogid \
 		--es file $src &>/dev/null
 	    exit 0
 	fi

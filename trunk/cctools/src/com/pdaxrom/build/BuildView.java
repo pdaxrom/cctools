@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.pdaxrom.cctools.R;
 import com.pdaxrom.utils.LogItem;
 import com.pdaxrom.utils.Utils;
 
@@ -24,6 +26,7 @@ import android.widget.TextView;
 public class BuildView extends TextView {
 	private static final String TAG = "cctools-build";
 
+	private String name = null;
 	private boolean isRunning = false;
 	
 	private String cctoolsDir;
@@ -41,25 +44,45 @@ public class BuildView extends TextView {
     private Handler handler = new Handler();
 
 	private ArrayList<LogItem> errorsList = null;
+	
+	private BuildViewInterface buildViewInterface = null;
+	private ActionBar.Tab tab = null;
+	private Context context;
 
 	public BuildView(Context context) {
 		super(context);
+		this.context = context;
 		init();
 	}
 
 	public BuildView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		this.context = context;
 		init();
 	}
 
 	public BuildView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs);
+		this.context = context;
 		init();
 	}
 		
 	private void init() {
 		Log.i(TAG, "cctools-build created!");
 		isRunning = false;
+	}
+	
+	public void setInterface(BuildViewInterface buildViewInterface, ActionBar.Tab tab) {
+		this.buildViewInterface = buildViewInterface;
+		this.tab = tab;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public boolean isRunning() {
@@ -79,6 +102,15 @@ public class BuildView extends TextView {
     	handler.post(proc);
     }
 
+    private void title(final String title) {
+    	Runnable proc = new Runnable() {
+    		public void run() {
+    			buildViewInterface.titleHasChanged(tab, title);
+    		}
+    	};
+    	handler.post(proc);
+    }
+    
     public void start(String cmdline, String workDir, String cctoolsDir, String cctoolsResDir, String tmpDir) {
     	if (isRunning) {
     		Log.w(TAG, "BuildView start - already started!");
@@ -110,6 +142,8 @@ public class BuildView extends TextView {
     	public void run() {
     		try {
     			Log.i(TAG, "execute " + cmdline + "\n");
+    			
+    			title(context.getString(R.string.buildwindow_name));
     			
     			String libSuffix = "/lib";
     			
@@ -225,9 +259,11 @@ public class BuildView extends TextView {
         				
         				//FIXME: set tab title
 						if (mExitCode != 0) {
+			    			title(context.getString(R.string.buildwindow_name_error));
 							//output(getString(R.string.build_error) + " " + mExitCode + "\n");
 					        //showTitle(getString(R.string.buildwindow_name_error) + " - " + fileName);
 						} else {
+			    			title(context.getString(R.string.buildwindow_name_done));
 					        //showTitle(getString(R.string.buildwindow_name_done) + " - " + fileName);
 						}
 
@@ -236,10 +272,12 @@ public class BuildView extends TextView {
         				procout.close();
         			} catch (IOException ie) {
         				Log.e(TAG, "exception " + ie);
-        			}    				
+            			title(context.getString(R.string.buildwindow_name_error));
+       			}    				
     			}    			
     		} catch (Exception ie) {
     			Log.e(TAG, "exec() " + ie);
+    			title(context.getString(R.string.buildwindow_name_error));
     		}
     		isRunning = false;
     		//output("\n" + getString(R.string.build_done) +"\n\n");

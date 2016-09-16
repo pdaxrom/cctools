@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -346,7 +347,7 @@ public class FlexiDialogActivity extends SherlockActivity {
      * @param pwd current working directory (null for CCTools last opened directory)
      * @param file current file (null for CCTools current opened file)
      */
-    protected void dialogFromModule(String ruleFile, final String pwd, final String file) {
+    protected void dialogFromModule(String ruleFile, final String pwd, final String file, final String dialogId) {
 		XMLParser xmlParser = new XMLParser();
 		String xml = xmlParser.getXmlFromFile(ruleFile);
 		if (xml != null) {
@@ -365,6 +366,11 @@ public class FlexiDialogActivity extends SherlockActivity {
 				} else {
 					varOverrides.remove("$current_file$");
 				}
+				if (dialogId != null) {
+					varOverrides.put("$dialog_id$", dialogId);
+				} else {
+					varOverrides.put("$dialog_id$", UUID.randomUUID().toString());
+				}
 				NodeList nl = doc.getElementsByTagName("cctools-module");
 				Element e = (Element) nl.item(0);
 				String title = getLocalizedAttribute(e, "title");
@@ -378,15 +384,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 			}
 		}
     }
-    
-    protected void dialogFromModule(String ruleFile, final String pwd) {
-    	dialogFromModule(ruleFile, pwd, null);
-    }
-    
-    protected void dialogFromModule(String ruleFile) {
-    	dialogFromModule(ruleFile, null, null);
-    }
-    
+  
     /**
      * Show action dialog
      * @param nl

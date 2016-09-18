@@ -374,6 +374,11 @@ int do_extract_currentfile(uf,popt_extract_without_path,popt_overwrite,password,
 
         if ((skip==0) && (err==UNZ_OK))
         {
+	    struct stat sb;
+	    if (!stat(write_filename, &sb)) {
+		LOGI(" remove existing file %s\n", write_filename);
+		unlink(write_filename);
+	    }
             fout=fopen64(write_filename,"wb");
 
             /* some zipfile don't contain directory alone before file */

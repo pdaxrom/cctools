@@ -26,6 +26,16 @@ build_subversion() {
 
     # Configure here
 
+    local OPT_ARGS=
+
+    case $TARGET_ARCH in
+    aarch64*|mips64*|x86_64*)
+	;;
+    *)
+	OPT_ARGS="CPPFLAGS=-Dinline=__inline__"
+	;;
+    esac
+
     ${S_DIR}/configure	\
 			--host=${TARGET_ARCH} \
                         --prefix=$TMPINST_DIR \
@@ -33,6 +43,7 @@ build_subversion() {
 			--with-apr-util=$TMPINST_DIR \
 			--with-neon=$TMPINST_DIR \
 			--with-sqlite=$TMPINST_DIR \
+			$OPT_ARGS \
 			|| error "Configure $PKG."
 
 #			--enable-static \

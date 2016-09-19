@@ -53,7 +53,7 @@ if [ "x$SDK_DIR" = "x" ]; then
 fi
 
 if [ "x$MAKEARGS" = "x" ]; then
-    MAKEARGS=-j3
+    MAKEARGS=-j4
 fi
 
 TOPDIR="$PWD"
@@ -703,6 +703,8 @@ build_build_essential_fortran_compact
 build_build_essential_gcc_objc_compact
 build_build_essential_gcc_objc_fortran_compact
 build_build_essential_luajit
+
+build_build_helper
 
 # utils
 build_busybox

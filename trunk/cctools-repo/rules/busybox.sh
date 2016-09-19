@@ -23,7 +23,17 @@ build_busybox() {
 #    mkdir -p $B_DIR
     copysrc $S_DIR  $B_DIR
     cd $B_DIR
-    cp -f ${TOPDIR}/configs/busybox-${PKG_VERSION} .config || error "no config file"
+
+    case $TARGET_ARCH in
+    aarch64*|mips64*|x86_64*)
+	cp -f ${TOPDIR}/configs/busybox-${PKG_VERSION} .config || error "no config file"
+	;;
+    *)
+	patch -p1 < $patch_dir/busybox-$PKG_VERSION-pre21.patch || error "patch"
+	cp -f ${TOPDIR}/configs/busybox-${PKG_VERSION}-pre21 .config || error "no config file"
+	#sed -i -e 's|CONFIG_LFS=y|# CONFIG_LFS is not set|' .config
+	;;
+    esac
 
     if [ "$BUILD_PIE_COMPILER" = "yes" ]; then
 

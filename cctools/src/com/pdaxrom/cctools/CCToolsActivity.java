@@ -1,9 +1,7 @@
 package com.pdaxrom.cctools;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +42,6 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -739,9 +736,11 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     private void loadFile() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
 		String dir = getLastOpenedDir();
-		String fileName = codeEditor.getFileName();
-		if (fileName != null && new File(fileName).getParentFile().exists()) {
-			dir = (new File(fileName)).getParent();
+		if (codeEditor != null) {
+			String fileName = codeEditor.getFileName();
+			if (fileName != null && new File(fileName).getParentFile().exists()) {
+				dir = (new File(fileName)).getParent();
+			}
 		}
 		if (dir == null || !new File(dir).exists()) {
 			dir = Environment.getExternalStorageDirectory().getPath();
@@ -753,47 +752,51 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void saveFile() {
-    	String fileName = codeEditor.getFileName();
-		if (fileName == null || fileName.equals("")) {
-			String dir = getLastOpenedDir();
-			if (fileName != null && new File(dir).getParentFile().exists()) {
-				dir = (new File(fileName)).getParent();
-			}
-			if (dir == null || !new File(dir).exists()) {
-				dir = Environment.getExternalStorageDirectory().getPath();
-			}
-    		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-    		intent.putExtra(FileDialog.START_PATH, dir);
-    		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
-    		startActivityForResult(intent, REQUEST_SAVE);
-		} else {
-			if (codeEditor.saveFile(fileName)) {
-				saveFileEditPos(codeEditor);
-				Toast.makeText(getBaseContext(), getString(R.string.file_saved), Toast.LENGTH_SHORT).show();
-				setLastOpenedDir((new File (fileName)).getParent());
-			} else {
-				Toast.makeText(getBaseContext(), getString(R.string.file_not_saved), Toast.LENGTH_SHORT).show();
-			}
-			if (buildAfterSave) {
-				buildFile(forceTmpVal);
-				buildAfterSave = false;
-			}
-		}    	
+    	if (codeEditor != null) {
+        	String fileName = codeEditor.getFileName();
+    		if (fileName == null || fileName.equals("")) {
+    			String dir = getLastOpenedDir();
+    			if (fileName != null && new File(dir).getParentFile().exists()) {
+    				dir = (new File(fileName)).getParent();
+    			}
+    			if (dir == null || !new File(dir).exists()) {
+    				dir = Environment.getExternalStorageDirectory().getPath();
+    			}
+        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
+        		intent.putExtra(FileDialog.START_PATH, dir);
+        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
+        		startActivityForResult(intent, REQUEST_SAVE);
+    		} else {
+    			if (codeEditor.saveFile(fileName)) {
+    				saveFileEditPos(codeEditor);
+    				Toast.makeText(getBaseContext(), getString(R.string.file_saved), Toast.LENGTH_SHORT).show();
+    				setLastOpenedDir((new File (fileName)).getParent());
+    			} else {
+    				Toast.makeText(getBaseContext(), getString(R.string.file_not_saved), Toast.LENGTH_SHORT).show();
+    			}
+    			if (buildAfterSave) {
+    				buildFile(forceTmpVal);
+    				buildAfterSave = false;
+    			}
+    		}
+    	}
     }
     
     private void saveAsFile() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
 		String dir = getLastOpenedDir();
-		String fileName = codeEditor.getFileName();
-		if (fileName != null && new File(fileName).getParentFile().exists()) {
-			dir = (new File(fileName)).getParent();
+		if (codeEditor != null) {
+			String fileName = codeEditor.getFileName();
+			if (fileName != null && new File(fileName).getParentFile().exists()) {
+				dir = (new File(fileName)).getParent();
+			}
+			if (dir == null || !new File(dir).exists()) {
+				dir = Environment.getExternalStorageDirectory().getPath();
+			}
+			intent.putExtra(FileDialog.START_PATH, dir);
+			intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
+			startActivityForResult(intent, REQUEST_SAVE);
 		}
-		if (dir == null || !new File(dir).exists()) {
-			dir = Environment.getExternalStorageDirectory().getPath();
-		}
-		intent.putExtra(FileDialog.START_PATH, dir);
-		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
-		startActivityForResult(intent, REQUEST_SAVE);    	
     }
     
     private void saveFileEditPos(CodeEditor code) {
@@ -811,23 +814,41 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
 
     private void build(boolean force) {
-//TODO: add force save options to preferences?    	
-//		if (codeEditor.hasChanged() && codeEditor.getText().length() > 0) {
-//			buildAfterSave = true;
-//			forceTmpVal = force;
-//			saveFile();
-//		} else 
-		if (codeEditor.getFileName() == null || codeEditor.getFileName().equals("")) {
+    	if (codeEditor == null || codeEditor.getFileName() == null || codeEditor.getFileName().equals("")) {
 			buildAfterLoad = true;
 			forceTmpVal = force;
 			loadFile();
-		} else
-			buildFile(force);    	
+    	} else if (codeEditor.hasChanged() && codeEditor.getText().length() > 0) {
+			buildAfterSave = true;
+			forceTmpVal = force;
+			saveFile();
+		} else {
+			buildFile(force);
+		}
     }
     
-    private void buildFile(boolean force) {
-    	if (codeEditor == null) {
-    		return;
+    private void buildFile(final boolean force) {
+    	if (codeEditor != null) {
+    		new Thread() {
+    			public void run() {
+    	    		String argv[] = {
+    	        			"build-helper",
+    	        			"--openbuild",
+    	        			Boolean.toString(force),
+    	        			"--buildwindow",
+    	        			Boolean.toString(!force),
+    	        			"--executable",
+    	        			Boolean.toString(force),
+    	        			"--run",
+    	        			Boolean.toString(force),
+    	        			"--runwindow",
+    	        			Boolean.toString(!mPrefs.getBoolean("force_run", true)),
+    	        			codeEditor.getFileName()
+    	        		};
+    	    		
+    	    		system(argv);
+    			}
+    		}.start();
     	}
     }
     
@@ -1028,7 +1049,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	}
 	
     private void warnSaveDialog(final int req) {
-    	if (!codeEditor.hasChanged()) {
+    	if (codeEditor == null || !codeEditor.hasChanged()) {
     		warnSaveRequest(req);
     		return;
     	}
@@ -1124,7 +1145,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 
     	FilenameFilter filter = new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				String lowercaseName = name.toLowerCase();
+				String lowercaseName = name.toLowerCase(getResources().getConfiguration().locale);
 				if (lowercaseName.endsWith(".xml")) {
 					return true;
 				} else {
@@ -1206,7 +1227,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     	});
     }
 
-    //TODO
 	public String getBuiltinVariable(String name) {
 		if (name.contains("$current_file$")) {
 			String file = "";
@@ -1301,9 +1321,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void installOrUpgradeToolchain() {
-		if (!getPrefString("use_package_manager").equals("yes")) {
-			(new RemoveOldToolchainTask()).execute((Void)null);
-		} else if (!getPrefString("toolchain_installed").equals("yes")) {
+		if (!getPrefString("toolchain_installed").equals("yes")) {
 			installToolchainPackage();
 		} else {
 			if (mPrefs.getBoolean("updater", true)) {
@@ -1358,67 +1376,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		.setCancelable(false)
 		.show();
     }
-    
-    private class RemoveOldToolchainTask extends AsyncTask<Void, Void, Void> {
-    	protected void onPreExecute() {
-    		super.onPreExecute();
-    	}
-
-		protected Void doInBackground(Void... params) {
-			final String[] oldPackages = {
-					"cctools-examples-1.00.zip",	"cctools-examples-1.01.zip","cctools-examples-1.02.zip",
-					"cctools-examples-1.03.zip", 	"platform-arm-3.zip",		"platform-arm-8.zip",
-					"platform-mips-14.zip", 		"platform-x86-14.zip",		"toolchain-arm.zip",
-					"platform-arm-14.zip",			"platform-arm-4.zip",		"platform-arm-9.zip",
-					"platform-mips-18.zip",			"platform-x86-18.zip",		"toolchain-mips.zip",
-					"platform-arm-18.zip",			"platform-arm-5.zip",		"platform-common.zip",
-					"platform-mips-9.zip",			"platform-x86-9.zip",		"toolchain-x86.zip" };
-
-			if (getPrefString("use_package_manager").equals("yes")) {
-				return null;
-			}
-			
-			FilenameFilter filter = new FilenameFilter() {
-				public boolean accept(File dir, String name) {
-					String lowercaseName = name.toLowerCase();
-					for (String file: oldPackages) {
-						if (lowercaseName.equals(file + ".list")) {
-							return true;
-						}
-					}
-					return false;
-				}
-			};
-			File dir = new File(getToolchainDir() + PKGS_LISTS_DIR);
-			if (dir.isDirectory()) {
-				for (String fileName: dir.list(filter)) {
-					try {
-						Log.i(TAG, "uninstalling " + dir.getPath() + "/" + fileName);
-						FileInputStream fin = new FileInputStream(dir.getPath() + "/" + fileName);
-						DataInputStream in = new DataInputStream(fin);
-						BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-						String line = "";
-						while((line = reader.readLine()) != null) {
-							Log.i(TAG, "Delete file: " + line);
-							(new File(getToolchainDir() + "/" + line)).delete();
-						}
-						in.close();
-						(new File(dir.getPath() + "/" + fileName)).delete();
-					} catch (Exception e) {
-						Log.e(TAG, "Error during remove files " + e);
-					}
-				}
-			}
-			setPrefString("use_package_manager", "yes");
-			return null;
-		}
-		
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-			installToolchainPackage();
-		}
-    }
-    
+   
 	private void serviceStartStop(final int cmd) {
 		String serviceCmd;
 		if (cmd == SERVICE_START) {

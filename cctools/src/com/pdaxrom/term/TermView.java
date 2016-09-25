@@ -6,7 +6,6 @@ import java.util.List;
 import com.actionbarsherlock.app.ActionBar;
 import com.pdaxrom.utils.CommandLineSupport;
 
-import android.R;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;

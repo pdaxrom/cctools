@@ -211,6 +211,7 @@ public class FlexiDialogActivity extends SherlockActivity {
     	return null;
     }
 
+/*    
     private String getVariable(List<NamedView> views, String name) {
     	for (NamedView view: views) {
     		if (name.contains("@" + view.getName() + "@")) {
@@ -223,6 +224,7 @@ public class FlexiDialogActivity extends SherlockActivity {
     	
     	return name;
     }
+ */
     
     private String getBuiltinVariable(String name) {
     	if (varOverrides != null) {

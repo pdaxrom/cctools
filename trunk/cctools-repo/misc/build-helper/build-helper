@@ -1,5 +1,6 @@
 #!/system/bin/sh
 
+openbuild=false
 native=false
 executable=false
 run=false
@@ -9,7 +10,11 @@ dialogid=""
 
 while true; do
 
-    if [ "$1" = "--native" ]; then
+    if [ "$1" = "--openbuild" ]; then
+	openbuild=$2
+	shift 2
+	continue
+    elif [ "$1" = "--native" ]; then
 	native=$2
 	shift 2
 	continue
@@ -38,6 +43,23 @@ while true; do
     break
 
 done
+
+if [ "$PWD" = "/" -o "$PWD" = "" ]; then
+    cd $(dirname "$1")
+fi
+
+if [ "$openbuild" = true ]; then
+    if [ "$dialogid" = "" ]; then
+	dialogid="$1"
+    fi
+
+    am start $(am 2>&1 | grep -q '\-\-user' && echo '--user 0') -n com.pdaxrom.cctools/.CCToolsActivity \
+	--es type build \
+	--es cmdline "build-helper --native $native --executable $executable --run $run --buildwindow $buildwindow --runwindow $runwindow --dialogid $dialogid $@" \
+	--es workdir "$PWD" \
+	--es name "$dialogid" &>/dev/null
+	exit 0
+fi
 
 src=$1
 
@@ -70,7 +92,7 @@ run_exec() {
 		    --es path ${m}/share/modules/runargs.xml \
 		    --es workdir $PWD \
 		    --es dialogid $dialogid \
-		    --es file ${PWD}/$1 &>/dev/null
+		    --es file $1 &>/dev/null
 		exit 0
 	    fi
 	done

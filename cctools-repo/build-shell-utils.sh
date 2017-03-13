@@ -794,10 +794,10 @@ build_android_shmem
 
 build_SDL2
 
-#exit 0
+exit 0
 
 # Xorg
-if false; then
+if true; then
 build_util_macros
 build_xproto
 build_bigreqsproto

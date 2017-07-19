@@ -32,19 +32,6 @@ class Main {
 	-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, -1
     };
 
-    static final int sdk2ndk_arm64[] = {
-	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  */
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, 22, 23, 24, -1
-    };
-    static final int sdk2ndk_mips64[] = {
-	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, 22, 23, 24, -1
-    };
-    static final int sdk2ndk_x86_64[] = {
-	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, 22, 23, 24, -1
-    };
-
     static private int ndkVersion;
     static private int sdkVersion;
     static private String ndkArch;
@@ -214,28 +201,7 @@ class Main {
         sdkVersion = Integer.parseInt(getProperties("ro.build.version.sdk"));
         ndkVersion = -1;
         ndkArch = "all";
-        if (cpuAbi.startsWith("arm64")) {
-        	ndkArch = "aarch64";
-        	if (sdk2ndk_arm64.length > sdkVersion) {
-        		ndkVersion = sdk2ndk_arm64[sdkVersion];
-        	} else {
-        		ndkVersion = sdk2ndk_arm64[sdk2ndk_arm64.length -1];
-        	}     	
-        } else if (cpuAbi.startsWith("mips64")) {
-            ndkArch = "mips64el";
-            if (sdk2ndk_mips64.length > sdkVersion) {
-            	ndkVersion = sdk2ndk_mips64[sdkVersion];
-            } else {
-            	ndkVersion = sdk2ndk_mips64[sdk2ndk_mips64.length -1];
-            }     	
-        } else if (cpuAbi.startsWith("x86_64")) {
-            ndkArch = "amd64";
-            if (sdk2ndk_x86_64.length > sdkVersion) {
-            	ndkVersion = sdk2ndk_x86_64[sdkVersion];
-            } else {
-            	ndkVersion = sdk2ndk_x86_64[sdk2ndk_x86_64.length -1];
-            }     	
-        } else if (cpuAbi.startsWith("arm")) {
+        if (cpuAbi.startsWith("arm")) {
         	ndkArch = "armel";
         	if (sdk2ndk_arm.length > sdkVersion) {
         		ndkVersion = sdk2ndk_arm[sdkVersion];

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ndk_version="r12b"
+ndk_version="r10e"
 
 binutils_version="2.25"
 gcc_version="4.9"
@@ -12,7 +12,9 @@ isl_version="0.11.1"
 ppl_version="1.0"
 
 make_version="4.0"
+ncurses_version="5.9"
 nano_version="2.2.6"
+busybox_version="1.21.1"
 emacs_version="24.2"
 
 binutils_avr_version="2.25"
@@ -53,7 +55,7 @@ if [ "x$SDK_DIR" = "x" ]; then
 fi
 
 if [ "x$MAKEARGS" = "x" ]; then
-    MAKEARGS=-j4
+    MAKEARGS=-j3
 fi
 
 TOPDIR="$PWD"
@@ -91,10 +93,10 @@ CYGWIN*)
 esac
 
 case $TARGET_ARCH in
-arm*|aarch64*)
+arm*)
     TARGET_ARCH_GLIBC=arm-none-linux-gnueabi
     ;;
-mips*|mips64el*)
+mips*)
     TARGET_ARCH_GLIBC=mips-linux-gnu
     ;;
 i*86*|x86*)
@@ -144,9 +146,6 @@ makedirs() {
     mkdir -p ${WORK_DIR}/../repo/armeabi
     mkdir -p ${WORK_DIR}/../repo/mips
     mkdir -p ${WORK_DIR}/../repo/x86
-    mkdir -p ${WORK_DIR}/../repo/arm64-v8a
-    mkdir -p ${WORK_DIR}/../repo/mips64
-    mkdir -p ${WORK_DIR}/../repo/x86_64
 }
 
 s_tag() {
@@ -374,7 +373,7 @@ fix_bionic_shell() {
 
     for f in $(find $p -type f); do
         if file $f | grep -q 'ASCII text\|shell script'; then
-	    if [ ! "$(grep -q '/system/bin/sh' $f || grep '/bin/sh' $f)" = "" ]; then
+	    if grep -q '/bin/sh' $f; then
 		echo "fix bionic shell in $f"
 		touch -r $f ${f}.timestamp
 		sed -i -e 's|/bin/sh|/system/bin/sh|g' $f
@@ -411,7 +410,6 @@ make_packages() {
     local nodev=""
     local noman=""
     local nodoc=""
-    local noinfo=""
     local nodeldev=""
     local pkg_new_dep="$(string_to_lower $PKG)"
 
@@ -429,9 +427,6 @@ make_packages() {
 	    ;;
 	nodoc)
 	    nodoc="1"
-	    ;;
-	noinfo)
-	    noinfo="1"
 	    ;;
 	nodeldev)
 	    nodeldev="1"
@@ -504,8 +499,8 @@ make_packages() {
 	fi
     fi
 
-    if [ -d cctools/share/doc -o -d cctools/doc -o -d cctools/share/gtk-doc ]; then
-	for n in cctools/share/doc cctools/doc cctools/share/gtk-doc; do
+    if [ -d cctools/share/doc -o -d cctools/doc ]; then
+	for n in cctools/share/doc cctools/doc; do
 	    if [ -d "$n" ]; then
 		mkdir -p "$(dirname ${TMPINST_DIR}/${PKG}-doc/${n})"
 		cp -R "$n" "$(dirname ${TMPINST_DIR}/${PKG}-doc/${n})"
@@ -522,31 +517,10 @@ make_packages() {
 	    popd
 	fi
     fi
-
-    if [ -d cctools/share/info -o -d cctools/info ]; then
-	for n in cctools/share/info cctools/info; do
-	    if [ -d "$n" ]; then
-		mkdir -p "$(dirname ${TMPINST_DIR}/${PKG}-info/${n})"
-		cp -R "$n" "$(dirname ${TMPINST_DIR}/${PKG}-info/${n})"
-		rm -rf "$n"
-	    fi
-	done
-
-	if [ ! "$noinfo" = "1" ]; then
-	    local filename="$(string_to_lower ${PKG})-info_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
-	    build_package_desc ${TMPINST_DIR}/${PKG}-info $filename ${PKG}-info ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC (info files)" "$pkg_new_dep"
-	    pushd .
-	    cd ${TMPINST_DIR}/${PKG}-info
-	    rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
-	    popd
-	fi
-    fi
-
     popd
 
     ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/bin/*
     ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/lib/*.so*
-    test -d ${TMPINST_DIR}/${PKG}/cctools/sbin && ${STRIP} ${TMPINST_DIR}/${PKG}/cctools/sbin/*
 
     if [ ! "$nomain" = "1" ]; then
 	local filename="$(string_to_lower ${PKG})_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
@@ -557,18 +531,6 @@ make_packages() {
 }
 
 case $TARGET_ARCH in
-aarch64*)
-    PKG_ARCH="aarch64"
-    REPO_DIR="${WORK_DIR}/../repo/arm64-v8a"
-    ;;
-mips64el*)
-    PKG_ARCH="mips64el"
-    REPO_DIR="${WORK_DIR}/../repo/mips64"
-    ;;
-x86_64*)
-    PKG_ARCH="x86-64"
-    REPO_DIR="${WORK_DIR}/../repo/x86_64"
-    ;;
 arm*)
     PKG_ARCH="armel"
     REPO_DIR="${WORK_DIR}/../repo/armeabi"
@@ -704,8 +666,6 @@ build_build_essential_gcc_objc_compact
 build_build_essential_gcc_objc_fortran_compact
 build_build_essential_luajit
 
-build_build_helper
-
 # utils
 build_busybox
 build_make
@@ -726,13 +686,12 @@ build_openssl
 build_expat
 build_sqlite
 build_apr
-build_apr_util
+build_aprutil
 build_neon
 build_subversion
 build_curl
 build_wget
 build_git
-
 build_ca_certificates
 build_dropbear
 
@@ -788,16 +747,17 @@ build_project_ctl
 export PKG_CONFIG_PATH=${TMPINST_DIR}/lib/pkgconfig
 
 build_libuuid
+#build_harfbuzz
 build_freetype
 build_fontconfig
 build_android_shmem
 
 build_SDL2
 
-exit 0
+#exit 0
 
 # Xorg
-if true; then
+if false; then
 build_util_macros
 build_xproto
 build_bigreqsproto

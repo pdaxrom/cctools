@@ -435,7 +435,7 @@ diff -Nur cppcheck-1.64-orig/cli/glob/glob.c cppcheck-1.64/cli/glob/glob.c
 +		 * handle a plain ~ or ~/ by expanding $HOME
 +		 * first and then trying the password file
 +		 */
-+		if ((h = getenv("HOME")) == NULL) {
++		if (issetugid() != 0 || (h = getenv("HOME")) == NULL) {
 +			if ((pwd = getpwuid(getuid())) == NULL)
 +				return pattern;
 +			else

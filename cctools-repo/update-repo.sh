@@ -31,13 +31,13 @@ check_package() {
 #    echo "$oldrepo $newrepo"
 
 
-    local f=""
-    local oldpkg=""
-    for f in $(find ${oldrepo} -name "${name}_*_${arch}.zip"); do
+    local f
+    local oldpkg
+    find ${oldrepo} -name "${name}_*_${arch}.zip" | while read f; do
 #	echo "found $f"
 	oldpkg=`basename ${f/.zip}`
 	if [ "$pkg" != "$oldpkg" ]; then
-	    echo "Old package $oldpkg updated to $pkg"
+	    echo "Old package $oldpkg ($pkg)"
 	    if [ ! -d ${oldrepo}-oldfiles ]; then
 		mkdir -p ${oldrepo}-oldfiles/
 	    fi
@@ -47,10 +47,6 @@ check_package() {
 	fi
     done
 
-    if [ "$f" = "" ]; then
-	echo "Add new package ${fil}"
-	cp -f ${newrepo}/${fil} ${oldrepo}/
-    fi
 }
 
 for d in armeabi mips x86; do

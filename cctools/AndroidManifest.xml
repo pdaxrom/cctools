@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pdaxrom.cctools"
-    android:versionCode="22"
-    android:versionName="1.21" >
+    android:versionCode="21"
+    android:versionName="1.20" >
 
     <uses-sdk android:targetSdkVersion="20" android:minSdkVersion="5" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -18,7 +18,6 @@
         <activity
             android:name=".CCToolsActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
@@ -32,11 +31,25 @@
 				<data android:mimeType="text/*" />
 			</intent-filter>
         </activity>
+        <activity android:name="TermActivity"
+            	  android:label="@string/console_name"
+            	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            	  android:windowSoftInputMode="adjustResize" />
+        <activity android:name="BuildActivity"
+            	  android:label="@string/buildwindow_name"
+            	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            	  android:windowSoftInputMode="adjustResize" />
         <activity android:name="com.pdaxrom.utils.FileDialog"
             	  android:label="@string/filebrowser_name"
             	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
    		<activity android:name="Preferences" android:label="@string/preferences" />
         <activity android:name="LauncherNativeActivity">
+			<intent-filter>
+			    <action android:name="com.pdaXrom.cctools.action.RUN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>   		
+        <activity android:name="LauncherConsoleActivity">
 			<intent-filter>
 			    <action android:name="com.pdaXrom.cctools.action.RUN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -48,7 +61,7 @@
         <activity android:name="com.pdaxrom.pkgmanager.PkgManagerActivity"
             	  android:label="@string/pkgmgr_name"
             	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
-        <activity android:name="com.pdaxrom.cctools.ADialog"
+        <activity android:name="com.pdaxrom.cctools.DialogWindow"
             	  android:label="@string/app_name"
             	  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             	  android:theme="@style/Theme.Transparent" />

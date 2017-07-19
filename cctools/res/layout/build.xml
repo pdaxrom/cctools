@@ -8,13 +8,13 @@
         android:id="@+id/ScrollView01"  
       	android:layout_height="fill_parent"   
       	android:layout_width="fill_parent" >
-    	<com.pdaxrom.build.BuildView
-    	    xmlns:app="http://schemas.android.com/apk/res/com.pdaxrom.cctools"    	    
-        	android:id="@+id/buildLog"
-        	android:layout_width="match_parent"
-        	android:layout_height="wrap_content"
-        	android:ems="10"
-        	android:typeface="monospace"
-        	android:textSize="12sp"/>
+    <TextView
+        android:id="@+id/buildLog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:typeface="monospace"
+        android:textSize="12sp">
+    </TextView>
 	</ScrollView>
 </RelativeLayout>

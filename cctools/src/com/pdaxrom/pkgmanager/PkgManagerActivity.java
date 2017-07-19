@@ -101,19 +101,6 @@ public class PkgManagerActivity extends SherlockListActivity {
 	-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, -1
     };
 
-    final int sdk2ndk_arm64[] = {
-	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  */
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, 22, 23, 24, -1
-    };
-    final int sdk2ndk_mips64[] = {
-	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, 22, 23, 24, -1
-    };
-    final int sdk2ndk_x86_64[] = {
-	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, 22, 23, 24, -1
-    };
-
 	private int ndkVersion;
 	private int sdkVersion;
 	private String ndkArch;
@@ -272,28 +259,7 @@ public class PkgManagerActivity extends SherlockListActivity {
         sdkVersion = Build.VERSION.SDK_INT;
         ndkVersion = -1;
         ndkArch = "all";
-        if (Build.CPU_ABI.startsWith("arm64")) {
-        	ndkArch = "aarch64";
-        	if (sdk2ndk_arm64.length > sdkVersion) {
-        		ndkVersion = sdk2ndk_arm64[sdkVersion];
-        	} else {
-        		ndkVersion = sdk2ndk_arm64[sdk2ndk_arm64.length -1];
-        	}     	
-        } else if (Build.CPU_ABI.startsWith("mips64")) {
-            ndkArch = "mips64el";
-            if (sdk2ndk_mips64.length > sdkVersion) {
-            	ndkVersion = sdk2ndk_mips64[sdkVersion];
-            } else {
-            	ndkVersion = sdk2ndk_mips64[sdk2ndk_mips64.length -1];
-            }     	
-        } else if (Build.CPU_ABI.startsWith("x86_64")) {
-            ndkArch = "amd64";
-            if (sdk2ndk_x86_64.length > sdkVersion) {
-            	ndkVersion = sdk2ndk_x86_64[sdkVersion];
-            } else {
-            	ndkVersion = sdk2ndk_x86_64[sdk2ndk_x86_64.length -1];
-            }     	
-        } else if (Build.CPU_ABI.startsWith("arm")) {
+        if (Build.CPU_ABI.startsWith("arm")) {
         	ndkArch = "armel";
         	if (sdk2ndk_arm.length > sdkVersion) {
         		ndkVersion = sdk2ndk_arm[sdkVersion];
@@ -935,14 +901,6 @@ public class PkgManagerActivity extends SherlockListActivity {
 		if (bootClassPath == null) {
 			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
 		}
-
-		String libSuffix = "/lib";
-		
-		if (Build.CPU_ABI.startsWith("arm64") || Build.CPU_ABI.startsWith("mips64")
-				|| Build.CPU_ABI.startsWith("x86_64")) {
-			libSuffix = "/lib64";
-		}
-
 		String[] envp = {
 				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
 				"PATH=" + cctoolsDir + "/bin:" + cctoolsDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
@@ -954,7 +912,7 @@ public class PkgManagerActivity extends SherlockListActivity {
 				"BOOTCLASSPATH=" + bootClassPath,
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system" + libSuffix + ":/vendor" + libSuffix,
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system/lib:/vendor/lib",
 				"HOME=" + cctoolsDir + "/home",
 				"SHELL=" + getShell(),
 				"TERM=xterm",

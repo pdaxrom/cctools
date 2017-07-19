@@ -15,15 +15,6 @@ build_sdktools() {
 
     local OPTS
     case $TARGET_ARCH in
-    aarch64*)
-	OPTS="CPU=aarch64"
-	;;
-    mips64*)
-	OPTS="CPU=aarch64"
-	;;
-    x86_64*)
-	OPTS="CPU=x86_64"
-	;;
     arm*)
 	OPTS="CPU=arm"
 	;;

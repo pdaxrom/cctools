@@ -11,10 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,7 +36,6 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -66,7 +62,6 @@ public class FlexiDialogActivity extends SherlockActivity {
 
 	private Context context = this;
 	private FlexiDialogInterface flexiDialogInterface = null;
-	private Map <String, String> varOverrides = null;
 	
     List<NamedView> namedViews = null;
     private int fileSelectorId;
@@ -211,7 +206,6 @@ public class FlexiDialogActivity extends SherlockActivity {
     	return null;
     }
 
-/*    
     private String getVariable(List<NamedView> views, String name) {
     	for (NamedView view: views) {
     		if (name.contains("@" + view.getName() + "@")) {
@@ -224,18 +218,8 @@ public class FlexiDialogActivity extends SherlockActivity {
     	
     	return name;
     }
- */
     
     private String getBuiltinVariable(String name) {
-    	if (varOverrides != null) {
-    		for (Map.Entry<String, String> entry: varOverrides.entrySet()) {
-    			String key = entry.getKey();
-    			String value = entry.getValue();
-    			Log.i(TAG, "Override variable " + key + " with " + value);
-    			name = name.replace(key, value);
-    		}
-    	}
-    	
     	if (flexiDialogInterface != null) {
     		name = flexiDialogInterface.getBuiltinVariable(name);
     	}
@@ -291,21 +275,6 @@ public class FlexiDialogActivity extends SherlockActivity {
 		return value;
     }
     
-    private String getValueFromView(View view) {
-    	if (view != null) {
-        	if (view instanceof EditText) {
-        		return ((EditText) view).getText().toString();
-        	} else if (view instanceof CheckBox) {
-        		if (((CheckBox) view).isChecked()) {
-        			return "true";
-        		} else {
-        			return "false";
-        		}
-        	}
-    	}
-    	return null;
-    }
-    
     /**
      * Show module actions
      * @param nl NodeList
@@ -346,33 +315,14 @@ public class FlexiDialogActivity extends SherlockActivity {
     /**
      * Create Dialog popup window from xml template
      * @param ruleFile xml template file
-     * @param pwd current working directory (null for CCTools last opened directory)
-     * @param file current file (null for CCTools current opened file)
+     * @param lastOpenedDir last opened directory
      */
-    protected void dialogFromModule(String ruleFile, final String pwd, final String file, final String dialogId) {
+    protected void dialogFromModule(String ruleFile, final String lastOpenedDir) {
 		XMLParser xmlParser = new XMLParser();
 		String xml = xmlParser.getXmlFromFile(ruleFile);
 		if (xml != null) {
 			Document doc = xmlParser.getDomElement(xml);
 			if (doc != null) {
-				if (varOverrides == null) {
-					varOverrides = new HashMap<String, String>();
-				}
-				if (pwd != null) {
-					varOverrides.put("$current_dir$", pwd);
-				} else {
-					varOverrides.remove("$current_dir$");
-				}
-				if (file != null) {
-					varOverrides.put("$current_file$", file);
-				} else {
-					varOverrides.remove("$current_file$");
-				}
-				if (dialogId != null) {
-					varOverrides.put("$dialog_id$", dialogId);
-				} else {
-					varOverrides.put("$dialog_id$", UUID.randomUUID().toString());
-				}
 				NodeList nl = doc.getElementsByTagName("cctools-module");
 				Element e = (Element) nl.item(0);
 				String title = getLocalizedAttribute(e, "title");
@@ -386,7 +336,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 			}
 		}
     }
-  
+    
     /**
      * Show action dialog
      * @param nl
@@ -422,23 +372,6 @@ public class FlexiDialogActivity extends SherlockActivity {
 
 				row.addView(view);
 				row.addView(edit);
-				table.addView(row);
-			} else if (ne.getAttribute("type").equals("checkbox")) {
-				TableRow row = new TableRow(context);
-				
-				TextView view = new TextView(context);
-				view.setText(getBuiltinVariable(getLocalizedAttribute(ne, "title")));
-				//view.setHint(getBuiltinVariable(getLocalizedAttribute(ne, "hint")));
-				
-				CheckBox check = new CheckBox(context);
-				
-				String value = getPrefString(title + "@" + ne.getAttribute("name") + "@");
-				check.setChecked(Boolean.valueOf(value));
-				
-				namedViews.add(new NamedView(check, ne.getAttribute("name")));
-				
-				row.addView(check);
-				row.addView(view);
 				table.addView(row);
 			} else if (ne.getAttribute("type").equals("dirpath") || ne.getAttribute("type").equals("filepath")) {
 				TableRow row = new TableRow(context);
@@ -531,10 +464,14 @@ public class FlexiDialogActivity extends SherlockActivity {
 			public void onClick(DialogInterface dialog, int which) {
 				if (exec.length() == 0) {
 					Intent intent = null;
-					if (intentName.contentEquals("CCToolsActivity")) {
-						intent = new Intent(FlexiDialogActivity.this, CCToolsActivity.class);
+					if (intentName.contentEquals("BuildActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, BuildActivity.class);
+					} else if (intentName.contentEquals("TermActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, TermActivity.class);
 					} else if (intentName.contentEquals("NativeActivity")) {
 						intent = new Intent(FlexiDialogActivity.this, NativeActivity.class);
+					} else if (intentName.contentEquals("LauncherConsoleActivity")) {
+						intent = new Intent(FlexiDialogActivity.this, LauncherConsoleActivity.class);
 					} else if (intentName.contentEquals("LauncherNativeActivity")) {
 						intent = new Intent(FlexiDialogActivity.this, LauncherNativeActivity.class);
 					}
@@ -549,10 +486,11 @@ public class FlexiDialogActivity extends SherlockActivity {
 						
 				    	for (NamedView view: namedViews) {
 				    		if (value.contains("@" + view.getName() + "@")) {
-				    			value = value.replace("@" + view.getName() + "@", getValueFromView(view.getView()));
-				    			if (view.getView() != null) {
-				    				setPrefString(title + "@" + view.getName() + "@", getValueFromView(view.getView()));
-				    			}
+								EditText edit = (EditText) view.getView();
+								if (edit != null) {
+					    			value = value.replace("@" + view.getName() + "@", edit.getText().toString());
+					    			setPrefString(title + "@" + view.getName() + "@", edit.getText().toString());
+								}
 				    		}
 				    	}
 						
@@ -580,9 +518,10 @@ public class FlexiDialogActivity extends SherlockActivity {
 					for (int i = 0; i < argv.length; i++) {
 						if (argv[i].startsWith("@") && argv[i].endsWith("@")) {
 							String var = argv[i].substring(1, argv[i].length() - 1);
-							argv[i] = getValueFromView(getNamedView(namedViews, var));
-							if (getNamedView(namedViews, var) != null) {
-				    			setPrefString(title + "@" + var + "@", argv[i]);
+							EditText edit = (EditText) getNamedView(namedViews, var);
+							if (edit != null) {
+								argv[i] = edit.getText().toString();
+				    			setPrefString(title + "@" + var + "@", edit.getText().toString());
 							}
 						} else {
 							argv[i] = getBuiltinVariable(argv[i]);
@@ -621,14 +560,6 @@ public class FlexiDialogActivity extends SherlockActivity {
 		if (bootClassPath == null) {
 			bootClassPath = "/system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar"; 
 		}
-
-		String libSuffix = "/lib";
-		
-		if (Build.CPU_ABI.startsWith("arm64") || Build.CPU_ABI.startsWith("mips64")
-				|| Build.CPU_ABI.startsWith("x86_64")) {
-			libSuffix = "/lib64";
-		}
-
 		String[] envp = {
 				"TMPDIR=" + Environment.getExternalStorageDirectory().getPath(),
 				"PATH=" + cctoolsDir + "/bin:" + cctoolsDir + "/sbin:/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin",
@@ -640,7 +571,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 				"BOOTCLASSPATH=" + bootClassPath,
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system" + libSuffix + ":/vendor" + libSuffix,
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system/lib:/vendor/lib",
 				"HOME=" + cctoolsDir + "/home",
 				"SHELL=" + getShell(),
 				"TERM=xterm",

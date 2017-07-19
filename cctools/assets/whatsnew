@@ -1,6 +1,6 @@
 CCTools
-- Added support for Android 24.
+- Added support for NDK 24.
 
 Repository
-- Added SDK 24.
+- Added NDK 24.
 - GCC updated to 4.9

@@ -1,9 +1,9 @@
-build_expat() {
-    PKG=expat
-    PKG_VERSION=2.1.0
-    PKG_DESC="Expat is an XML parser library written in C. It is a stream-oriented parser in which an application registers handlers for things the parser might find in the XML document (like start tags)."
-    PKG_URL=http://downloads.sourceforge.net/project/expat/expat/$PKG_VERSION/$PKG-$PKG_VERSION.tar.gz
-    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.gz
+build_aprutil() {
+    PKG=apr-util
+    PKG_DESC="The mission of the Apache Portable Runtime (APR) project is to create and maintain software libraries that provide a predictable and consistent interface to underlying platform-specific implementations."
+    PKG_VERSION=1.5.3
+    PKG_URL=http://www.eu.apache.org/dist/apr/$PKG-$PKG_VERSION.tar.bz2
+    O_FILE=$SRC_PREFIX/$PKG/$PKG-$PKG_VERSION.tar.bz2
     S_DIR=$src_dir/$PKG-$PKG_VERSION
     B_DIR=$build_dir/$PKG
 
@@ -12,13 +12,13 @@ build_expat() {
     banner "Build $PKG"
 
     pushd .
-    mkdir -p $SRC_PREFIX/$PKG
-    test -e $O_FILE || wget $PKG_URL -O $O_FILE || error "download $PKG_URL"
 
-    tar zxf $O_FILE -C $src_dir || error "tar zxf $O_FILE"
+    download $PKG_URL $O_FILE
+
+    unpack $src_dir $O_FILE
 
     cd $S_DIR
-#    patch -p1 < $patch_dir/$PKG-$PKG_VERSION.patch || error "patch"
+    #patch -p1 < $patch_dir/$PKG-$PKG_VERSION.patch || error "patch"
 
 #    mkdir -p $B_DIR
     copysrc $S_DIR  $B_DIR
@@ -45,7 +45,10 @@ build_expat() {
     apr_cv_type_rwlock_t=yes \
     apr_cv_gai_addrconfig=yes \
     apr_cv_mutex_recursive=yes \
-	./configure --host=$TARGET_ARCH --prefix=$TMPINST_DIR --disable-shared --enable-static || error "configure"
+	./configure --host=$TARGET_ARCH --prefix=$TMPINST_DIR \
+	--with-apr=$TMPINST_DIR --with-openssl=$TMPINST_DIR \
+	--with-sqlite3=$TMPINST_DIR --with-expat=$TMPINST_DIR \
+	--disable-shared --enable-static || error "configure"
 
     $MAKE $MAKEARGS || error "make"
 

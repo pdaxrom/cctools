@@ -35,7 +35,7 @@ build_libX11() {
                         --prefix=$TMPINST_DIR \
 			|| error "Configure $PKG."
 
-    $MAKE $MAKEARGS HOST_CC="gcc -I${S_DIR}/include" || error "make $MAKEARGS"
+    $MAKE $MAKEARGS || error "make $MAKEARGS"
 
     $MAKE install || error "make install"
 

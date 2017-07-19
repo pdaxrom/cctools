@@ -1,11 +1,17 @@
 package com.pdaxrom.cctools;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.BindException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +25,6 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.pdaxrom.build.BuildView;
-import com.pdaxrom.build.BuildViewInterface;
 import com.pdaxrom.editor.CodeEditor;
 import com.pdaxrom.editor.CodeEditorInterface;
 import com.pdaxrom.pkgmanager.PkgManagerActivity;
@@ -29,8 +33,6 @@ import com.pdaxrom.utils.LogItem;
 import com.pdaxrom.utils.SelectionMode;
 import com.pdaxrom.utils.Utils;
 import com.pdaxrom.utils.XMLParser;
-import com.pdaxrom.term.TermView;
-import com.pdaxrom.term.TermViewInterface;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -42,6 +44,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -74,8 +77,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 								implements ActionBar.TabListener,
 											OnSharedPreferenceChangeListener,
 											CodeEditorInterface,
-											TermViewInterface,
-											BuildViewInterface,
 											FlexiDialogInterface {
 	private Context context = this;
 	public static final String SHARED_PREFS_NAME = "cctoolsSettings";
@@ -99,14 +100,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	private View buttBar;
 	
 	private ViewFlipper flipper;
-	private List<View> tabViews = null;	
-	private CodeEditor codeEditor = null;
-	private TermView termView = null;
-	private BuildView buildView = null;
-	
-	private static final int TAB_EDITOR = 1;
-	private static final int TAB_TERMINAL = 2;
-	private static final int TAB_BUILD = 3;
+	private List<CodeEditor> editors = null;	
+	private CodeEditor codeEditor;
 	
 	private static final int REQUEST_OPEN = 1;
 	private static final int REQUEST_SAVE = 2;
@@ -129,6 +124,10 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	private int showFileLine;
 	private int showFilePos;
 	
+	private Thread dialogServiceThread;
+	private ServerSocket dialogServerSocket;
+	public static Socket dialogServiceSocket;
+
 	private static final int SERVICE_STOP = 0;
 	private static final int SERVICE_START = 1;
 	
@@ -144,7 +143,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         
         mPrefs = getSharedPreferences(SHARED_PREFS_NAME, 0);
 
-        tabViews = new ArrayList<View>();
+        editors = new ArrayList<CodeEditor>();
         flipper = (ViewFlipper) findViewById(R.id.flipper);
 
         int tabsLoaded = loadTabs();
@@ -208,43 +207,34 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         terminalButton = (ImageButton) findViewById(R.id.terminalButton);
         terminalButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				addTab(TAB_TERMINAL);
-				newTitle(getString(R.string.console_name));
+				runTerminal();
 			}
         });
         
         undoButton = (ImageButton) findViewById(R.id.undoButton);
         undoButton.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
-        		if (codeEditor != null) {
-        			codeEditor.undo();
-        		}
+        		codeEditor.undo();
         	}
         });
 
         redoButton = (ImageButton) findViewById(R.id.redoButton);
         redoButton.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
-        		if (codeEditor != null) {
-        			codeEditor.redo();
-        		}
+        		codeEditor.redo();
         	}
         });
         
         buttBar = (View) findViewById(R.id.toolButtonsBar);
 
+        dialogServiceThread = dialogService(13527);
         serviceStartStop(SERVICE_START);
 
         mPrefs.registerOnSharedPreferenceChangeListener(this);
         onSharedPreferenceChanged(mPrefs, null);
-        
-        onNewIntent(getIntent());
-    }
-    
-    protected void onNewIntent(Intent intent) {
-    	Log.i(TAG, "onNewIntent !!!!!!!!!!");
 
         // Get intent, action and MIME type
+        Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
 
@@ -255,78 +245,32 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
             	Uri uri = intent.getData();
             	String fileName = uri.getPath();
             	Log.i(TAG, "Load external file " + fileName);
-            	if (!findAndShowTab(TAB_EDITOR, fileName)) {
-                	addTab(TAB_EDITOR);
+            	if (!findAndShowEditorTab(fileName)) {
+                	if (tabsLoaded != 0) {
+                		addEditorTab();
+                	}
                 	if (codeEditor.loadFile(fileName)) {
         				loadFileEditPos(codeEditor);
         				newTitle(new File(fileName).getName());
                 	}
             	}
             }
-        } else {
-            type = intent.getStringExtra("type");
-            
-            Log.w(TAG, "type = " + type);
-            
-            if (type != null) {
-                if (type.contentEquals("build")) {
-                	String cmdline = intent.getStringExtra("cmdline");
-                	String workDir = intent.getStringExtra("workdir");
-                	String name = intent.getStringExtra("name");
-                	Log.i(TAG, "BUILD NAME " + name);
-                	if (cmdline != null) {
-                		if (!findAndShowTab(TAB_BUILD, name)) {
-                			addTab(TAB_BUILD);
-                			buildView.setName(name);
-                		}
-                		buildView.start(cmdline, workDir, getToolchainDir() + "/cctools", getPackageResourcePath(), getTempDir());
-                	}
-                } else if (type.contentEquals("module")) {
-                	String path = intent.getStringExtra("path");
-                	String workdir = intent.getStringExtra("workdir");
-                	String file = intent.getStringExtra("file");
-                	String uuid = intent.getStringExtra("dialogid");
-                	
-                	Log.i(TAG, "module " + path + " " + workdir + " " + file);
-                	
-                	dialogFromModule(path, workdir, file, uuid);
-                } else if (type.contentEquals("terminal")) {
-                	String cmdline = intent.getStringExtra("cmdline");
-                	String workDir = intent.getStringExtra("workdir");
-                	String title = intent.getStringExtra("title");
-                	if (title == null) {
-                		title = getString(R.string.console_name);
-                	}
-                	if (cmdline != null) {
-                		Log.i(TAG, "CMDLINE = " + cmdline);
-                		addTerminalTab(cmdline, workDir);
-        				newTitle(title);
-                	}                	
-                }
-            }
         }
     }
     
-    private void updateEditorPrefs(SharedPreferences prefs, View tab) {
-    	if (tab instanceof CodeEditor) {
-    		CodeEditor editor = (CodeEditor) tab;
-    		editor.setTextSize(Float.valueOf(prefs.getString("fontsize", "12")));
-    		editor.showSyntax(prefs.getBoolean("syntax", true));
-    		editor.drawLineNumbers(prefs.getBoolean("drawLineNumbers", true));
-    		editor.drawGutterLine(prefs.getBoolean("drawLineNumbers", true));
-    		editor.setAutoPair(prefs.getBoolean("autopair", true));
-    		editor.setAutoIndent(prefs.getBoolean("autoindent", true));
-    	} else if (tab instanceof TermView) {
-    		TermView termView = (TermView) tab;
-    		termView.setDensity(getResources().getDisplayMetrics());
-            termView.setTextSize(Integer.valueOf(mPrefs.getString("console_fontsize", "12")));
-    	}
+    private void updateEditorPrefs(SharedPreferences prefs, CodeEditor editor) {
+		editor.setTextSize(Float.valueOf(prefs.getString("fontsize", "12")));
+		editor.showSyntax(prefs.getBoolean("syntax", true));
+		editor.drawLineNumbers(prefs.getBoolean("drawLineNumbers", true));
+		editor.drawGutterLine(prefs.getBoolean("drawLineNumbers", true));
+		editor.setAutoPair(prefs.getBoolean("autopair", true));
+		editor.setAutoIndent(prefs.getBoolean("autoindent", true));    	
     }
     
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		Log.i(TAG, "onSharedPreferenceChanged()");
-		for (View tab: tabViews) {
-			updateEditorPrefs(prefs, tab);
+		for (CodeEditor editor: editors) {
+			updateEditorPrefs(prefs, editor);
 		}
 		if (prefs.getBoolean("showToolBar", true)) {
 			buttBar.setVisibility(View.VISIBLE);
@@ -339,26 +283,29 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		saveTabs();
         serviceStartStop(SERVICE_STOP);
 
+        if (dialogServiceThread.isAlive()) {
+			Log.i(TAG, "Stop dialog service");
+			dialogServiceThread.interrupt();
+		}
+		if ((dialogServerSocket != null) && 
+			(!dialogServerSocket.isClosed())) {
+			try {
+				dialogServerSocket.close();
+			} catch (IOException e) {
+				Log.e(TAG, "Error close dialogServerSocket " + e);
+			}
+		}
+		
 		Log.i(TAG, "Clean temp directory");
 		Utils.deleteDirectory(new File(getToolchainDir() + "/tmp"));
 		super.onDestroy();
 	}
 
 	public void onBackPressed() {
-		if (termView != null) {
-			if (termView.isAlive()) {
-				termView.hangup();
-				
-				return;
-			}
-		}
 		boolean hasChanged = false;
 		for (int i = 0; i < flipper.getChildCount(); i++) {
-			CodeEditor code = (CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor);
-			if (code != null) {
-				if (code.hasChanged()) {
-					hasChanged = true;
-				}
+			if (((CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor)).hasChanged()) {
+				hasChanged = true;
 			}
 		}
 		if (hasChanged) {
@@ -387,14 +334,10 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 			searchDialog();
 			break;
 		case TEXT_UNDO:
-			if (codeEditor != null) {
-				codeEditor.undo();
-			}
+			codeEditor.undo();
 			break;
 		case TEXT_REDO:
-			if (codeEditor != null) {
-				codeEditor.redo();
-			}
+			codeEditor.redo();
 			break;
 		default:
 			return super.onContextItemSelected(item);			
@@ -430,26 +373,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         		saveAsFile();
         		break;
         	case R.id.item_close:
-        		if (codeEditor != null) {
-        			warnSaveDialog(WARN_SAVE_AND_CLOSE);
-        			break;
-        		} else if (termView != null) {
-        			if (termView.isAlive()) {
-        				termView.hangup();
-        			}
-        			termView.stop();
-        		} else if (buildView != null) {
-        			if (buildView.isRunning()) {
-        				buildView.stop();
-        			}
-        			
-        		}
-    			int i = flipper.getDisplayedChild();
-    			flipper.removeViewAt(i);
-    			getSupportActionBar().removeTabAt(i);				
-    			if (flipper.getChildCount() == 0) {
-    				finish();
-    			}
+        		warnSaveDialog(WARN_SAVE_AND_CLOSE);
         		break;
         	case R.id.item_run:
         		warnSaveDialog(WARN_SAVE_AND_BUILD_FORCE);
@@ -461,8 +385,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         		showLog();
         		break;
         	case R.id.item_terminal:
-        		addTab(TAB_TERMINAL);
-				newTitle(getString(R.string.console_name));
+        		runTerminal();
         		break;
         	case R.id.item_pkgmgr:
         		packageManager();
@@ -480,14 +403,10 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
         		searchDialog();
         		break;
         	case TEXT_UNDO:
-        		if (codeEditor != null) {
-        			codeEditor.undo();
-        		}
+        		codeEditor.undo();
         		break;
         	case TEXT_REDO:
-        		if (codeEditor != null) {
-        			codeEditor.redo();
-        		}
+        		codeEditor.redo();
         		break;
         	case R.id.item_modules:
         		showModules();
@@ -497,11 +416,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
 
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-        Log.i(TAG, "onTabSelected ");
 		flipper.setDisplayedChild(tab.getPosition());
         codeEditor = (CodeEditor) flipper.getChildAt(tab.getPosition()).findViewById(R.id.codeEditor);
-        termView = (TermView) flipper.getChildAt(tab.getPosition()).findViewById(R.id.emulatorView);
-        buildView = (BuildView) flipper.getChildAt(tab.getPosition()).findViewById(R.id.buildLog);
 	}
 
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
@@ -525,14 +441,6 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		}
 	}
 
-	public void titleHasChanged(ActionBar.Tab tab, String title) {
-//		if (getSupportActionBar().getSelectedTab().getText() == null) {
-//			return;
-//		}
-//		Log.i(TAG, "New term title " + title);
-		tab.setText(title);
-	}
-
     private int loadTabs() {
 	    SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
 	    int total = settings.getInt("TabsCount", 0);
@@ -545,7 +453,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	    			newFile();
 	    		} else {
 	    			if (new File(fileName).exists()) {
-		    			addTab(TAB_EDITOR);
+		    			addEditorTab();
 		            	if (codeEditor.loadFile(fileName)) {
 		    				loadFileEditPos(codeEditor);
 		    				newTitle(new File(fileName).getName());
@@ -576,133 +484,42 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 			editor.putInt("CurrentTab", flipper.getDisplayedChild());
 		}
 		for (int i = 0; i < flipper.getChildCount(); i++) {
-			CodeEditor code = (CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor);
-			if (code != null) {
-				String fileName = code.getFileName();
-				if (fileName == null) {
-					fileName = "";
-				} else {
-					saveFileEditPos(code);				
-				}
-				editor.putString("TabN" + i, fileName);
+			CodeEditor ce = ((CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor));
+			String fileName = ce.getFileName();
+			if (fileName == null) {
+				fileName = "";
 			} else {
-				TermView term = (TermView) flipper.getChildAt(i).findViewById(R.id.emulatorView);
-				if (term != null) {
-					if (term.isAlive()) {
-						term.hangup();
-					}
-					term.stop();
-				}
+				saveFileEditPos(ce);				
 			}
+			editor.putString("TabN" + i, fileName);
 		}
 		editor.commit();
     }
     
-    private boolean findAndShowTab(int type, String newName) {
-    	if (newName != null) {
-        	for (int i = 0; i < flipper.getChildCount(); i++) {
-        		String name;
-        		if (type == TAB_EDITOR) {
-            		CodeEditor code = (CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor);
-            		if (code != null) {
-                		name = code.getFileName();
-            		} else {
-            			continue;
-            		}
-        		} else if (type == TAB_BUILD) {
-        			BuildView build = (BuildView) flipper.getChildAt(i).findViewById(R.id.buildLog);
-        			if (build != null) {
-        				name = build.getName();
-        			} else {
-        				continue;
-        			}
-        		} else {
-        			break;
-        		}
-        		if (name != null && name.equals(newName)) {
-        			getSupportActionBar().setSelectedNavigationItem(i);
-        			return true;
-        		}
-        	}
+    private boolean findAndShowEditorTab(String filename) {
+    	for (int i = 0; i < flipper.getChildCount(); i++) {
+    		CodeEditor e = (CodeEditor) flipper.getChildAt(i).findViewById(R.id.codeEditor);
+    		String name = e.getFileName();
+    		if (name != null && name.equals(filename)) {
+    			getSupportActionBar().setSelectedNavigationItem(i);
+    			return true;
+    		}
     	}
     	return false;
     }
     
-    private void addTab(int type) {
-    	TermView term = null;
-    	BuildView build = null;
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (type == TAB_EDITOR) {
-        	View view = inflater.inflate(R.layout.editor, flipper, false);
-            flipper.addView(view);
-        	
-            CodeEditor code = (CodeEditor) view.findViewById(R.id.codeEditor);
-            updateEditorPrefs(mPrefs, code);
-            code.setCodeEditorInterface(this);
-            tabViews.add(code);
-            registerForContextMenu(code);
-        } else if (type == TAB_TERMINAL) {
-    		String workDir = getToolchainDir() + "/cctools/home";
-    		if (codeEditor != null) {
-        		String fileName = codeEditor.getFileName();
-        		if (fileName != null && (new File(fileName)).exists()) {
-        			workDir = (new File(fileName)).getParentFile().getAbsolutePath();
-        		}
-    		}
-    		
-        	View view = inflater.inflate(R.layout.term, flipper, false);
-        	flipper.addView(view);
-        	
-        	term = (TermView) view.findViewById(R.id.emulatorView);
-        	tabViews.add(term);
-//        	term.setTermViewInterface(this, tab);
-        	term.start("-" + getShell(), workDir, getToolchainDir() + "/cctools");
-        	updateEditorPrefs(mPrefs, term);
-        	//registerForContextMenu(tabView);
-        } else if (type == TAB_BUILD) {
-        		View view = inflater.inflate(R.layout.build, flipper, false);
-        		flipper.addView(view);
-        		
-        		build = (BuildView) view.findViewById(R.id.buildLog);
-        		tabViews.add(build);
-        		updateEditorPrefs(mPrefs, build);
-        }
-
+    private void addEditorTab() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);        
+        flipper.addView(inflater.inflate(R.layout.editor, null));
+        codeEditor = (CodeEditor) flipper.getChildAt(flipper.getChildCount() - 1).findViewById(R.id.codeEditor);
+        updateEditorPrefs(mPrefs, codeEditor);
+        codeEditor.setCodeEditorInterface(this);
+        editors.add(codeEditor);
+        registerForContextMenu(codeEditor);  
         ActionBar.Tab tab = getSupportActionBar().newTab();
         tab.setTabListener(this);
         getSupportActionBar().addTab(tab);
         getSupportActionBar().selectTab(tab);
-        
-        switch(type) {
-        case TAB_TERMINAL:
-        	term.setTermViewInterface(this, tab);
-        	break;
-        case TAB_BUILD:
-        	build.setInterface(this, tab);
-        	break;
-        }
-    }
-    
-    private void addTerminalTab(String cmdline, String workDir) {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-    	View view = inflater.inflate(R.layout.term, flipper, false);
-    	flipper.addView(view);
-    	
-    	TermView term = (TermView) view.findViewById(R.id.emulatorView);
-    	tabViews.add(term);
-    	if (workDir == null) {
-    		workDir = getToolchainDir() + "/cctools/home";
-    	}
-    	term.start(cmdline, workDir, getToolchainDir() + "/cctools");
-    	updateEditorPrefs(mPrefs, term);
-    	
-        ActionBar.Tab tab = getSupportActionBar().newTab();
-        tab.setTabListener(this);
-        getSupportActionBar().addTab(tab);
-        getSupportActionBar().selectTab(tab);
-        
-        term.setTermViewInterface(this, tab);        	
     }
     
     private String getLastOpenedDir() {
@@ -719,13 +536,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void newFile() {
-    	addTab(TAB_EDITOR);
-        if (codeEditor == null) {
-        	Log.w(TAG, "new file codeEditor == null");
-        } else {
-        	Log.w(TAG, "new file codeEditor !!!");
-        }
-
+    	addEditorTab();
 		newTitle(getString(R.string.new_file));
 		buildAfterSave = false;
 		buildAfterLoad = false;
@@ -736,11 +547,9 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     private void loadFile() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
 		String dir = getLastOpenedDir();
-		if (codeEditor != null) {
-			String fileName = codeEditor.getFileName();
-			if (fileName != null && new File(fileName).getParentFile().exists()) {
-				dir = (new File(fileName)).getParent();
-			}
+		String fileName = codeEditor.getFileName();
+		if (fileName != null && new File(fileName).getParentFile().exists()) {
+			dir = (new File(fileName)).getParent();
 		}
 		if (dir == null || !new File(dir).exists()) {
 			dir = Environment.getExternalStorageDirectory().getPath();
@@ -752,104 +561,136 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void saveFile() {
-    	if (codeEditor != null) {
-        	String fileName = codeEditor.getFileName();
-    		if (fileName == null || fileName.equals("")) {
-    			String dir = getLastOpenedDir();
-    			if (fileName != null && new File(dir).getParentFile().exists()) {
-    				dir = (new File(fileName)).getParent();
-    			}
-    			if (dir == null || !new File(dir).exists()) {
-    				dir = Environment.getExternalStorageDirectory().getPath();
-    			}
-        		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-        		intent.putExtra(FileDialog.START_PATH, dir);
-        		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
-        		startActivityForResult(intent, REQUEST_SAVE);
-    		} else {
-    			if (codeEditor.saveFile(fileName)) {
-    				saveFileEditPos(codeEditor);
-    				Toast.makeText(getBaseContext(), getString(R.string.file_saved), Toast.LENGTH_SHORT).show();
-    				setLastOpenedDir((new File (fileName)).getParent());
-    			} else {
-    				Toast.makeText(getBaseContext(), getString(R.string.file_not_saved), Toast.LENGTH_SHORT).show();
-    			}
-    			if (buildAfterSave) {
-    				buildFile(forceTmpVal);
-    				buildAfterSave = false;
-    			}
-    		}
-    	}
-    }
-    
-    private void saveAsFile() {
-		Intent intent = new Intent(getBaseContext(), FileDialog.class);
-		String dir = getLastOpenedDir();
-		if (codeEditor != null) {
-			String fileName = codeEditor.getFileName();
-			if (fileName != null && new File(fileName).getParentFile().exists()) {
+    	String fileName = codeEditor.getFileName();
+		if (fileName == null || fileName.equals("")) {
+			String dir = getLastOpenedDir();
+			if (fileName != null && new File(dir).getParentFile().exists()) {
 				dir = (new File(fileName)).getParent();
 			}
 			if (dir == null || !new File(dir).exists()) {
 				dir = Environment.getExternalStorageDirectory().getPath();
 			}
-			intent.putExtra(FileDialog.START_PATH, dir);
-			intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
-			startActivityForResult(intent, REQUEST_SAVE);
-		}
+    		Intent intent = new Intent(getBaseContext(), FileDialog.class);
+    		intent.putExtra(FileDialog.START_PATH, dir);
+    		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
+    		startActivityForResult(intent, REQUEST_SAVE);
+		} else {
+			if (codeEditor.saveFile(fileName)) {
+				saveFileEditPos(codeEditor);
+				Toast.makeText(getBaseContext(), getString(R.string.file_saved), Toast.LENGTH_SHORT).show();
+				setLastOpenedDir((new File (fileName)).getParent());
+			} else {
+				Toast.makeText(getBaseContext(), getString(R.string.file_not_saved), Toast.LENGTH_SHORT).show();
+			}
+			if (buildAfterSave) {
+				buildFile(forceTmpVal);
+				buildAfterSave = false;
+			}
+		}    	
     }
     
-    private void saveFileEditPos(CodeEditor code) {
+    private void saveAsFile() {
+		Intent intent = new Intent(getBaseContext(), FileDialog.class);
+		String dir = getLastOpenedDir();
+		String fileName = codeEditor.getFileName();
+		if (fileName != null && new File(fileName).getParentFile().exists()) {
+			dir = (new File(fileName)).getParent();
+		}
+		if (dir == null || !new File(dir).exists()) {
+			dir = Environment.getExternalStorageDirectory().getPath();
+		}
+		intent.putExtra(FileDialog.START_PATH, dir);
+		intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_CREATE);
+		startActivityForResult(intent, REQUEST_SAVE);    	
+    }
+    
+    private void saveFileEditPos(CodeEditor ce) {
     	SharedPreferences settings = getSharedPreferences(SHARED_PREFS_FILES_EDITPOS, 0);
     	SharedPreferences.Editor editor = settings.edit();
-    	editor.putInt(code.getFileName(), code.getSelectionStart());
+    	editor.putInt(ce.getFileName(), ce.getSelectionStart());
     	editor.commit();
     }
 
-    private void loadFileEditPos(CodeEditor code) {
+    private void loadFileEditPos(CodeEditor ce) {
     	SharedPreferences settings = getSharedPreferences(SHARED_PREFS_FILES_EDITPOS, 0);
-    	if (code.getText().toString().length() >= settings.getInt(code.getFileName(), 0)) {
-    		code.setSelection(settings.getInt(code.getFileName(), 0));
+    	if (ce.getText().toString().length() >= settings.getInt(ce.getFileName(), 0)) {
+    		ce.setSelection(settings.getInt(ce.getFileName(), 0));
     	}
     }
 
     private void build(boolean force) {
-    	if (codeEditor == null || codeEditor.getFileName() == null || codeEditor.getFileName().equals("")) {
+//TODO: add force save options to preferences?    	
+//		if (codeEditor.hasChanged() && codeEditor.getText().length() > 0) {
+//			buildAfterSave = true;
+//			forceTmpVal = force;
+//			saveFile();
+//		} else 
+		if (codeEditor.getFileName() == null || codeEditor.getFileName().equals("")) {
 			buildAfterLoad = true;
 			forceTmpVal = force;
 			loadFile();
-    	} else if (codeEditor.hasChanged() && codeEditor.getText().length() > 0) {
-			buildAfterSave = true;
-			forceTmpVal = force;
-			saveFile();
-		} else {
-			buildFile(force);
-		}
+		} else
+			buildFile(force);    	
     }
     
-    private void buildFile(final boolean force) {
-    	if (codeEditor != null) {
-    		new Thread() {
-    			public void run() {
-    	    		String argv[] = {
-    	        			"build-helper",
-    	        			"--openbuild",
-    	        			Boolean.toString(force),
-    	        			"--buildwindow",
-    	        			Boolean.toString(!force),
-    	        			"--executable",
-    	        			Boolean.toString(force),
-    	        			"--run",
-    	        			Boolean.toString(force),
-    	        			"--runwindow",
-    	        			Boolean.toString(!mPrefs.getBoolean("force_run", true)),
-    	        			codeEditor.getFileName()
-    	        		};
-    	    		
-    	    		system(argv);
-    			}
-    		}.start();
-    	}
+    private void buildFile(boolean force) {
+    	String fileName = codeEditor.getFileName();
+		Log.i(TAG, "build activity " + fileName);
+		if ((new File(fileName)).exists()) {
+			buildBaseDir = (new File(fileName)).getParentFile().getAbsolutePath();
+			String infile = (new File(fileName)).getName();
+			if (infile.lastIndexOf(".") != -1) {
+				String ext = infile.substring(infile.lastIndexOf("."));
+				if (ext.contentEquals(".sh")) {
+		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
+		    		intent.putExtra("executable_file", fileName);
+		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
+		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
+		    		if (force) {
+		    			intent.putExtra("force", mPrefs.getBoolean("force_run", false));
+		    		} else {
+		    			intent.putExtra("force", false);
+		    		}
+		    		startActivity(intent);
+		    		return;
+				}
+				if (ext.contentEquals(".lua") && (new File(getToolchainDir() + "/cctools/bin/luajit")).exists()) {
+		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
+		    		intent.putExtra("executable_file", getToolchainDir() + "/cctools/bin/luajit " + fileName);
+		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
+		    		intent.putExtra("workdir", (new File(fileName)).getParentFile().getAbsolutePath());
+		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
+		    		if (force) {
+		    			intent.putExtra("force", mPrefs.getBoolean("force_run", true));
+		    		} else {
+		    			intent.putExtra("force", false);
+		    		}
+		    		startActivity(intent);
+		    		return;					
+				}
+				if ((ext.equals(".pl") || ext.equals(".pm")) &&
+					(new File(getToolchainDir() + "/cctools/bin/perl")).exists()) {
+		    		Intent intent = new Intent(CCToolsActivity.this, LauncherConsoleActivity.class);
+		    		intent.putExtra("executable_file", getToolchainDir() + "/cctools/bin/perl " + fileName);
+		    		intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
+		    		intent.putExtra("workdir", (new File(fileName)).getParentFile().getAbsolutePath());
+		    		SharedPreferences mPrefs = getSharedPreferences(CCToolsActivity.SHARED_PREFS_NAME, 0);
+		    		if (force) {
+		    			intent.putExtra("force", mPrefs.getBoolean("force_run", true));
+		    		} else {
+		    			intent.putExtra("force", false);
+		    		}
+		    		startActivity(intent);
+		    		return;					
+				}
+			}
+			Intent intent = new Intent(CCToolsActivity.this, BuildActivity.class);
+			intent.putExtra("filename", fileName);
+			intent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
+			intent.putExtra("tmpdir", getTempDir());
+			intent.putExtra("force", force);
+			startActivity(intent);
+		}
     }
     
 	static private final String KEY_FILE = "file";
@@ -869,15 +710,12 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	}
 	
     private void showLog() {
-    	if (buildView == null) {
-    		return;
-    	}
-    	if (buildView.getLog().isEmpty()) {
+    	if (BuildActivity.errorsList.isEmpty()) {
     		Toast.makeText(getBaseContext(), getString(R.string.log_empty), Toast.LENGTH_SHORT).show();
     		return;
     	}
     	ArrayList<HashMap<String, String>> menuItems = new ArrayList<HashMap<String, String>>();
-    	for (LogItem item: buildView.getLog()) {
+    	for (LogItem item: BuildActivity.errorsList) {
     		HashMap<String, String> map = new HashMap<String, String>();
     		map.put(KEY_FILE, item.getFile());
     		map.put(KEY_LINE, Integer.toString(item.getLine()));
@@ -915,22 +753,20 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 					name = buildBaseDir + "/" + name;
 				}
 				
-				if (codeEditor != null) {
-					if (!(new File(codeEditor.getFileName())).getAbsolutePath().contentEquals((new File(name)).getAbsolutePath())) {
-						alertDialog.cancel();
-						showFileName = name;
-						showFileLine = line;
-						showFilePos = pos;
-		            	Log.i(TAG, "Jump to file " + showFileName);
-						warnSaveDialog(WARN_SAVE_AND_LOAD_POS);
+				if (!(new File(codeEditor.getFileName())).getAbsolutePath().contentEquals((new File(name)).getAbsolutePath())) {
+					alertDialog.cancel();
+					showFileName = name;
+					showFileLine = line;
+					showFilePos = pos;
+	            	Log.i(TAG, "Jump to file " + showFileName);
+					warnSaveDialog(WARN_SAVE_AND_LOAD_POS);
+				} else {
+					if (pos > 0) {
+						codeEditor.goToLinePos(line, pos);
 					} else {
-						if (pos > 0) {
-							codeEditor.goToLinePos(line, pos);
-						} else {
-							codeEditor.goToLine(line);
-						}
-						alertDialog.cancel();
+						codeEditor.goToLine(line);
 					}
+					alertDialog.cancel();
 				}
 			}    		
     	});
@@ -964,8 +800,8 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 			} else if (requestCode == REQUEST_OPEN) {
     			fileName = data.getStringExtra(FileDialog.RESULT_PATH);
     			setLastOpenedDir((new File (fileName)).getParent());
-    			if (!findAndShowTab(TAB_EDITOR, fileName)) {
-        			addTab(TAB_EDITOR);
+    			if (!findAndShowEditorTab(fileName)) {
+        			addEditorTab();
         			if (codeEditor.loadFile(fileName)) {
         				loadFileEditPos(codeEditor);
         				Toast.makeText(getBaseContext(), getString(R.string.file_loaded), Toast.LENGTH_SHORT).show();
@@ -998,14 +834,14 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
 
     private void loadAndShowLinePos() {
-    	if (findAndShowTab(TAB_EDITOR, showFileName)) {
+    	if (findAndShowEditorTab(showFileName)) {
 			if (showFilePos > 0) {
 				codeEditor.goToLinePos(showFileLine, showFilePos);
 			} else {
 				codeEditor.goToLine(showFileLine);
 			}    		
     	} else {
-        	addTab(TAB_EDITOR);
+        	addEditorTab();
     		if (codeEditor.loadFile(showFileName)) {
     			Toast.makeText(getBaseContext(), getString(R.string.file_loaded), Toast.LENGTH_SHORT).show();
     			if (showFilePos > 0) {
@@ -1049,7 +885,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 	}
 	
     private void warnSaveDialog(final int req) {
-    	if (codeEditor == null || !codeEditor.hasChanged()) {
+    	if (!codeEditor.hasChanged()) {
     		warnSaveRequest(req);
     		return;
     	}
@@ -1137,6 +973,19 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		.show();    	
     }
     
+    private void runTerminal() {
+		Intent myIntent = new Intent(this, TermActivity.class);
+		myIntent.putExtra("filename", "-" + getShell());
+		myIntent.putExtra("cctoolsdir", getToolchainDir() + "/cctools");
+		String workDir = getToolchainDir() + "/cctools/home";
+		String fileName = codeEditor.getFileName();
+		if (fileName != null && (new File(fileName)).exists()) {
+			workDir = (new File(fileName)).getParentFile().getAbsolutePath();
+		}
+		myIntent.putExtra("workdir", workDir);
+		startActivity(myIntent);
+    }
+    
     private void showModules() {
     	final ListView listView = new ListView(this);
     	//final Spinner spinner = new Spinner(this);
@@ -1145,7 +994,7 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 
     	FilenameFilter filter = new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				String lowercaseName = name.toLowerCase(getResources().getConfiguration().locale);
+				String lowercaseName = name.toLowerCase();
 				if (lowercaseName.endsWith(".xml")) {
 					return true;
 				} else {
@@ -1215,18 +1064,12 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 					int position, long id) {
 				Log.i(TAG, "selected action " + position);
 				dialog.dismiss();
-				String dialogid = null;
-				if (codeEditor != null) {
-					dialogid = codeEditor.getFileName();
-					if (dialogid != null) {
-						dialogid = new File(dialogid).getName();
-					}
-				}
-				dialogFromModule(modules.get(position), null, null, dialogid);
+				dialogFromModule(modules.get(position), getLastOpenedDir());
 			}
     	});
     }
 
+    //TODO
 	public String getBuiltinVariable(String name) {
 		if (name.contains("$current_file$")) {
 			String file = "";
@@ -1321,7 +1164,9 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
     }
     
     private void installOrUpgradeToolchain() {
-		if (!getPrefString("toolchain_installed").equals("yes")) {
+		if (!getPrefString("use_package_manager").equals("yes")) {
+			(new RemoveOldToolchainTask()).execute((Void)null);
+		} else if (!getPrefString("toolchain_installed").equals("yes")) {
 			installToolchainPackage();
 		} else {
 			if (mPrefs.getBoolean("updater", true)) {
@@ -1376,7 +1221,103 @@ public class CCToolsActivity extends /*SherlockActivity*/ FlexiDialogActivity
 		.setCancelable(false)
 		.show();
     }
-   
+    
+    private class RemoveOldToolchainTask extends AsyncTask<Void, Void, Void> {
+    	protected void onPreExecute() {
+    		super.onPreExecute();
+    	}
+
+		protected Void doInBackground(Void... params) {
+			final String[] oldPackages = {
+					"cctools-examples-1.00.zip",	"cctools-examples-1.01.zip","cctools-examples-1.02.zip",
+					"cctools-examples-1.03.zip", 	"platform-arm-3.zip",		"platform-arm-8.zip",
+					"platform-mips-14.zip", 		"platform-x86-14.zip",		"toolchain-arm.zip",
+					"platform-arm-14.zip",			"platform-arm-4.zip",		"platform-arm-9.zip",
+					"platform-mips-18.zip",			"platform-x86-18.zip",		"toolchain-mips.zip",
+					"platform-arm-18.zip",			"platform-arm-5.zip",		"platform-common.zip",
+					"platform-mips-9.zip",			"platform-x86-9.zip",		"toolchain-x86.zip" };
+
+			if (getPrefString("use_package_manager").equals("yes")) {
+				return null;
+			}
+			
+			FilenameFilter filter = new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					String lowercaseName = name.toLowerCase();
+					for (String file: oldPackages) {
+						if (lowercaseName.equals(file + ".list")) {
+							return true;
+						}
+					}
+					return false;
+				}
+			};
+			File dir = new File(getToolchainDir() + PKGS_LISTS_DIR);
+			if (dir.isDirectory()) {
+				for (String fileName: dir.list(filter)) {
+					try {
+						Log.i(TAG, "uninstalling " + dir.getPath() + "/" + fileName);
+						FileInputStream fin = new FileInputStream(dir.getPath() + "/" + fileName);
+						DataInputStream in = new DataInputStream(fin);
+						BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+						String line = "";
+						while((line = reader.readLine()) != null) {
+							Log.i(TAG, "Delete file: " + line);
+							(new File(getToolchainDir() + "/" + line)).delete();
+						}
+						in.close();
+						(new File(dir.getPath() + "/" + fileName)).delete();
+					} catch (Exception e) {
+						Log.e(TAG, "Error during remove files " + e);
+					}
+				}
+			}
+			setPrefString("use_package_manager", "yes");
+			return null;
+		}
+		
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			installToolchainPackage();
+		}
+    }
+    
+	private Thread dialogService(final int port) {
+		Log.i(TAG, "Launch dialog service (port " + port + ")");
+		Thread t = new Thread() {
+			public void run() {
+				try {
+					dialogServerSocket = new ServerSocket();
+					dialogServerSocket.setReuseAddress(true);
+					dialogServerSocket.bind(new InetSocketAddress(port));
+					Log.i(TAG, "Waiting for incoming requests");
+					while (true) {
+						dialogServiceSocket = dialogServerSocket.accept();
+						Log.i(TAG, "Dialog request from " + dialogServiceSocket.getInetAddress().toString());
+						if (!dialogServiceSocket.getInetAddress().toString().equals("/127.0.0.1")) {
+							continue;
+						}
+						Intent intent = new Intent(CCToolsActivity.this, DialogWindow.class);
+						startActivity(intent);
+						Log.i(TAG, "Waiting for finish dialog activity");
+						while(!dialogServiceSocket.isClosed()) {
+							Thread.sleep(300);
+						}
+						Log.i(TAG, "Dialog activity finished");
+					}
+				} catch (BindException e) {
+					Log.e(TAG, "bind failed, try again");
+				} catch (IOException e) {
+					Log.e(TAG, "ServerSocket " + e);
+				} catch (InterruptedException e) {
+					Log.e(TAG, "Interrupted " + e);
+				}
+			}
+		};
+		t.start();
+		return t;
+	}
+	
 	private void serviceStartStop(final int cmd) {
 		String serviceCmd;
 		if (cmd == SERVICE_START) {

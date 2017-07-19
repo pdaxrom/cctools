@@ -29,15 +29,6 @@ build_gcc_host() {
 
     local EXTRA_CONF=
     case $TARGET_ARCH in
-    aarch64*)
-	EXTRA_CONF="--enable-fix-cortex-a53-835769"
-	;;
-    mips64el*)
-	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point"
-	;;
-    x86_64*)
-	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --with-multilib-list=m32,m64,mx32 --disable-libcilkrts"
-	;;
     mips*)
 	EXTRA_CONF="--with-arch=mips32 --disable-threads --disable-fixed-point"
 	;;

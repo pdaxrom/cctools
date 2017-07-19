@@ -1,6 +1,2 @@
 CCTools
-- Added support for NDK 24.
-
-Repository
-- Added NDK 24.
-- GCC updated to 4.9
+- Fixed for arm64 devices.

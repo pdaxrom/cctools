@@ -21,15 +21,15 @@ import com.pdaxrom.utils.Utils;
 class Main {
     static final int sdk2ndk_arm[] = {
 	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  */
-	-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, -1
+	-1, -1, -1,  3,  4,  5,  5,  5,  8,  9,  9,  9,  9, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, 24, -1
     };
     static final int sdk2ndk_mips[] = {
 	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-	-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, -1
+	-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, 24, -1
     };
     static final int sdk2ndk_x86[] = {
 	/*   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 */
-	-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, -1
+	-1, -1, -1, -1, -1, -1, -1, -1, -1,  9,  9, -1, -1, 13, 14, 15, 16, 17, 18, 19, 19, 21, 22, 23, 24, 24, -1
     };
 
     static private int ndkVersion;
@@ -533,7 +533,7 @@ class Main {
 				"ANDROID_ROOT=/system",
 				"CCTOOLSDIR=" + baseDir,
 //				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + baseDir + "/lib:/system/lib:/vendor/lib",
+				"LD_LIBRARY_PATH=" + baseDir + "/lib",
 				"HOME=" + baseDir + "/home",
 //				"SHELL=" + getShell(),
 				"TERM=xterm",

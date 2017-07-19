@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="NewApi">
+        <ignore path="src/com/pdaxrom/cctools/BuildActivity.java" />
+        <ignore path="src/com/pdaxrom/cctools/CCToolsActivity.java" />
+        <ignore path="src/com/pdaxrom/cctools/LauncherNativeActivity.java" />
+        <ignore path="src/com/pdaxrom/pkgmanager/Main.java" />
+        <ignore path="src/com/pdaxrom/utils/FileDialog.java" />
+    </issue>
+</lint>

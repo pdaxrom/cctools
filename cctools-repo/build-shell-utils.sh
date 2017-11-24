@@ -604,6 +604,8 @@ makedirs
 
 if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 
+    TARGET_STRIP=strip
+
     build_native_perl
     build_m4
 

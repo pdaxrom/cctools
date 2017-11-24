@@ -64,6 +64,7 @@ fi
 	;;
     *86*)
 	EXTRA_CONF="--disable-libquadmath-support --disable-libcilkrts"
+	SYSROOT="/data/data/com.pdaxrom.cctools/root/cctools/i686-linux-android"
 	;;
     esac
 
@@ -87,6 +88,9 @@ fi
 	--target=$TARGET_ARCH \
 	--with-gnu-as \
 	--with-gnu-ld \
+	--with-as=$(which as) \
+	--with-ld=$(which ld) \
+	--with-nm=$(which nm) \
 	--enable-languages=c,c++,fortran,objc,obj-c++ \
 	--disable-libsanitizer \
 	--disable-libssp \
@@ -112,7 +116,7 @@ fi
 	--disable-libquadmath-support \
 	--disable-libcilkrts \
 	--with-sysroot=$SYSROOT \
-	--program-suffix=-${gcc_version} \
+	--program-suffix=-${PKG_VERSION} \
 	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
 	$EXTRA_CONF \
 	|| error "configure"
@@ -148,28 +152,28 @@ fi
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
 
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-ar-$gcc_version
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-nm-$gcc_version
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-ranlib-$gcc_version
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-c++-$gcc_version
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-g++-$gcc_version
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-$gcc_version
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gfortran-$gcc_version
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/c++-$gcc_version
-    ln -sf g++-${gcc_version} ${TMPINST_DIR}/${PKG}/cctools/bin/c++-$gcc_version
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-ar-$PKG_VERSION
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-nm-$PKG_VERSION
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-ranlib-$PKG_VERSION
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-c++-$PKG_VERSION
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-g++-$PKG_VERSION
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gcc-$PKG_VERSION
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/$TARGET_ARCH-gfortran-$PKG_VERSION
+    rm -f ${TMPINST_DIR}/${PKG}/cctools/bin/c++-$PKG_VERSION
+    ln -sf g++-${PKG_VERSION} ${TMPINST_DIR}/${PKG}/cctools/bin/c++-$PKG_VERSION
 
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/bin/*
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/cc1
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/cc1obj
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/cc1objplus
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/cc1plus
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/collect2
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/f951
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/lto-wrapper
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/lto1
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/install-tools/fixincl
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/liblto_plugin.so.0.0.0
-    $TARGET_ARCH-strip ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$gcc_version/plugin/gengtype
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/bin/*
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/cc1
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/cc1obj
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/cc1objplus
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/cc1plus
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/collect2
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/f951
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/lto-wrapper
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/lto1
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/install-tools/fixincl
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/liblto_plugin.so.0.0.0
+    $TARGET_STRIP ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/$TARGET_ARCH/$PKG_VERSION/plugin/gengtype
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/info
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/man
@@ -201,14 +205,14 @@ fi
     find . -name "libobjc.*"    -type f -exec install -D -m644 {} ${TMPINST_DIR}/libobjc-dev/cctools/${TARGET_ARCH}/{} \; -exec rm -f {} \;
     find . -name "libobjc_gc.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libobjc-dev/cctools/${TARGET_ARCH}/{} \; -exec rm -f {} \;
 
-    cd ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}
+    cd ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}
 
-    find . -name "crt*.o"      -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
-    find . -name "libgcc.*"    -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
-    find . -name "libgcov.*"   -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
+    find . -name "crt*.o"      -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/{} \; -exec rm -f {} \;
+    find . -name "libgcc.*"    -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/{} \; -exec rm -f {} \;
+    find . -name "libgcov.*"   -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgcc-dev/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/{} \; -exec rm -f {} \;
 
-    find . -name "libgfortranbegin.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgfortran-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
-    find . -name "libcaf_single.*"    -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgfortran-dev/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/{} \; -exec rm -f {} \;
+    find . -name "libgfortranbegin.*" -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgfortran-dev/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/{} \; -exec rm -f {} \;
+    find . -name "libcaf_single.*"    -type f -exec install -D -m644 {} ${TMPINST_DIR}/libgfortran-dev/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/{} \; -exec rm -f {} \;
 
     cd ${TMPINST_DIR}/${PKG}/cctools
 
@@ -219,25 +223,25 @@ fi
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/include/c++
 
-    copysrc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/include/objc \
+    copysrc ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/include/objc \
 		${TMPINST_DIR}/libobjc-dev/cctools/${TARGET_ARCH}/include/objc
 
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/include/objc
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/include/objc
 
-    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/bin/gfortran-${gcc_version} ${TMPINST_DIR}/gfortran/cctools/bin/gfortran-${gcc_version}
-    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/f951 \
-			${TMPINST_DIR}/gfortran/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/f951
+    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/bin/gfortran-${PKG_VERSION} ${TMPINST_DIR}/gfortran/cctools/bin/gfortran-${PKG_VERSION}
+    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/f951 \
+			${TMPINST_DIR}/gfortran/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/f951
 
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/bin/gfortran-${gcc_version}
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/f951
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/bin/gfortran-${PKG_VERSION}
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/f951
 
-    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/cc1obj \
-			${TMPINST_DIR}/gobjc/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/cc1obj
-    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/cc1objplus \
-			${TMPINST_DIR}/gobjc/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/cc1objplus
+    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/cc1obj \
+			${TMPINST_DIR}/gobjc/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/cc1obj
+    install -D -m 755 ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/cc1objplus \
+			${TMPINST_DIR}/gobjc/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/cc1objplus
 
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/cc1obj
-    rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${gcc_version}/cc1objplus
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/cc1obj
+    rm -rf ${TMPINST_DIR}/${PKG}/cctools/libexec/gcc/${TARGET_ARCH}/${PKG_VERSION}/cc1objplus
 
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/thumb
     rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/armv7-a
@@ -246,12 +250,12 @@ fi
     cat >> ${TMPINST_DIR}/${PKG}/cctools/bin/set-default-compiler-gcc << EOF
 #!/system/bin/sh
 
-ln -sf gcc-${gcc_version}  \${CCTOOLSDIR}/bin/gcc
-ln -sf gcc-${gcc_version}  \${CCTOOLSDIR}/bin/cc
-ln -sf g++-${gcc_version}  \${CCTOOLSDIR}/bin/g++
-ln -sf g++-${gcc_version}  \${CCTOOLSDIR}/bin/c++
-ln -sf cpp-${gcc_version}  \${CCTOOLSDIR}/bin/cpp
-ln -sf gcov-${gcc_version} \${CCTOOLSDIR}/bin/gcov
+ln -sf gcc-${PKG_VERSION}  \${CCTOOLSDIR}/bin/gcc
+ln -sf gcc-${PKG_VERSION}  \${CCTOOLSDIR}/bin/cc
+ln -sf g++-${PKG_VERSION}  \${CCTOOLSDIR}/bin/g++
+ln -sf g++-${PKG_VERSION}  \${CCTOOLSDIR}/bin/c++
+ln -sf cpp-${PKG_VERSION}  \${CCTOOLSDIR}/bin/cpp
+ln -sf gcov-${PKG_VERSION} \${CCTOOLSDIR}/bin/gcov
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/cctools/bin/set-default-compiler-gcc
 
@@ -265,12 +269,12 @@ EOF
     cat >> ${TMPINST_DIR}/${PKG}/prerm << EOF
 #!/system/bin/sh
 
-test \`readlink \${CCTOOLSDIR}/bin/gcc\`  = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/gcc
-test \`readlink \${CCTOOLSDIR}/bin/cc\`   = "gcc-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cc
-test \`readlink \${CCTOOLSDIR}/bin/g++\`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/g++
-test \`readlink \${CCTOOLSDIR}/bin/c++\`  = "g++-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/c++
-test \`readlink \${CCTOOLSDIR}/bin/cpp\`  = "cpp-${gcc_version}"  && rm -f \${CCTOOLSDIR}/bin/cpp
-test \`readlink \${CCTOOLSDIR}/bin/gcov\` = "gcov-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/gcov
+test \`readlink \${CCTOOLSDIR}/bin/gcc\`  = "gcc-${PKG_VERSION}"  && rm -f \${CCTOOLSDIR}/bin/gcc
+test \`readlink \${CCTOOLSDIR}/bin/cc\`   = "gcc-${PKG_VERSION}"  && rm -f \${CCTOOLSDIR}/bin/cc
+test \`readlink \${CCTOOLSDIR}/bin/g++\`  = "g++-${PKG_VERSION}"  && rm -f \${CCTOOLSDIR}/bin/g++
+test \`readlink \${CCTOOLSDIR}/bin/c++\`  = "g++-${PKG_VERSION}"  && rm -f \${CCTOOLSDIR}/bin/c++
+test \`readlink \${CCTOOLSDIR}/bin/cpp\`  = "cpp-${PKG_VERSION}"  && rm -f \${CCTOOLSDIR}/bin/cpp
+test \`readlink \${CCTOOLSDIR}/bin/gcov\` = "gcov-${PKG_VERSION}" && rm -f \${CCTOOLSDIR}/bin/gcov
 
 which set-default-compiler-clang && set-default-compiler-clang
 EOF
@@ -301,16 +305,16 @@ EOF
     cat >> ${TMPINST_DIR}/${PKG}/postinst << EOF
 #!/system/bin/sh
 
-ln -sf gfortran-${gcc_version}  \${CCTOOLSDIR}/bin/gfortran
-ln -sf gfortran-${gcc_version}  \${CCTOOLSDIR}/bin/f77
+ln -sf gfortran-${PKG_VERSION}  \${CCTOOLSDIR}/bin/gfortran
+ln -sf gfortran-${PKG_VERSION}  \${CCTOOLSDIR}/bin/f77
 EOF
     chmod 755 ${TMPINST_DIR}/${PKG}/postinst
 
     cat >> ${TMPINST_DIR}/${PKG}/prerm << EOF
 #!/system/bin/sh
 
-test \`readlink \${CCTOOLSDIR}/bin/gfortran\` = "gfortran-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/gfortran
-test \`readlink \${CCTOOLSDIR}/bin/f77\`      = "gfortran-${gcc_version}" && rm -f \${CCTOOLSDIR}/bin/f77
+test \`readlink \${CCTOOLSDIR}/bin/gfortran\` = "gfortran-${PKG_VERSION}" && rm -f \${CCTOOLSDIR}/bin/gfortran
+test \`readlink \${CCTOOLSDIR}/bin/f77\`      = "gfortran-${PKG_VERSION}" && rm -f \${CCTOOLSDIR}/bin/f77
 EOF
 
     chmod 755 ${TMPINST_DIR}/${PKG}/prerm
@@ -349,15 +353,15 @@ EOF
 
     case $TARGET_ARCH in
     arm*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/armv7-a
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/armv7-a
 	;;
     mips*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r6
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/mips-r2
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/mips-r6
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6
@@ -378,7 +382,7 @@ EOF
     PKG="libstdc++-dev"
     PKG_DESC="GNU Standard C++ Library v3 (development files)"
 
-    local src_dir="${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/$gcc_version"
+    local src_dir="${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/$PKG_VERSION"
 
     case $TARGET_ARCH in
     aarch64*)
@@ -444,15 +448,15 @@ EOF
 
     case $TARGET_ARCH in
     arm*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/thumb
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/armv7-a
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${PKG_VERSION}/${TARGET_ARCH}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${PKG_VERSION}/${TARGET_ARCH}/armv7-a
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/armv7-a
 	;;
     mips*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/mips-r2
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/mips-r6
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${PKG_VERSION}/${TARGET_ARCH}/mips-r2
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${PKG_VERSION}/${TARGET_ARCH}/mips-r6
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6
@@ -496,15 +500,15 @@ EOF
 
     case $TARGET_ARCH in
     arm*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/armv7-a
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/armv7-a
 	;;
     mips*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r6
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/mips-r2
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/mips-r6
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6
@@ -547,15 +551,15 @@ EOF
 
     case $TARGET_ARCH in
     arm*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/thumb
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/armv7-a
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib/armv7-a
 	;;
     mips*)
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r2
-	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/mips-r6
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/mips-r2
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${PKG_VERSION}/mips-r6
 
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6

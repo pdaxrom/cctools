@@ -650,6 +650,9 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
     build_isl
     build_ppl
     build_cloog
+
+    build_findutils
+
     build_native_binutils
 
     build_native_gcc

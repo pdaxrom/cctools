@@ -2,7 +2,7 @@ build_ppl() {
     PKG=ppl
     PKG_VERSION=$ppl_version
     PKG_SUBVERSION=
-    PKG_URL="http://bugseng.com/products/ppl/download/ftp/releases/1.2/${PKG}-${PKG_VERSION}.tar.xz"
+    PKG_URL="http://bugseng.com/products/ppl/download/ftp/releases/${PKG_VERSION}/${PKG}-${PKG_VERSION}.tar.xz"
     PKG_DESC="The Parma Polyhedra Library"
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
@@ -15,11 +15,16 @@ build_ppl() {
 
     banner "Build $PKG"
 
-    #download $PKG_URL $O_FILE
+    if [ ! -f $O_FILE ]; then
+	download $PKG_URL $O_FILE
+    fi
 
-    #unpack $src_dir $O_FILE
+    unpack $src_dir $O_FILE
+    patchsrc $S_DIR $PKG $PKG_VERSION
 
-    #patchsrc $S_DIR $PKG $PKG_VERSION
+    if [ "$USE_NATIVE_BUILD" = "yes" ]; then
+	fix_bionic_shell $S_DIR
+    fi
 
     mkdir -p $B_DIR
     cd $B_DIR

@@ -40,7 +40,7 @@ x86_64*)
     ash ./build-shell-utils.sh ${PWD}/src x86_64-linux-android   ${WRKDIR}/x86_64-repo   || exit 1
     ;;
 *)
-    ash ./build-shell-utils.sh ${PWD}/src i686-linux-android     ${WRKDIR}/i686-repo     || exit 1
+    bash ./build-shell-utils.sh ${PWD}/src i686-linux-android     ${WRKDIR}/i686-repo     || exit 1
     ;;
 esac
 

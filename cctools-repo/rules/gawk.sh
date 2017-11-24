@@ -1,11 +1,11 @@
-build_isl() {
-    PKG=isl
-    PKG_VERSION=$isl_version
+build_gawk() {
+    PKG=gawk
+    PKG_VERSION=4.2.0
     PKG_SUBVERSION=
-    PKG_URL="http://isl.gforge.inria.fr/${PKG}-${PKG_VERSION}.tar.bz2"
-    PKG_DESC="Integer Set Library"
+    PKG_URL="https://ftp.gnu.org/gnu/gawk/${PKG}-${PKG_VERSION}.tar.gz"
+    PKG_DESC="The awk utility interprets a special-purpose programming language that makes it possible to handle simple data-reformatting jobs with just a few lines of code."
     PKG_DEPS=""
-    O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
+    O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.gz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
 
@@ -32,21 +32,15 @@ build_isl() {
     # Configure here
 
     ${S_DIR}/configure	\
-	--target=$TARGET_ARCH \
-	--host=$TARGET_ARCH \
-	--prefix=$TMPINST_DIR \
-	--with-gmp-prefix=$TMPINST_DIR \
-	--disable-werror \
-	--disable-static \
-	--enable-shared || error "Configure $PKG."
+			--host=${TARGET_ARCH} \
+                        --prefix=$TMPINST_DIR \
+			|| error "Configure $PKG."
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"
 
     $MAKE install || error "make install"
 
     $MAKE install prefix=${TMPINST_DIR}/${PKG}/cctools || error "package install"
-
-    rm -f ${TMPINST_DIR}/${PKG}/cctools/lib/*.py
 
     make_packages
 

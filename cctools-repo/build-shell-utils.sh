@@ -184,7 +184,7 @@ download() {
 	    opt="--no-check-certificate"
 	    ;;
 	esac
-	if wget $opt $1 -O $2 ; then
+	if wget --no-check-certificate $opt $1 -O $2 ; then
 	    return
 	fi
 	rm -f $2
@@ -192,7 +192,7 @@ download() {
 	local mirror
 	for mirror in "http://mirror.cctools.info/packages/src" "http://cctools.info/packages/src"; do
 	    local f=${1/*\/}
-	    if wget -c ${mirror}/${f} -O $2 ; then
+	    if wget --no-check-certificate -c ${mirror}/${f} -O $2 ; then
 		return
 	    fi
 	    rm -f $2
@@ -635,14 +635,26 @@ if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 	exit 0
     fi
 
+    build_gawk
     build_bison
     build_flex
 
     makerepo -p $REPO_DIR
-    pkgman install bison flex
+    pkgman install gawk bison flex
 
-    build_nano
-    build_vim
+    build_gmp
+    build_mpfr
+    build_mpc
+    build_isl
+    build_ppl
+    build_cloog
+    build_native_binutils
+
+    build_native_gcc
+exit 1
+
+#    build_nano
+#    build_vim
 
     exit 0
 fi

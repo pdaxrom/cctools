@@ -15,11 +15,16 @@ build_mpfr() {
 
     banner "Build $PKG"
 
-    #download $PKG_URL $O_FILE
+    if [ ! -f $O_FILE ]; then
+	download $PKG_URL $O_FILE
+    fi
 
-    #unpack $src_dir $O_FILE
+    unpack $src_dir $O_FILE
+    patchsrc $S_DIR $PKG $PKG_VERSION
 
-    #patchsrc $S_DIR $PKG $PKG_VERSION
+    if [ "$USE_NATIVE_BUILD" = "yes" ]; then
+	fix_bionic_shell $S_DIR
+    fi
 
     mkdir -p $B_DIR
     cd $B_DIR

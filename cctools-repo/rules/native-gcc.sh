@@ -6,9 +6,9 @@ build_native_gcc() {
     PKG_DESC="The GNU C compiler"
     O_FILE=$SRC_PREFIX/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
     S_DIR=$src_dir/gcc-${PKG_VERSION}
-    B_DIR=$build_dir/${PKG}
+    B_DIR=$build_dir/${PKG}-native
 
-    c_tag $FUNCNAME && return
+    c_tag ${PKG}-native && return
 
     banner "Build $PKG"
 
@@ -288,7 +288,7 @@ EOF
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     popd
-    s_tag $FUNCNAME
+    s_tag ${PKG}-native
 
     PKG="gobjc"
     PKG_DESC="GNU Objective-C and Objective-C++ compilers"

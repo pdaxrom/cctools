@@ -5,9 +5,9 @@ build_gcc_mingw32_host() {
     PKG_DESC="The GNU C compiler (cross compiler for mingw32)"
     O_FILE=$SRC_PREFIX/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/gnu/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/${PKG}-mingw32-${1}-host
+    B_DIR=$build_dir/${PKG}-mingw-${1}-host
 
-    c_tag ${PKG}-mingw32-host-${1} && return
+    c_tag ${PKG}-mingw-${1}-host && return
 
     banner "Build $PKG mingw32 host"
 
@@ -107,5 +107,5 @@ build_gcc_mingw32_host() {
 #    $MAKE install prefix=${TMPINST_DIR}/${PKG}-mingw-w64-${WARCH}/cctools/ || error "prepackage install"
 
     popd
-    s_tag ${PKG}-mingw32-host-${1}
+    s_tag ${PKG}-mingw-${1}-host
 }

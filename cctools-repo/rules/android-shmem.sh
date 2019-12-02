@@ -9,7 +9,7 @@ build_android_shmem() {
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
     B_DIR=$build_dir/${PKG}
 
-    c_tag $FUNCNAME && return
+    c_tag $PKG && return
 
     pushd .
 
@@ -47,5 +47,5 @@ build_android_shmem() {
     make_packages
 
     popd
-    s_tag $FUNCNAME
+    s_tag $PKG
 }

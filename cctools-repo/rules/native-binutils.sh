@@ -6,9 +6,9 @@ build_native_binutils() {
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/${PKG}
+    B_DIR=$build_dir/${PKG}-native
 
-    c_tag $FUNCNAME && return
+    c_tag ${PKG}-native && return
 
     banner "Build $PKG"
 
@@ -71,7 +71,7 @@ build_native_binutils() {
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename cctools pkgdesc
 
     popd
-    s_tag $FUNCNAME
+    s_tag ${PKG}-native
 
     PKG=binutils-compact
     PKG_DESC="GNU assembler and linker only, compact version"

@@ -7,9 +7,9 @@ build_gmp_host() {
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-${PKG}
+    B_DIR=$build_dir/${PKG}-host
 
-    c_tag $FUNCNAME && return
+    c_tag ${PKG}-host && return
 
     pushd .
 
@@ -38,5 +38,5 @@ build_gmp_host() {
     $MAKE install || error "make install"
 
     popd
-    s_tag $FUNCNAME
+    s_tag ${PKG}-host
 }

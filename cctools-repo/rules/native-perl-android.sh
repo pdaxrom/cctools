@@ -6,9 +6,9 @@ build_native_perl_android() {
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/perl5-dexter-android-v${PKG_VERSION}.zip
     S_DIR=$src_dir/perl5-dexter-android-v${PKG_VERSION}
-    B_DIR=$build_dir/${PKG}
+    B_DIR=$build_dir/${PKG}-native
 
-    c_tag native-${PKG}-android && return
+    c_tag ${PKG}-native-android && return
 
     pushd .
 
@@ -52,5 +52,5 @@ build_native_perl_android() {
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     popd
-    s_tag native-${PKG}-android
+    s_tag ${PKG}-native-android
 }

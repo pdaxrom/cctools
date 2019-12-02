@@ -7,9 +7,9 @@ build_bison() {
     PKG_DEPS="m4"
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.xz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/${PKG}
+    B_DIR=$build_dir/${PKG}-native
 
-    c_tag $PKG && return
+    c_tag ${PKG}-native && return
 
     pushd .
 
@@ -54,5 +54,5 @@ build_bison() {
     rm -f ${REPO_DIR}/$filename; zip -r9y ${REPO_DIR}/$filename *
 
     popd
-    s_tag $PKG
+    s_tag ${PKG}-native
 }

@@ -6,7 +6,7 @@ build_file_host() {
     PKG_DEPS=""
     O_FILE=$SRC_PREFIX/${PKG}/${PKG}-${PKG_VERSION}.tar.gz
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-${PKG}
+    B_DIR=$build_dir/${PKG}-host
 
     c_tag ${PKG}-host && return
 

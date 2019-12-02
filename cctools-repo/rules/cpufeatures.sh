@@ -4,7 +4,7 @@ build_cpufeatures() {
     PKG_DESC="Detect cpu features"
     PKG_DEPS=""
 
-    c_tag $FUNCNAME && return
+    c_tag $PKG && return
 
     banner "Build $PKG"
 
@@ -29,5 +29,5 @@ build_cpufeatures() {
     make_packages
 
     popd
-    s_tag $FUNCNAME
+    s_tag $PKG
 }

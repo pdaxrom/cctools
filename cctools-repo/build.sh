@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 BUILD_START=$(date +%s)
 
 WRKDIR=$PWD/tmp

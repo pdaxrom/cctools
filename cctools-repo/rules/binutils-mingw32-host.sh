@@ -4,9 +4,9 @@ build_binutils_mingw32_host() {
     PKG_DESC="Binary utilities supporting mingw32 targets"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-binutils-mingw32-${1}
+    B_DIR=$build_dir/${PKG}-mingw-${1}-host
 
-    c_tag ${PKG}-host-mingw32-${1} && return
+    c_tag ${PKG}-mingw-${1}-host && return
 
     banner "Build $PKG mingw32 host"
 
@@ -39,5 +39,5 @@ build_binutils_mingw32_host() {
     $MAKE install || error "make install"
 
     popd
-    s_tag ${PKG}-host-mingw32-${1}
+    s_tag ${PKG}-mingw-${1}-host
 }

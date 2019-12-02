@@ -63,7 +63,7 @@ src_dir="${WORK_DIR}/src"
 patch_dir="${TOPDIR}/patches"
 
 TARGET_DIR="${WORK_DIR}/cctools"
-TMPINST_DIR="${build_dir}/tmpinst"
+TMPINST_DIR="${WORK_DIR}/tmpinst"
 
 SYSROOT="${TARGET_DIR}-host/sysroot"
 

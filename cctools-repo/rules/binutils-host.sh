@@ -4,7 +4,7 @@ build_binutils_host() {
     PKG_DESC="Binary utilities"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-binutils
+    B_DIR=$build_dir/${PKG}-host
 
     c_tag ${PKG}-host && return
 

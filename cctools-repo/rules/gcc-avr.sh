@@ -6,7 +6,7 @@ build_gcc_avr() {
     PKG_DESC="The GNU C compiler (cross compiler for avr)"
     O_FILE=$SRC_PREFIX/gnu/${PKG}/${PKG}-${PKG_VERSION}.tar.bz2
     S_DIR=$src_dir/gnu/gcc-${PKG_VERSION}
-    B_DIR=$build_dir/${PKG}-avr
+    B_DIR=$build_dir/${PKG}
 
     c_tag ${PKG} && return
 

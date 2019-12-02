@@ -70,7 +70,7 @@ build_binutils() {
 	rm -f ${TMPINST_DIR}/binutils-compact/cctools/bin/$f
     done
     case $TARGET_ARCH in
-    arm*)
+    arm*|aarch*)
 	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/*btsmip*
 	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/*ltsmip*
 	rm -f ${TMPINST_DIR}/binutils-compact/cctools/${TARGET_ARCH}/lib/ldscripts/elf_*

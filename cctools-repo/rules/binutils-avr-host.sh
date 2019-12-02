@@ -4,9 +4,9 @@ build_binutils_avr_host() {
     PKG_DESC="Binary utilities supporting Atmel's AVR targets"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-binutils-avr
+    B_DIR=$build_dir/${PKG}-avr-host
 
-    c_tag ${PKG}-host-avr && return
+    c_tag ${PKG}-avr-host && return
 
     banner "Build $PKG avr host"
 
@@ -33,5 +33,5 @@ build_binutils_avr_host() {
     $MAKE install || error "make install"
 
     popd
-    s_tag ${PKG}-host-avr
+    s_tag ${PKG}-avr-host
 }

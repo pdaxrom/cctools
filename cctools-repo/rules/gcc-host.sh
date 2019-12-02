@@ -4,7 +4,7 @@ build_gcc_host() {
     PKG_DESC="The GNU fortran compiler"
     O_DIR=$SRC_PREFIX/$PKG/${PKG}-${PKG_VERSION}
     S_DIR=$src_dir/${PKG}-${PKG_VERSION}
-    B_DIR=$build_dir/host-${PKG}
+    B_DIR=$build_dir/${PKG}-host
 
     c_tag ${PKG}-host && return
 

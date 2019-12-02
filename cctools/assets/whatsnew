@@ -1,6 +1,5 @@
 CCTools
-- Added support for NDK 24.
+- Fixed ndk installation on new androids.
 
 Repository
-- Added NDK 24.
-- GCC updated to 4.9
+- busybox updated for new androids.

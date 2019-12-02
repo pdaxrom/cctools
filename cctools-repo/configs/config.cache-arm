@@ -74,7 +74,6 @@ ac_cv_header_sys_param_h=${ac_cv_header_sys_param_h=yes}
 ac_cv_header_sys_resource_h=${ac_cv_header_sys_resource_h=yes}
 ac_cv_header_sys_stat_h=${ac_cv_header_sys_stat_h=yes}
 ac_cv_header_sys_time_h=${ac_cv_header_sys_time_h=yes}
-ac_cv_header_sys_timeb_h=${ac_cv_header_sys_timeb_h=yes}
 ac_cv_header_sys_types_h=${ac_cv_header_sys_types_h=yes}
 ac_cv_header_sys_wait_h=${ac_cv_header_sys_wait_h=yes}
 ac_cv_header_time=${ac_cv_header_time=yes}

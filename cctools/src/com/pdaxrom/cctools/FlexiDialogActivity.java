@@ -571,7 +571,7 @@ public class FlexiDialogActivity extends SherlockActivity {
 				"BOOTCLASSPATH=" + bootClassPath,
 				"CCTOOLSDIR=" + cctoolsDir,
 				"CCTOOLSRES=" + getPackageResourcePath(),
-				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib:/system/lib:/vendor/lib",
+				"LD_LIBRARY_PATH=" + cctoolsDir + "/lib",
 				"HOME=" + cctoolsDir + "/home",
 				"SHELL=" + getShell(),
 				"TERM=xterm",

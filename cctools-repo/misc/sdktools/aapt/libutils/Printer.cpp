@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef __BIONIC__
+#if defined(__BIONIC__) && (__ANDROID_API__ > 21)
 #define fdprintf dprintf
 #endif
 

@@ -36,9 +36,8 @@ build_busybox() {
     esac
 
     if [ "$BUILD_PIE_COMPILER" = "yes" ]; then
-
 	sed -i -e "s|# CONFIG_PIE is not set|CONFIG_PIE=y|" .config
-
+	sed -i -e "s|CONFIG_EXTRA_CFLAGS=\"\"|CONFIG_EXTRA_CFLAGS=\"-fpic\"|" .config
     fi
 
     $MAKE CROSS_COMPILE=${TARGET_ARCH}- oldconfig

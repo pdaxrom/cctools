@@ -46,12 +46,12 @@ EOF
 
     case $TARGET_ARCH in
     arm64*|aarch64*)
-	copysrc ${FROM}-21/arch-arm64 $SYSROOT
+	copysrc ${FROM}-24/arch-arm64 $SYSROOT
 
 	fix_sysroot lib ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/arm64-v8a elf64-littleaarch64
 	;;
     mips64*)
-	copysrc ${FROM}-21/arch-mips64 $SYSROOT
+	copysrc ${FROM}-24/arch-mips64 $SYSROOT
 
 	fix_sysroot lib     ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/mips   elf32-tradlittlemips
 	fix_sysroot libr2   ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/mips   elf32-tradlittlemips
@@ -60,28 +60,41 @@ EOF
 	fix_sysroot lib64r2 ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/mips64 elf64-tradlittlemips
 	;;
     x86_64*|amd64*)
-	copysrc ${FROM}-21/arch-x86_64 $SYSROOT
+	copysrc ${FROM}-24/arch-x86_64 $SYSROOT
 
 	fix_sysroot lib    ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/x86    elf32-i386
 	fix_sysroot lib64  ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/x86_64 elf64-x86-64
 	fix_sysroot libx32 ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/x32    elf32-x86-64
 	;;
     arm*)
-	copysrc ${FROM}-9/arch-arm $SYSROOT
+	if [ "$BUILD_PIE_COMPILER" = "yes" ]; then
+	    copysrc ${FROM}-24/arch-arm $SYSROOT
+	else
+	    copysrc ${FROM}-9/arch-arm $SYSROOT
+	fi
+
 	mkdir -p ${SYSROOT}/usr/lib/armeabi-v7a
 
 	fix_sysroot lib             ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/armeabi     elf32-littlearm
 	fix_sysroot lib/armeabi-v7a ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/armeabi-v7a elf32-littlearm
 	;;
     mips*)
-	copysrc ${FROM}-9/arch-mips $SYSROOT
+	if [ "$BUILD_PIE_COMPILER" = "yes" ]; then
+	    copysrc ${FROM}-24/arch-mips $SYSROOT
+	else
+	    copysrc ${FROM}-9/arch-mips $SYSROOT
+	fi
 
 	fix_sysroot lib   ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/mips elf32-tradlittlemips
 	fix_sysroot libr2 ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/mips elf32-tradlittlemips
 	fix_sysroot libr6 ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/mips elf32-tradlittlemips
 	;;
     *86*)
-	copysrc ${FROM}-9/arch-x86 $SYSROOT
+	if [ "$BUILD_PIE_COMPILER" = "yes" ]; then
+	    copysrc ${FROM}-24/arch-x86 $SYSROOT
+	else
+	    copysrc ${FROM}-9/arch-x86 $SYSROOT
+	fi
 
 	fix_sysroot lib ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/x86 elf32-i386
 	;;

@@ -1,0 +1,4 @@
+ac_cv_func_fseeko64=${ac_cv_func_fseeko64=no}
+ac_cv_func_fseeko=${ac_cv_func_fseeko=no}
+ac_cv_func_ftello64=${ac_cv_func_ftello64=no}
+ac_cv_func_ftello=${ac_cv_func_ftello=no}

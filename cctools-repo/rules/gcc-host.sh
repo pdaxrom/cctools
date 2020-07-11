@@ -33,10 +33,10 @@ build_gcc_host() {
 	EXTRA_CONF="--enable-fix-cortex-a53-835769"
 	;;
     mips64el*)
-	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point"
+	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point --disable-objc-gc"
 	;;
     x86_64*)
-	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --with-multilib-list=m32,m64,mx32 --disable-libcilkrts"
+	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --with-multilib-list=m32,m64 --disable-libquadmath-support --disable-libcilkrts"
 	;;
     mips*)
 	EXTRA_CONF="--with-arch=mips32 --disable-threads --disable-fixed-point"

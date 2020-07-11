@@ -22,6 +22,16 @@ build_binutils() {
     mkdir -p $B_DIR
     cd $B_DIR
 
+    local EXTRA_LDFLAGS="-Wl,-rpath-link,${SYSROOT}/usr/lib"
+
+    case $TARGET_ARCH in
+    x86*)
+	EXTRA_LDFLAGS="-Wl,-rpath-link,${SYSROOT}/usr/lib64"
+	#mkdir bfd
+	#cp -f ${TOPDIR}/configs/config.cache-x86_64 bfd/config.cache
+	;;
+    esac
+
 #    export ac_cv_func_strtod=no
     $S_DIR/configure \
 	--host=$TARGET_ARCH \
@@ -34,7 +44,7 @@ build_binutils() {
 	--disable-static \
 	--enable-shared \
 	--disable-werror \
-	LDFLAGS="-Wl,-rpath-link,${SYSROOT}/usr/lib" \
+	LDFLAGS="$EXTRA_LDFLAGS" \
 	|| error "configure"
 
     $MAKE $MAKEARGS || error "make $MAKEARGS"

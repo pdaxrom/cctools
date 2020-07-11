@@ -31,7 +31,7 @@ diff -Nur gcc-4.9-no-pie/gcc/config/linux-android.h gcc-4.9/gcc/config/linux-and
  #define ANDROID_LINK_SPEC \
 +  "%{!nopie: %{!static: %{!A: %{!shared: %{!nostdlib: %{!nostartfiles:	\
 +     %{!fno-PIE: %{!fno-pie: -pie} } } } } } } } %{pie: -pie} "		\
-   "%{shared: -Bsymbolic} -z noexecstack -z relro -z now"
+   "-z noexecstack -z relro -z now"
  
  #define ANDROID_CC1_SPEC(ANDROID_PIC_DEFAULT)				\
    "%{!mglibc:%{!muclibc:%{!mbionic: -mbionic}}} "			\

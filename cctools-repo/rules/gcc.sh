@@ -35,7 +35,7 @@ build_gcc() {
 	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point"
 	;;
     x86_64*)
-	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --with-multilib-list=m32,m64,mx32 --disable-libcilkrts"
+	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --enable-multilib --disable-libquadmath-support --disable-libcilkrts"
 	;;
     mips*)
 	EXTRA_CONF="--with-arch=mips32 --disable-threads --disable-fixed-point"
@@ -316,6 +316,14 @@ EOF
     PKG_DESC="GCC support library, compact version (development files)"
 
     case $TARGET_ARCH in
+    aarch64*)
+	;;
+    mips64*)
+	;;
+    x86_64*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/32
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib
+	;;
     arm*)
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
@@ -330,7 +338,7 @@ EOF
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6
 	;;
-    i*86*|x86*)
+    i*86*)
 	;;
     esac
 
@@ -343,6 +351,27 @@ EOF
     # LIBSTDC++
     #
 
+add_gnustl_library() {
+    local ANAME=$1
+    local ALIB=$2
+    local OFORM=$3
+
+    $INSTALL -D -m 644 $src_dir/libs/${ANAME}/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/${ALIB}/libgnustl_shared.so
+    $INSTALL -D -m 644 $src_dir/libs/${ANAME}/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/${ALIB}/libgnustl_static.a
+    mkdir -p ${TMPINST_DIR}/${PKG}/cctools/${ALIB}
+    ln -sf ../${TARGET_ARCH}/${ALIB}/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/${ALIB}
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/${ALIB}/libstdc++.so <<EOF
+OUTPUT_FORMAT($OFORM)
+GROUP ( libgnustl_shared.so )
+EOF
+
+    cat > ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/${ALIB}/libstdc++.a <<EOF
+OUTPUT_FORMAT($OFORM)
+GROUP ( libgnustl_static.a )
+EOF
+}
+
     PKG="libstdc++-dev"
     PKG_DESC="GNU Standard C++ Library v3 (development files)"
 
@@ -350,45 +379,26 @@ EOF
 
     case $TARGET_ARCH in
     aarch64*)
-	OFORM="elf64-littleaarch64"
-	ANAME="arm64-v8a"
+	add_gnustl_library arm64-v8a lib64 elf64-littleaarch64
 	;;
     mips64el*)
-	OFORM="elf64-tradlittlemips"
-	ANAME="mips64"
+	add_gnustl_library mips64 lib64 elf64-tradlittlemips
+	add_gnustl_library mips   lib   elf32-tradlittlemips
 	;;
     x86_64*)
-	OFORM="elf64-x86-64"
-	ANAME="x86_64"
+	add_gnustl_library x86_64 lib64 elf64-x86-64
+	add_gnustl_library x86    lib   elf32-i386
 	;;
     mips*)
-	OFORM="elf32-tradlittlemips"
-	ANAME="mips"
+	add_gnustl_library mips lib elf32-tradlittlemips
 	;;
     arm*)
-	OFORM="elf32-littlearm"
-	ANAME="armeabi"
+	add_gnustl_library armeabi lib elf32-littlearm
 	;;
-    i*86*|x86*)
-	OFORM="elf32-i386"
-	ANAME="x86"
+    i*86*)
+	add_gnustl_library x86 lib elf32-i386
 	;;
     esac
-
-    $INSTALL -D -m 644 $src_dir/libs/${ANAME}/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_shared.so
-    $INSTALL -D -m 644 $src_dir/libs/${ANAME}/libgnustl_static.a  ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libgnustl_static.a
-    mkdir -p ${TMPINST_DIR}/${PKG}/cctools/lib
-    ln -sf ../${TARGET_ARCH}/lib/libgnustl_shared.so ${TMPINST_DIR}/${PKG}/cctools/lib/
-
-    cat > ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.so <<EOF
-OUTPUT_FORMAT($OFORM)
-GROUP ( libgnustl_shared.so )
-EOF
-
-    cat > ${TMPINST_DIR}/${PKG}/cctools/$TARGET_ARCH/lib/libstdc++.a <<EOF
-OUTPUT_FORMAT($OFORM)
-GROUP ( libgnustl_static.a )
-EOF
 
     local filename="${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${PKG_ARCH}.zip"
     build_package_desc ${TMPINST_DIR}/${PKG} $filename ${PKG} ${PKG_VERSION}${PKG_SUBVERSION} $PKG_ARCH "$PKG_DESC" "" "libstdc++-compact-dev"
@@ -411,6 +421,15 @@ EOF
     PKG_DESC="GNU Standard C++ Library v3, compact version (development files)"
 
     case $TARGET_ARCH in
+    aarch64*)
+	;;
+    mips64*)
+	;;
+    x86_64*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/32
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib
+	;;
     arm*)
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/include/c++/${gcc_version}/${TARGET_ARCH}/armv7-a
@@ -425,7 +444,7 @@ EOF
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6
 	;;
-    i*86*|x86*)
+    i*86*)
 	;;
     esac
 
@@ -463,6 +482,14 @@ EOF
     PKG_DESC="Runtime library for GNU Fortran applications, compact version (development files)"
 
     case $TARGET_ARCH in
+    aarch64*)
+	;;
+    mips64*)
+	;;
+    x86_64*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/32
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib
+	;;
     arm*)
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
@@ -477,7 +504,7 @@ EOF
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6
 	;;
-    i*86*|x86*)
+    i*86*)
 	;;
     esac
 
@@ -514,6 +541,13 @@ EOF
     PKG_DESC="Runtime library for GNU Objective-C applications, compact version (development files)"
 
     case $TARGET_ARCH in
+    aarch64*)
+	;;
+    mips64*)
+	;;
+    x86_64*)
+	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/lib
+	;;
     arm*)
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/thumb
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/lib/gcc/${TARGET_ARCH}/${gcc_version}/armv7-a
@@ -528,7 +562,7 @@ EOF
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr2
 	rm -rf ${TMPINST_DIR}/${PKG}/cctools/${TARGET_ARCH}/libr6
 	;;
-    i*86*|x86*)
+    i*86*)
 	;;
     esac
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-ndk_version="r12b"
+ndk_version="r15c"
 
-binutils_version="2.25"
+binutils_version="2.27"
 gcc_version="4.9"
 gmp_version="5.0.5"
 mpc_version="1.0.1"
@@ -15,7 +15,7 @@ make_version="4.0"
 nano_version="2.2.6"
 emacs_version="24.2"
 
-binutils_avr_version="2.25"
+binutils_avr_version="2.27"
 gcc_avr_version="4.9.3"
 
 gcc_mingw_version="4.9.3"
@@ -168,7 +168,7 @@ preparesrc() {
 	copysrc $1 $2
 	if [ -f ${patch_dir}/`basename $2`.patch ]; then
 	    cd $2
-	    patch -p1 < ${patch_dir}/`basename $2`.patch
+	    patch -p1 < ${patch_dir}/`basename $2`.patch || error "preparesrc $1 $2"
 	fi
 	popd
     fi
@@ -234,7 +234,7 @@ patchsrc() {
     if [ -f ${patch_dir}/${2}-${3}.patch ]; then
 	pushd .
 	cd $1
-	patch -p1 < ${patch_dir}/${2}-${3}.patch || error "Correpted patch file."
+	patch -p1 < ${patch_dir}/${2}-${3}.patch || error "Corrupted patch file."
 	popd
     fi
 }
@@ -727,6 +727,7 @@ build_build_helper
 build_busybox
 build_make
 build_adialog
+exit 0
 
 # Addons
 build_ncurses

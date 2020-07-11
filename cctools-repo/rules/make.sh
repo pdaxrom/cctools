@@ -29,7 +29,7 @@ build_make() {
     mips*)
 	cp -f ${TOPDIR}/configs/config.cache-mips config.cache
 	;;
-    i*86*|x86*)
+    i*86*)
 	cp -f ${TOPDIR}/configs/config.cache-x86 config.cache
 	;;
     esac

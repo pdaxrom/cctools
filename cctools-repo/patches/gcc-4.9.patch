@@ -399,24 +399,14 @@ diff -Nur gcc-4.9.orig/libiberty/getpagesize.c gcc-4.9/libiberty/getpagesize.c
 diff -Nur gcc-4.9.orig/libstdc++-v3/src/Makefile.in gcc-4.9/libstdc++-v3/src/Makefile.in
 --- gcc-4.9.orig/libstdc++-v3/src/Makefile.in	2015-06-06 00:33:27.000000000 +0400
 +++ gcc-4.9/libstdc++-v3/src/Makefile.in	2015-06-06 10:51:19.527904995 +0400
-@@ -343,7 +343,7 @@
- SUBDIRS = c++98 c++11
+ @ENABLE_BIONIC_LIBS_FALSE@toolexeclib_LTLIBRARIES = libstdc++.la
  
  # Cross compiler support.
--toolexeclib_LTLIBRARIES = libgnustl_shared.la
-+toolexeclib_LTLIBRARIES = libstdc++.la
+-@ENABLE_BIONIC_LIBS_TRUE@toolexeclib_LTLIBRARIES = libgnustl_shared.la
++@ENABLE_BIONIC_LIBS_TRUE@toolexeclib_LTLIBRARIES = libstdc++.la
  @GLIBCXX_LDBL_COMPAT_FALSE@ldbl_compat_sources = 
  @GLIBCXX_LDBL_COMPAT_TRUE@ldbl_compat_sources = compatibility-ldbl.cc
  parallel_compat_sources = \
-@@ -554,7 +554,7 @@
- libstdc++.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES) 
- 	$(libstdc___la_LINK) -rpath $(toolexeclibdir) $(libstdc___la_OBJECTS) $(libstdc___la_LIBADD) $(LIBS)
- 
--libgnustl_shared.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES)
-+libstdc++.la: $(libstdc___la_OBJECTS) $(libstdc___la_DEPENDENCIES)
- 	$(libstdc___la_LINK) -rpath $(toolexeclibdir) $(libstdc___la_OBJECTS) $(libstdc___la_LIBADD) $(LIBS)
- 
- mostlyclean-compile:
 diff -Nur gcc-4.9.orig/gcc/gcov-tool.c gcc-4.9/gcc/gcov-tool.c
 --- gcc-4.9.orig/gcc/gcov-tool.c	2015-06-06 00:33:18.000000000 +0400
 +++ gcc-4.9/gcc/gcov-tool.c	2015-06-06 13:53:06.880383435 +0400

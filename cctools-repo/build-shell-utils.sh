@@ -21,7 +21,7 @@ gcc_avr_version="4.9.3"
 gcc_mingw_version="4.9.3"
 
 TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/root/cctools"
-#TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/cache/cctools"
+TERMUX_TARGET_INST_DIR="/data/data/com.termux/files/opt"
 
 SRC_PREFIX="$1"
 TARGET_ARCH="$2"
@@ -91,14 +91,25 @@ CYGWIN*)
 esac
 
 case $TARGET_ARCH in
-arm*|aarch64*)
+arm*)
     TARGET_ARCH_GLIBC=arm-none-linux-gnueabi
+    DEB_ARCH=arm
+    ;;
+aarch64*)
+    TARGET_ARCH_GLIBC=arm-none-linux-gnueabi
+    DEB_ARCH=aarch64
     ;;
 mips*|mips64el*)
     TARGET_ARCH_GLIBC=mips-linux-gnu
+    DEB_ARCH=mips
     ;;
-i*86*|x86*)
+i*86*)
     TARGET_ARCH_GLIBC=i686-pc-linux-gnu
+    DEB_ARCH=i686
+    ;;
+x86*)
+    TARGET_ARCH_GLIBC=i686-pc-linux-gnu
+    DEB_ARCH=x86_64
     ;;
 *)
     echo "unknown arch $TARGET_ARCH"
@@ -668,17 +679,25 @@ fi
 
 build_sysroot_host
 
-build_gmp_host
-build_mpfr_host
-build_mpc_host
-build_isl_host
-build_ppl_host
-build_cloog_host
+#build_gmp_host
+#build_mpfr_host
+#build_mpc_host
+#build_isl_host
+#build_ppl_host
+#build_cloog_host
 
-build_binutils_host
-build_gcc_host
+#build_binutils_host
+#build_gcc_host
 
 # ----------------------------------------------------------
+
+build_cross_binutils_cctools
+build_cross_gcc_cctools
+
+build_binutils_cctools
+
+exit 0
+
 
 # Toolchain support libs
 build_gmp

@@ -1,0 +1,91 @@
+--- gcc-6.4.0-orig/libstdc++-v3/config/os/bionic/ctype_base.h
++++ gcc-6.4.0-android/libstdc++-v3/config/os/bionic/ctype_base.h
+@@ -28,6 +28,22 @@
+ 
+ // Information as gleaned from /usr/include/ctype.h
+ 
++#if defined (__ANDROID__)
++#if !defined(_U)
++#if !defined(_CTYPE_U)
++#error Bionic header ctype.h does not define either _U nor _CTYPE_U
++#endif
++#define _U _CTYPE_U
++#define _L _CTYPE_L
++#define _N _CTYPE_N
++#define _S _CTYPE_S
++#define _P _CTYPE_P
++#define _C _CTYPE_C
++#define _X _CTYPE_X
++#define _B _CTYPE_B
++#endif
++#endif /* __ANDROID__ */
++
+ namespace std _GLIBCXX_VISIBILITY(default)
+ {
+ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+--- gcc-10.1.0/libgfortran/runtime/error.c-	2020-07-11 05:20:06.492289412 -0700
++++ gcc-10.1.0/libgfortran/runtime/error.c	2020-07-11 05:20:29.692290397 -0700
+@@ -59,6 +59,10 @@
+ #include <process.h>
+ #endif
+ 
++#ifdef __BIONIC__
++#undef HAVE_STRERROR_L
++#endif
++
+ 
+ /* Termination of a program: F2008 2.3.5 talks about "normal
+    termination" and "error termination". Normal termination occurs as
+--- gcc-6.4.0-orig/libstdc++-v3/src/c++11/futex.cc
++++ gcc-6.4.0-android/libstdc++-v3/src/c++11/futex.cc
+@@ -27,7 +27,11 @@
+ #if defined(_GLIBCXX_HAVE_LINUX_FUTEX) && ATOMIC_INT_LOCK_FREE > 1
+ #include <chrono>
+ #include <climits>
++#ifdef __ANDROID__
++#include <sys/syscall.h>
++#else
+ #include <syscall.h>
++#endif
+ #include <unistd.h>
+ #include <sys/time.h>
+ #include <errno.h>
+--- gcc-6.4.0-orig/libstdc++-v3/libsupc++/guard.cc
++++ gcc-6.4.0-android/libstdc++-v3/libsupc++/guard.cc
+@@ -33,7 +33,11 @@
+ #if defined(__GTHREADS) && defined(__GTHREAD_HAS_COND) \
+   && (ATOMIC_INT_LOCK_FREE > 1) && defined(_GLIBCXX_HAVE_LINUX_FUTEX)
+ # include <climits>
++#if defined(__ANDROID__)
++# include <sys/syscall.h>
++#else
+ # include <syscall.h>
++#endif
+ # include <unistd.h>
+ # define _GLIBCXX_USE_FUTEX
+ # define _GLIBCXX_FUTEX_WAIT 0
+--- gcc-10.1.0/libgfortran/intrinsics/random.c-	2020-07-11 05:30:27.460315769 -0700
++++ gcc-10.1.0/libgfortran/intrinsics/random.c	2020-07-11 05:31:01.300317206 -0700
+@@ -47,6 +47,10 @@
+ #include <_mingw.h> /* For __MINGW64_VERSION_MAJOR  */
+ #endif
+ 
++#ifdef __BIONIC__
++#undef HAVE_GETENTROPY
++#endif
++
+ extern void random_r4 (GFC_REAL_4 *);
+ iexport_proto(random_r4);
+ 
+--- gcc-10.1.0/libgfortran/io/unix.c-	2020-07-11 05:24:16.900300041 -0700
++++ gcc-10.1.0/libgfortran/io/unix.c	2020-07-11 05:24:24.144300348 -0700
+@@ -40,6 +40,9 @@
+ #include <string.h>
+ #include <errno.h>
+ 
++#ifdef __BIONIC__
++#undef HAVE_MKOSTEMP
++#endif
+ 
+ /* For mingw, we don't identify files by their inode number, but by a
+    64-bit identifier created from a BY_HANDLE_FILE_INFORMATION. */

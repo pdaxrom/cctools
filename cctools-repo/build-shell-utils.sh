@@ -21,7 +21,7 @@ gcc_avr_version="4.9.3"
 gcc_mingw_version="4.9.3"
 
 TARGET_INST_DIR="/data/data/com.pdaxrom.cctools/root/cctools"
-TERMUX_TARGET_INST_DIR="/data/data/com.termux/files/opt"
+TERMUX_TARGET_INST_DIR="/data/data/com.termux/files/cctools-toolchain"
 
 SRC_PREFIX="$1"
 TARGET_ARCH="$2"
@@ -695,7 +695,7 @@ build_cross_binutils_cctools
 build_cross_gcc_cctools
 
 build_binutils_cctools
-
+build_gcc_cctools
 exit 0
 
 

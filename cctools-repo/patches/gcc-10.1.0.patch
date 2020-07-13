@@ -1,5 +1,5 @@
---- gcc-6.4.0-orig/libstdc++-v3/config/os/bionic/ctype_base.h
-+++ gcc-6.4.0-android/libstdc++-v3/config/os/bionic/ctype_base.h
+--- gcc-10.1.0/libstdc++-v3/config/os/bionic/ctype_base.h-
++++ gcc-10.1.0/libstdc++-v3/config/os/bionic/ctype_base.h
 @@ -28,6 +28,22 @@
  
  // Information as gleaned from /usr/include/ctype.h
@@ -36,8 +36,8 @@
  
  /* Termination of a program: F2008 2.3.5 talks about "normal
     termination" and "error termination". Normal termination occurs as
---- gcc-6.4.0-orig/libstdc++-v3/src/c++11/futex.cc
-+++ gcc-6.4.0-android/libstdc++-v3/src/c++11/futex.cc
+--- gcc-10.1.0/libstdc++-v3/src/c++11/futex.cc-
++++ gcc-10.1.0/libstdc++-v3/src/c++11/futex.cc
 @@ -27,7 +27,11 @@
  #if defined(_GLIBCXX_HAVE_LINUX_FUTEX) && ATOMIC_INT_LOCK_FREE > 1
  #include <chrono>
@@ -50,8 +50,8 @@
  #include <unistd.h>
  #include <sys/time.h>
  #include <errno.h>
---- gcc-6.4.0-orig/libstdc++-v3/libsupc++/guard.cc
-+++ gcc-6.4.0-android/libstdc++-v3/libsupc++/guard.cc
+--- gcc-10.1.0/libstdc++-v3/libsupc++/guard.cc-
++++ gcc-10.1.0/libstdc++-v3/libsupc++/guard.cc
 @@ -33,7 +33,11 @@
  #if defined(__GTHREADS) && defined(__GTHREAD_HAS_COND) \
    && (ATOMIC_INT_LOCK_FREE > 1) && defined(_GLIBCXX_HAVE_LINUX_FUTEX)
@@ -89,3 +89,44 @@
  
  /* For mingw, we don't identify files by their inode number, but by a
     64-bit identifier created from a BY_HANDLE_FILE_INFORMATION. */
+--- gcc-10.1.0/libcpp/files.c-	2020-07-12 06:18:20.893290475 -0700
++++ gcc-10.1.0/libcpp/files.c	2020-07-12 06:19:05.509292368 -0700
+@@ -747,11 +747,15 @@
+     cpp_error_at (pfile, CPP_DL_WARNING, loc,
+ 	       "%s is shorter than expected", file->path);
+ 
++  off_t _st_size = file->st.st_size;
++
+   file->buffer = _cpp_convert_input (pfile,
+ 				     CPP_OPTION (pfile, input_charset),
+ 				     buf, size + 16, total,
+ 				     &file->buffer_start,
+-				     &file->st.st_size);
++				     &_st_size);
++
++  file->st.st_size = _st_size;
+   file->buffer_valid = true;
+ 
+   return true;
+--- gcc-10.1.0/libcpp/macro.c-	2020-07-12 06:23:24.805303374 -0700
++++ gcc-10.1.0/libcpp/macro.c	2020-07-12 06:24:44.545306759 -0700
+@@ -510,7 +510,7 @@
+ 		struct tm *tb = NULL;
+ 		struct stat *st = _cpp_get_file_stat (file);
+ 		if (st)
+-		  tb = localtime (&st->st_mtime);
++		  tb = localtime ((const time_t *)&st->st_mtime);
+ 		if (tb)
+ 		  {
+ 		    char *str = asctime (tb);
+--- gcc-10.1.0/gcc/opts-common.c-	2020-07-12 07:56:35.656027548 -0700
++++ gcc-10.1.0/gcc/opts-common.c	2020-07-12 07:56:50.900027869 -0700
+@@ -178,7 +178,7 @@
+ integral_argument (const char *arg, int *err, bool byte_size_suffix)
+ {
+   if (!err)
+-    err = &errno;
++    err = (int *) &errno;
+ 
+   if (!ISDIGIT (*arg))
+     {

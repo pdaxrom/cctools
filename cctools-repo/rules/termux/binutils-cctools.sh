@@ -50,11 +50,12 @@ if true; then
 	--enable-targets=arm-linux-androideabi,mipsel-linux-android,i686-linux-android,aarch64-linux-android,mips64el-linux-android,x86_64-linux-android \
 	--enable-multilib \
 	--disable-nls \
-	--disable-static \
-	--enable-shared \
 	--disable-werror \
 	LDFLAGS="$EXTRA_LDFLAGS" \
 	|| error "Configure $PKG."
+
+#	--disable-static \
+#	--enable-shared \
 
 fi
     $MAKE $MAKEARGS || error "make $MAKEARGS"
@@ -70,6 +71,8 @@ fi
 	    ln -sf ../../bin/$(basename $f) $f
 	fi
     done
+
+    rm -f  ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/share/info/dir
 
     ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/* || true
     ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/lib/* || true

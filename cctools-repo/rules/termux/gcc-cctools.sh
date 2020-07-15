@@ -132,6 +132,8 @@ fi
 	${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/lib/gcc/${TARGET_ARCH}/${PKG_VERSION/.*}/$f || true
     done
 
+    rm -f  ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/share/info/dir
+
     PKG_SIZE=$(du -k ${TMPINST_DIR}/${PKG} | tail -1 | awk '{ print $1}')
 
     mkdir ${TMPINST_DIR}/${PKG}/DEBIAN

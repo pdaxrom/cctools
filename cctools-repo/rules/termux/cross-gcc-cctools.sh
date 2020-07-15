@@ -2,7 +2,7 @@ build_cross_gcc_cctools() {
     PKG=cross-gcc-cctools
     PKG_VERSION=10.1.0
     PKG_SUBVERSION=
-    PKG_URL="http://mirror.koddos.net/gcc/releases/gcc-10.1.0/gcc-${PKG_VERSION}.tar.xz"
+    PKG_URL="http://mirrors.concertpass.com/gcc/releases/gcc-10.1.0/gcc-${PKG_VERSION}.tar.xz"
     PKG_MAINTAINER="sashz <sashz@pdaXrom.org>"
     PKG_HOME="https://gcc.gnu.org/"
     PKG_DESC="The GNU Compiler Collection"
@@ -46,7 +46,7 @@ if true; then
 	EXTRA_CONF="--enable-fix-cortex-a53-835769"
 	;;
     mips64el*)
-	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point --disable-objc-gc"
+	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point"
 	;;
     x86_64*)
 	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --with-multilib-list=m32,m64 --disable-libquadmath-support --disable-libcilkrts"
@@ -55,8 +55,7 @@ if true; then
 	EXTRA_CONF="--with-arch=mips32 --disable-threads --disable-fixed-point"
 	;;
     arm*)
-	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp --enable-objc-gc=auto"
-	#EXTRA_CONF="--with-arch=armv7-a --with-float=softfp --with-fpu=vfpv3-d16"
+	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp"
 	;;
     *86*)
 	EXTRA_CONF="--disable-libquadmath-support --disable-libcilkrts"
@@ -69,6 +68,7 @@ if true; then
 	EXTRA_CONF="$EXTRA_CONF --enable-default-pie"
     fi
 
+
     ${S_DIR}/configure	\
 	--target=$TARGET_ARCH \
 	--host=x86_64-linux-gnu \
@@ -76,7 +76,7 @@ if true; then
 	--build=x86_64-linux-gnu \
 	--with-gnu-as \
 	--with-gnu-ld \
-	--enable-languages=c,c++,d,fortran,objc,obj-c++ \
+	--enable-languages=c,c++,fortran,objc,obj-c++ \
 	--enable-bionic-libs \
 	--enable-libatomic-ifuncs=no \
 	--enable-cloog-backend=isl \
@@ -96,7 +96,7 @@ if true; then
 	--disable-libsanitizer \
 	--enable-graphite=yes \
 	--with-sysroot=$SYSROOT \
-	--enable-objc-gc \
+	--enable-objc-gc=auto \
 	--enable-eh-frame-hdr-for-static \
 	--enable-target-optspace \
 	--with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \

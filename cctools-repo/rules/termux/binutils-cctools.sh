@@ -61,8 +61,8 @@ fi
 
     $MAKE install DESTDIR=${TMPINST_DIR}/${PKG} || error "package install"
 
-    ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/* || true
-    ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/lib/* || true
+    rm -f  ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/ld.bfd
+    ln -sf ld ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/ld.bfd
 
     for f in $(find ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/${TARGET_ARCH}/bin/ -type f -executable); do
 	if [ -f ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/$(basename $f) ]; then
@@ -70,6 +70,9 @@ fi
 	    ln -sf ../../bin/$(basename $f) $f
 	fi
     done
+
+    ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/* || true
+    ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/lib/* || true
 
     PKG_SIZE=$(du -k ${TMPINST_DIR}/${PKG} | tail -1 | awk '{ print $1}')
 

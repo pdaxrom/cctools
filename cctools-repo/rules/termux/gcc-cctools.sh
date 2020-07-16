@@ -63,6 +63,8 @@ if true; then
 
     mkdir gcc
     echo "ac_cv_c_bigendian=no" > gcc/config.cache
+    echo "gcc_cv_c_no_fpie=no" >> gcc/config.cache
+    echo "gcc_cv_no_pie=no"    >> gcc/config.cache
 
     if [ "$BUILD_PIE_COMPILER" = "yes" ]; then
 	EXTRA_CONF="$EXTRA_CONF --enable-default-pie"

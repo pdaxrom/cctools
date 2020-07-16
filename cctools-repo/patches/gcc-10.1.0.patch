@@ -232,3 +232,27 @@ diff -Nur /mnt/sash/cctools/cctools-repo/tmp-pie/arm-repo/src/gcc-10.1.0/gcc/con
  	esac
  	aarch64_multilibs="${with_multilib_list}"
  	if test "$aarch64_multilibs" = "default"; then
+diff -Nur /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/libiberty/configure gcc-10.1.0/libiberty/configure
+--- /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/libiberty/configure	2020-05-07 03:50:02.000000000 -0700
++++ gcc-10.1.0/libiberty/configure	2020-07-16 02:00:37.780741643 -0700
+@@ -5378,7 +5378,7 @@
+   if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error $? "cannot run test program while cross compiling
++echo $? "cannot run test program while cross compiling
+ See \`config.log' for more details" "$LINENO" 5; }
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+diff -Nur /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/lto-plugin/configure gcc-10.1.0/lto-plugin/configure
+--- /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/lto-plugin/configure	2020-05-07 03:50:03.000000000 -0700
++++ gcc-10.1.0/lto-plugin/configure	2020-07-16 02:07:05.284748451 -0700
+@@ -5771,7 +5771,7 @@
+   if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error $? "cannot run test program while cross compiling
++echo $? "cannot run test program while cross compiling
+ See \`config.log' for more details" "$LINENO" 5; }
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext

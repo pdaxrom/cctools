@@ -68,7 +68,6 @@ if true; then
 	EXTRA_CONF="$EXTRA_CONF --enable-default-pie"
     fi
 
-
     ${S_DIR}/configure	\
 	--target=$TARGET_ARCH \
 	--host=x86_64-linux-gnu \

@@ -97,7 +97,6 @@ if true; then
 	--enable-libgomp \
 	--disable-libsanitizer \
 	--enable-graphite=yes \
-	--with-sysroot=$SYSROOT \
 	--with-gcc-major-version-only \
 	--program-suffix=-${PKG_VERSION/.*} \
 	--enable-objc-gc=auto \

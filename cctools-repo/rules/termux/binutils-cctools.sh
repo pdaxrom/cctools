@@ -46,7 +46,6 @@ if true; then
 	--host=$TARGET_ARCH \
 	--prefix=$TERMUX_TARGET_INST_DIR \
 	--target=$TARGET_ARCH \
-	--with-sysroot=$SYSROOT \
 	--enable-targets=arm-linux-androideabi,mipsel-linux-android,i686-linux-android,aarch64-linux-android,mips64el-linux-android,x86_64-linux-android \
 	--enable-multilib \
 	--disable-nls \

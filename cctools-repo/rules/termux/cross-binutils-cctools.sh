@@ -22,7 +22,7 @@ build_cross_binutils_cctools() {
     fi
 
     unpack $src_dir $O_FILE
-    patchsrc $S_DIR $PKG $PKG_VERSION
+    patchsrc $S_DIR binutils $PKG_VERSION
 
     if [ "$USE_NATIVE_BUILD" = "yes" ]; then
 	fix_bionic_shell $S_DIR

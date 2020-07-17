@@ -42,6 +42,13 @@ if true; then
 	;;
     esac
 
+    mkdir bfd
+cat >bfd/config.cache<<EOF
+ac_cv_func_fopen64=no
+ac_cv_func_fseeko64=no
+ac_cv_func_ftello64=no
+EOF
+
     ${S_DIR}/configure	\
 	--host=$TARGET_ARCH \
 	--prefix=$TERMUX_TARGET_INST_DIR \
@@ -90,6 +97,20 @@ Homepage: $PKG_HOME
 Depends: $PKG_DEPS
 Description: $PKG_DESC
 EOF
+
+#cat > ${TMPINST_DIR}/${PKG}/DEBIAN/postinst <<EOF
+#for f in ${TERMUX_TARGET_INST_DIR}/bin/*; do
+#    update-alternatives --install /data/data/com.termux/files/usr/bin/$$f $$f ${TERMUX_TARGET_INST_DIR}/bin/$$f 10
+#done
+#EOF
+
+#cat > ${TMPINST_DIR}/${PKG}/DEBIAN/prerm <<EOF
+#for f in ${TERMUX_TARGET_INST_DIR}/bin/*; do
+#    update-alternatives --remove $$f ${TERMUX_TARGET_INST_DIR}/bin/$$f
+#done
+#EOF
+
+#    chmod 755 ${TMPINST_DIR}/${PKG}/DEBIAN/postinst ${TMPINST_DIR}/${PKG}/DEBIAN/prerm
 
     dpkg -b ${TMPINST_DIR}/${PKG} ${REPO_DIR}/${PKG}_${PKG_VERSION}${PKG_SUBVERSION}_${DEB_ARCH}.deb
 

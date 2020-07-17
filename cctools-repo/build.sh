@@ -30,14 +30,14 @@ NDKSRC=/mnt/sash/ndk-r20b-src
 
 export PATH=/mnt/sash/CodeSourcery/bin:$PATH
 
-./build-shell-utils.sh ${PWD}/src arm-linux-androideabi  ${WRKDIR}/arm-repo $NDKDIR $SDKDIR      || exit 1
+#./build-shell-utils.sh ${PWD}/src arm-linux-androideabi  ${WRKDIR}/arm-repo $NDKDIR $SDKDIR      || exit 1
+./build-shell-utils.sh ${PWD}/src aarch64-linux-android  ${WRKDIR}/arm64-repo $NDKDIR $SDKDIR  || exit 1
+#./build-shell-utils.sh ${PWD}/src i686-linux-android     ${WRKDIR}/i686-repo $NDKDIR $SDKDIR     || exit 1
 
 # Depricated, but few devices still use it
 #./build-shell-utils.sh ${PWD}/src mipsel-linux-android   ${WRKDIR}/mips-repo $NDKDIR $SDKDIR     || exit 1
 
-#./build-shell-utils.sh ${PWD}/src i686-linux-android     ${WRKDIR}/i686-repo $NDKDIR $SDKDIR     || exit 1
 
-#./build-shell-utils.sh ${PWD}/src aarch64-linux-android  ${WRKDIR}/arm64-repo $NDKDIR $SDKDIR  || exit 1
 
 ### Depricated, never used
 #./build-shell-utils.sh ${PWD}/src mips64el-linux-android ${WRKDIR}/mips64-repo $NDKDIR $SDKDIR || exit 1

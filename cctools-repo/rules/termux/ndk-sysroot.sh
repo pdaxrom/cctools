@@ -143,7 +143,7 @@ EOF
 		mkdir ${TMPINST_DIR}/${PKG}-${y}-${vers}/DEBIAN
 
 cat > ${TMPINST_DIR}/${PKG}-${y}-${vers}/DEBIAN/control <<EOF
-Package: ${PKG}-api-${vers}-${DEB_ARCH}
+Package: ${PKG}-api-${vers}-${DEB_ARCH/_/-}
 Architecture: all
 Installed-Size: $PKG_SIZE
 Maintainer: $PKG_MAINTAINER

@@ -61,6 +61,10 @@ EOF
 	;;
     x86_64*|amd64*)
 	copysrc ${FROM}-24/arch-x86_64 $SYSROOT
+	cp -f ${FROM}-24/arch-x86/usr/lib/libc.so  ${SYSROOT}/usr/lib/
+	cp -f ${FROM}-24/arch-x86/usr/lib/libdl.so ${SYSROOT}/usr/lib/
+	cp -f ${FROM}-24/arch-x86/usr/lib/libm.so  ${SYSROOT}/usr/lib/
+	cp -f ${FROM}-24/arch-x86/usr/lib/libz.so  ${SYSROOT}/usr/lib/
 
 	fix_sysroot lib    ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/x86    elf32-i386
 	fix_sysroot lib64  ${NDK_DIR}/sources/cxx-stl/gnu-libstdc++/${gcc_version}/libs/x86_64 elf64-x86-64

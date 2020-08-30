@@ -1,8 +1,8 @@
 build_gcc_cctools() {
     PKG=gcc-cctools
-    PKG_VERSION=10.1.0
+    PKG_VERSION=10.2.0
     PKG_SUBVERSION=
-    PKG_URL="http://mirrors.concertpass.com/gcc/releases/gcc-10.1.0/gcc-${PKG_VERSION}.tar.xz"
+    PKG_URL="http://mirrors.concertpass.com/gcc/releases/gcc-10.2.0/gcc-${PKG_VERSION}.tar.xz"
     PKG_MAINTAINER="sashz <sashz@pdaXrom.org>"
     PKG_HOME="https://gcc.gnu.org/"
     PKG_DESC="The GNU Compiler Collection"
@@ -125,6 +125,9 @@ fi
 
     rm -f ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/c++-${PKG_VERSION/.*}
     ln -sf g++-${PKG_VERSION/.*} ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/c++-${PKG_VERSION/.*}
+
+# FIXME:
+    rm -f ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/*-tmp || true
 
     ${TARGET_ARCH}-strip ${TMPINST_DIR}/${PKG}/${TERMUX_TARGET_INST_DIR}/bin/* || true
 

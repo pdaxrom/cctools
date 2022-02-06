@@ -1,0 +1,280 @@
+--- gcc-10.1.0/libstdc++-v3/config/os/bionic/ctype_base.h-
++++ gcc-10.1.0/libstdc++-v3/config/os/bionic/ctype_base.h
+@@ -28,6 +28,22 @@
+ 
+ // Information as gleaned from /usr/include/ctype.h
+ 
++#if defined (__ANDROID__)
++#if !defined(_U)
++#if !defined(_CTYPE_U)
++#error Bionic header ctype.h does not define either _U nor _CTYPE_U
++#endif
++#define _U _CTYPE_U
++#define _L _CTYPE_L
++#define _N _CTYPE_N
++#define _S _CTYPE_S
++#define _P _CTYPE_P
++#define _C _CTYPE_C
++#define _X _CTYPE_X
++#define _B _CTYPE_B
++#endif
++#endif /* __ANDROID__ */
++
+ namespace std _GLIBCXX_VISIBILITY(default)
+ {
+ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+--- gcc-10.1.0/libgfortran/runtime/error.c-	2020-07-11 05:20:06.492289412 -0700
++++ gcc-10.1.0/libgfortran/runtime/error.c	2020-07-11 05:20:29.692290397 -0700
+@@ -59,6 +59,10 @@
+ #include <process.h>
+ #endif
+ 
++#ifdef __BIONIC__
++#undef HAVE_STRERROR_L
++#endif
++
+ 
+ /* Termination of a program: F2008 2.3.5 talks about "normal
+    termination" and "error termination". Normal termination occurs as
+--- gcc-10.1.0/libstdc++-v3/src/c++11/futex.cc-
++++ gcc-10.1.0/libstdc++-v3/src/c++11/futex.cc
+@@ -27,7 +27,11 @@
+ #if defined(_GLIBCXX_HAVE_LINUX_FUTEX) && ATOMIC_INT_LOCK_FREE > 1
+ #include <chrono>
+ #include <climits>
++#ifdef __ANDROID__
++#include <sys/syscall.h>
++#else
+ #include <syscall.h>
++#endif
+ #include <unistd.h>
+ #include <sys/time.h>
+ #include <errno.h>
+--- gcc-10.1.0/libstdc++-v3/libsupc++/guard.cc-
++++ gcc-10.1.0/libstdc++-v3/libsupc++/guard.cc
+@@ -33,7 +33,11 @@
+ #if defined(__GTHREADS) && defined(__GTHREAD_HAS_COND) \
+   && (ATOMIC_INT_LOCK_FREE > 1) && defined(_GLIBCXX_HAVE_LINUX_FUTEX)
+ # include <climits>
++#if defined(__ANDROID__)
++# include <sys/syscall.h>
++#else
+ # include <syscall.h>
++#endif
+ # include <unistd.h>
+ # define _GLIBCXX_USE_FUTEX
+ # define _GLIBCXX_FUTEX_WAIT 0
+--- gcc-10.1.0/libgfortran/intrinsics/random.c-	2020-07-11 05:30:27.460315769 -0700
++++ gcc-10.1.0/libgfortran/intrinsics/random.c	2020-07-11 05:31:01.300317206 -0700
+@@ -47,6 +47,10 @@
+ #include <_mingw.h> /* For __MINGW64_VERSION_MAJOR  */
+ #endif
+ 
++#ifdef __BIONIC__
++#undef HAVE_GETENTROPY
++#endif
++
+ extern void random_r4 (GFC_REAL_4 *);
+ iexport_proto(random_r4);
+ 
+--- gcc-10.1.0/libgfortran/io/unix.c-	2020-07-11 05:24:16.900300041 -0700
++++ gcc-10.1.0/libgfortran/io/unix.c	2020-07-11 05:24:24.144300348 -0700
+@@ -40,6 +40,9 @@
+ #include <string.h>
+ #include <errno.h>
+ 
++#ifdef __BIONIC__
++#undef HAVE_MKOSTEMP
++#endif
+ 
+ /* For mingw, we don't identify files by their inode number, but by a
+    64-bit identifier created from a BY_HANDLE_FILE_INFORMATION. */
+--- gcc-10.1.0/libcpp/files.c-	2020-07-12 06:18:20.893290475 -0700
++++ gcc-10.1.0/libcpp/files.c	2020-07-12 06:19:05.509292368 -0700
+@@ -747,11 +747,15 @@
+     cpp_error_at (pfile, CPP_DL_WARNING, loc,
+ 	       "%s is shorter than expected", file->path);
+ 
++  off_t _st_size = file->st.st_size;
++
+   file->buffer = _cpp_convert_input (pfile,
+ 				     CPP_OPTION (pfile, input_charset),
+ 				     buf, size + 16, total,
+ 				     &file->buffer_start,
+-				     &file->st.st_size);
++				     &_st_size);
++
++  file->st.st_size = _st_size;
+   file->buffer_valid = true;
+ 
+   return true;
+--- gcc-10.1.0/libcpp/macro.c-	2020-07-12 06:23:24.805303374 -0700
++++ gcc-10.1.0/libcpp/macro.c	2020-07-12 06:24:44.545306759 -0700
+@@ -510,7 +510,7 @@
+ 		struct tm *tb = NULL;
+ 		struct stat *st = _cpp_get_file_stat (file);
+ 		if (st)
+-		  tb = localtime (&st->st_mtime);
++		  tb = localtime ((const time_t *)&st->st_mtime);
+ 		if (tb)
+ 		  {
+ 		    char *str = asctime (tb);
+--- gcc-10.1.0/gcc/opts-common.c-	2020-07-12 07:56:35.656027548 -0700
++++ gcc-10.1.0/gcc/opts-common.c	2020-07-12 07:56:50.900027869 -0700
+@@ -178,7 +178,7 @@
+ integral_argument (const char *arg, int *err, bool byte_size_suffix)
+ {
+   if (!err)
+-    err = &errno;
++    err = (int *) &errno;
+ 
+   if (!ISDIGIT (*arg))
+     {
+diff -Nur /mnt/sash/cctools/cctools-repo/tmp-pie/arm-repo/src/gcc-10.1.0/gcc/config/aarch64/aarch64-linux.h gcc-10.1.0/gcc/config/aarch64/aarch64-linux.h
+--- /mnt/sash/cctools/cctools-repo/tmp-pie/arm-repo/src/gcc-10.1.0/gcc/config/aarch64/aarch64-linux.h	2020-05-07 03:49:59.000000000 -0700
++++ gcc-10.1.0/gcc/config/aarch64/aarch64-linux.h	2020-07-15 06:12:04.767689161 -0700
+@@ -22,6 +22,7 @@
+ #define GCC_AARCH64_LINUX_H
+ 
+ #define GLIBC_DYNAMIC_LINKER "/lib/ld-linux-aarch64%{mbig-endian:_be}%{mabi=ilp32:_ilp32}.so.1"
++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld-linux-aarch64%{mbig-endian:_be}%{mabi=ilp32:_ilp32}.so.1"
+ 
+ #undef MUSL_DYNAMIC_LINKER
+ #define MUSL_DYNAMIC_LINKER "/lib/ld-musl-aarch64%{mbig-endian:_be}%{mabi=ilp32:_ilp32}.so.1"
+@@ -30,7 +31,15 @@
+ #define ASAN_CC1_SPEC "%{%:sanitize(address):-funwind-tables}"
+ 
+ #undef  CC1_SPEC
+-#define CC1_SPEC GNU_USER_TARGET_CC1_SPEC ASAN_CC1_SPEC
++#define CC1_SPEC							\
++  LINUX_OR_ANDROID_CC (GNU_USER_TARGET_CC1_SPEC " " ASAN_CC1_SPEC " "	\
++		       ,						\
++		       GNU_USER_TARGET_CC1_SPEC " " ASAN_CC1_SPEC " "	\
++		       ANDROID_CC1_SPEC)
++
++#define CC1PLUS_SPEC \
++  LINUX_OR_ANDROID_CC ("", ANDROID_CC1PLUS_SPEC)
++
+ 
+ #define CPP_SPEC "%{pthread:-D_REENTRANT}"
+ 
+@@ -40,14 +49,26 @@
+    %{symbolic:-Bsymbolic}			\
+    %{!static:%{!static-pie:			\
+      %{rdynamic:-export-dynamic}		\
+-     %{!shared:-dynamic-linker " GNU_USER_DYNAMIC_LINKER "}}} \
++     %{!shared:-dynamic-linker " GNU_USER_DYNAMIC_LINKER64 "}}} \
+    %{static-pie:-Bstatic -pie --no-dynamic-linker -z text} \
+    -X						\
+    %{mbig-endian:-EB} %{mlittle-endian:-EL}     \
+    -maarch64linux%{mabi=ilp32:32}%{mbig-endian:b}"
+ 
+-
+-#define LINK_SPEC LINUX_TARGET_LINK_SPEC AARCH64_ERRATA_LINK_SPEC
++#undef  LINK_SPEC
++#define LINK_SPEC							\
++  LINUX_OR_ANDROID_LD (LINUX_TARGET_LINK_SPEC,				\
++		       LINUX_TARGET_LINK_SPEC " " ANDROID_LINK_SPEC)	\
++  AARCH64_ERRATA_LINK_SPEC
++
++#undef  LIB_SPEC
++#define LIB_SPEC							\
++  LINUX_OR_ANDROID_LD (GNU_USER_TARGET_LIB_SPEC,			\
++		    GNU_USER_TARGET_NO_PTHREADS_LIB_SPEC " " ANDROID_LIB_SPEC)
++
++#undef	STARTFILE_SPEC
++#define STARTFILE_SPEC \
++  LINUX_OR_ANDROID_LD (GNU_USER_TARGET_STARTFILE_SPEC, ANDROID_STARTFILE_SPEC)
+ 
+ #define GNU_USER_TARGET_MATHFILE_SPEC \
+   "%{Ofast|ffast-math|funsafe-math-optimizations:crtfastmath.o%s}"
+@@ -55,15 +76,19 @@
+ #undef ENDFILE_SPEC
+ #define ENDFILE_SPEC   \
+   GNU_USER_TARGET_MATHFILE_SPEC " " \
+-  GNU_USER_TARGET_ENDFILE_SPEC
++  LINUX_OR_ANDROID_LD (GNU_USER_TARGET_ENDFILE_SPEC, ANDROID_ENDFILE_SPEC)
+ 
+ #define TARGET_OS_CPP_BUILTINS()		\
+   do						\
+     {						\
+ 	GNU_USER_TARGET_OS_CPP_BUILTINS();	\
++	ANDROID_TARGET_OS_CPP_BUILTINS();	\
+     }						\
+   while (0)
+ 
++#define EXTRA_TARGET_D_OS_VERSIONS()		\
++  ANDROID_TARGET_D_OS_VERSIONS();
++
+ #define GNU_USER_TARGET_D_CRITSEC_SIZE 48
+ 
+ #define TARGET_ASM_FILE_END aarch64_file_end_indicate_exec_stack
+diff -Nur /mnt/sash/cctools/cctools-repo/tmp-pie/arm-repo/src/gcc-10.1.0/gcc/config.gcc gcc-10.1.0/gcc/config.gcc
+--- /mnt/sash/cctools/cctools-repo/tmp-pie/arm-repo/src/gcc-10.1.0/gcc/config.gcc	2020-05-07 03:49:59.000000000 -0700
++++ gcc-10.1.0/gcc/config.gcc	2020-07-15 05:57:59.827692384 -0700
+@@ -1083,14 +1083,18 @@
+ 	extra_options="${extra_options} netbsd.opt netbsd-elf.opt"
+ 	;;
+ aarch64*-*-linux*)
+-	tm_file="${tm_file} dbxelf.h elfos.h gnu-user.h linux.h glibc-stdint.h"
++	tm_file="${tm_file} dbxelf.h elfos.h gnu-user.h linux.h linux-android.h glibc-stdint.h"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-errata.h aarch64/aarch64-linux.h"
++	extra_options="${extra_options} linux-android.opt"
+ 	tmake_file="${tmake_file} aarch64/t-aarch64 aarch64/t-aarch64-linux"
+ 	tm_defines="${tm_defines}  TARGET_DEFAULT_ASYNC_UNWIND_TABLES=1"
+ 	case $target in
+ 	aarch64_be-*)
+ 		tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=1"
+ 		;;
++#	aarch64*-*-linux-android*)
++#		tm_file="${tm_file} aarch64/aarch64-linux-android.h"
++#		;;
+ 	esac
+ 	aarch64_multilibs="${with_multilib_list}"
+ 	if test "$aarch64_multilibs" = "default"; then
+diff -Nur /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/libiberty/configure gcc-10.1.0/libiberty/configure
+--- /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/libiberty/configure	2020-05-07 03:50:02.000000000 -0700
++++ gcc-10.1.0/libiberty/configure	2020-07-16 02:00:37.780741643 -0700
+@@ -5378,7 +5378,7 @@
+   if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error $? "cannot run test program while cross compiling
++echo $? "cannot run test program while cross compiling
+ See \`config.log' for more details" "$LINENO" 5; }
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+diff -Nur /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/lto-plugin/configure gcc-10.1.0/lto-plugin/configure
+--- /mnt/sash/cctools/cctools-repo/tmp-pie/arm64-repo/src/gcc-10.1.0/lto-plugin/configure	2020-05-07 03:50:03.000000000 -0700
++++ gcc-10.1.0/lto-plugin/configure	2020-07-16 02:07:05.284748451 -0700
+@@ -5771,7 +5771,7 @@
+   if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error $? "cannot run test program while cross compiling
++echo $? "cannot run test program while cross compiling
+ See \`config.log' for more details" "$LINENO" 5; }
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+diff -Nur gcc-10.1.0.orig/gcc/ada/libgnarl/s-linux__android.ads gcc-10.1.0/gcc/ada/libgnarl/s-linux__android.ads
+--- gcc-10.1.0.orig/gcc/ada/libgnarl/s-linux__android.ads	2020-05-07 03:49:59.000000000 -0700
++++ gcc-10.1.0/gcc/ada/libgnarl/s-linux__android.ads	2020-07-18 05:38:26.158784439 -0700
+@@ -87,6 +87,7 @@
+    SIGKILL    : constant := 9; --  kill (cannot be caught or ignored)
+    SIGBUS     : constant := 7; --  bus error
+    SIGSEGV    : constant := 11; --  segmentation violation
++   SIGSYS     : constant := 12; --  bad system call
+    SIGPIPE    : constant := 13; --  write on a pipe with no one to read it
+    SIGALRM    : constant := 14; --  alarm clock
+    SIGTERM    : constant := 15; --  software termination signal from kill
+diff -Nur gcc-10.1.0.orig/gcc/ada/libgnarl/s-osinte__android.ads gcc-10.1.0/gcc/ada/libgnarl/s-osinte__android.ads
+--- gcc-10.1.0.orig/gcc/ada/libgnarl/s-osinte__android.ads	2020-05-07 03:49:59.000000000 -0700
++++ gcc-10.1.0/gcc/ada/libgnarl/s-osinte__android.ads	2020-07-18 05:40:37.886783937 -0700
+@@ -114,6 +114,7 @@
+    SIGXFSZ    : constant := System.Linux.SIGXFSZ;
+    SIGUNUSED  : constant := System.Linux.SIGUNUSED;
+    SIGSTKFLT  : constant := System.Linux.SIGSTKFLT;
++   SIGSYS     : constant := System.Linux.SIGSYS;
+ 
+    SIGADAABORT : constant := SIGABRT;
+    --  Change this to use another signal for task abort. SIGTERM might be a

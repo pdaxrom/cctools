@@ -1,8 +1,8 @@
 build_gcc_cctools() {
     PKG=gcc-cctools
-    PKG_VERSION=10.2.0
-    PKG_SUBVERSION=
-    PKG_URL="http://mirrors.concertpass.com/gcc/releases/gcc-10.2.0/gcc-${PKG_VERSION}.tar.xz"
+    PKG_VERSION=10.3.0
+    PKG_SUBVERSION=-1
+    PKG_URL="http://mirrors.concertpass.com/gcc/releases/gcc-10.3.0/gcc-${PKG_VERSION}.tar.xz"
     PKG_MAINTAINER="sashz <sashz@pdaXrom.org>"
     PKG_HOME="https://gcc.gnu.org/"
     PKG_DESC="The GNU Compiler Collection"
@@ -43,21 +43,27 @@ if true; then
     case $TARGET_ARCH in
     aarch64*)
 	EXTRA_CONF="--enable-fix-cortex-a53-835769"
+	x=aarch64-linux-android
 	;;
     mips64el*)
 	EXTRA_CONF="--with-arch=mips64r6 --disable-fixed-point"
+	x=mips64el-linux-android
 	;;
     x86_64*)
 	EXTRA_CONF="--with-arch=x86-64 --with-tune=intel --with-fpmath=sse --enable-multilib --disable-libquadmath-support --disable-libcilkrts"
+	x=x86_64-linux-android
 	;;
     mips*)
 	EXTRA_CONF="--with-arch=mips32 --disable-threads --disable-fixed-point"
+	x=mipsel-linux-android
 	;;
     arm*)
 	EXTRA_CONF="--with-arch=armv5te --with-float=soft --with-fpu=vfp"
+	x=arm-linux-androideabi
 	;;
     *86*)
 	EXTRA_CONF="--disable-libquadmath-support --disable-libcilkrts"
+	x=i686-linux-android
 	;;
     esac
 
@@ -71,6 +77,7 @@ if true; then
     fi
 
     ${S_DIR}/configure	\
+	--with-pkgversion='CCTools Termux packages 1.0' \
 	--target=$TARGET_ARCH \
 	--host=$TARGET_ARCH \
 	--prefix=$TERMUX_TARGET_INST_DIR \
@@ -80,6 +87,8 @@ if true; then
 	--with-gnu-ld \
 	--enable-languages=c,c++,fortran,objc,obj-c++ \
 	--enable-bionic-libs \
+	--with-sysroot=$TERMUX_TARGET_INST_DIR/$x/sysroot \
+	--with-build-sysroot=$SYSROOT \
 	--enable-libatomic-ifuncs=no \
 	--enable-cloog-backend=isl \
 	--disable-libssp \

@@ -1,6 +1,6 @@
 build_cross_binutils_cctools() {
     PKG=cross-binutils-cctools
-    PKG_VERSION=2.34
+    PKG_VERSION=2.36.1
     PKG_SUBVERSION=
     PKG_URL="https://mirror.kumi.systems/gnu/binutils/binutils-${PKG_VERSION}.tar.xz"
     PKG_DESC="GNU assembler, linker and binary utilities"

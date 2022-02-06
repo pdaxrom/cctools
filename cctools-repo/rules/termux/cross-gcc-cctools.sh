@@ -1,8 +1,8 @@
 build_cross_gcc_cctools() {
     PKG=cross-gcc-cctools
-    PKG_VERSION=10.2.0
+    PKG_VERSION=10.3.0
     PKG_SUBVERSION=
-    PKG_URL="http://mirrors.concertpass.com/gcc/releases/gcc-10.2.0/gcc-${PKG_VERSION}.tar.xz"
+    PKG_URL="http://mirrors.concertpass.com/gcc/releases/gcc-10.3.0/gcc-${PKG_VERSION}.tar.xz"
     PKG_MAINTAINER="sashz <sashz@pdaXrom.org>"
     PKG_HOME="https://gcc.gnu.org/"
     PKG_DESC="The GNU Compiler Collection"

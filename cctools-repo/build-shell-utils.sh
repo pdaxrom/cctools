@@ -695,6 +695,9 @@ build_cross_binutils_cctools
 build_cross_gcc_cctools
 
 build_binutils_cctools
+build_binutils_n64
+exit 0
+
 build_gcc_cctools
 build_ndk_sysroot_cctools
 

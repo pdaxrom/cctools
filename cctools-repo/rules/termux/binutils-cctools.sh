@@ -1,6 +1,6 @@
 build_binutils_cctools() {
     PKG=binutils-cctools
-    PKG_VERSION=2.34
+    PKG_VERSION=2.36.1
     PKG_SUBVERSION=
     PKG_URL="https://mirror.kumi.systems/gnu/binutils/binutils-${PKG_VERSION}.tar.xz"
     PKG_DESC="GNU assembler, linker and binary utilities"
@@ -53,7 +53,7 @@ EOF
 	--host=$TARGET_ARCH \
 	--prefix=$TERMUX_TARGET_INST_DIR \
 	--target=$TARGET_ARCH \
-	--enable-targets=arm-linux-androideabi,mipsel-linux-android,i686-linux-android,aarch64-linux-android,mips64el-linux-android,x86_64-linux-android \
+	--enable-targets=arm-linux-androideabi,i686-linux-android,aarch64-linux-android,x86_64-linux-android,mipsel-linux-android,mips64el-linux-android \
 	--enable-multilib \
 	--disable-nls \
 	--disable-werror \

@@ -1,7 +1,7 @@
 build_ndk_sysroot_cctools() {
     PKG=ndk-sysroot-cctools
     PKG_VERSION=1.0${ndk_version}
-    PKG_SUBVERSION=
+    PKG_SUBVERSION=-1
     PKG_DEPS=
     PKG_MAINTAINER="sashz <sashz@pdaXrom.org>"
     PKG_HOME="https://developer.android.com/ndk"
@@ -104,11 +104,11 @@ build_ndk_sysroot_cctools() {
 
 		rm -rf ${TMPINST_DIR}/${PKG}-${y}-${vers}/cctools
 
-		mkdir -p ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x
-		copysrc $PWD/$a/usr/include ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/include
+		mkdir -p ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot
+		copysrc $PWD/$a/usr/include ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/include
 
-		mkdir -p ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/usr
-		ln -sf ../include ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/usr/include
+		mkdir -p ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/usr
+		ln -sf ../include ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/usr/include
 
 		local count=0
 
@@ -116,18 +116,18 @@ build_ndk_sysroot_cctools() {
 		    if test ! -d $PWD/$a/usr/$l ; then
 			continue
 		    fi
-		    copysrc $PWD/$a/usr/$l ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/$l
-		    rm -f ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/$l/libstdc++*
+		    copysrc $PWD/$a/usr/$l ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/$l
+		    rm -f ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/$l/libstdc++*
 
-		    cp ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/$l/libc.so ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/$l/libc.so.1
-		    rm -f ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/$l/libc.so
+		    cp ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/$l/libc.so ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/$l/libc.so.1
+		    rm -f ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/$l/libc.so
 
-		    cat > ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/$l/libc.so <<EOF
+		    cat > ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/$l/libc.so <<EOF
 OUTPUT_FORMAT(${z[$count]})
 GROUP ( libc.so.1 libc.a )
 EOF
 
-		    ln -sf ../$l ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/usr/$l
+		    ln -sf ../$l ${TMPINST_DIR}/${PKG}-${y}-${vers}/${TERMUX_TARGET_INST_DIR}/$x/sysroot/usr/$l
 		    count=$(( $count + 1))
 		done
 
